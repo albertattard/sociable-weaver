@@ -1,0 +1,49 @@
+name: Build application
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/README.md'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Update Rust
+        run: |
+          rustup update
+
+      - name: Build application
+        run: |
+          cargo build --release
+
+      - name: Run the tests
+        run: |
+          cargo test
+
+      - name: Extract version
+        run: |
+          VERSION=$(date +%Y%m%d.%H%M%S)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Release binary
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: ${{ github.event.commits[0].message }}
+          files: target/release/sw
