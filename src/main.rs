@@ -18,10 +18,21 @@ fn main() {
     "contents": [
       "We make mistakes, and we make more mistakes, and some more, and that's how we learn."
     ]
+  },
+  {
+    "type": "Command",
+    "id": "c865e693-2d56-48d1-9c9f-57a2a42d19d8",
+    "command": "date"
   }
 ]
 }"#;
 
     let document = Document::parse(json).unwrap();
     println!("Document: {}", document);
+
+    for command in document.commands() {
+        command
+            .run()
+            .expect("The command didn't complete as expected");
+    }
 }

@@ -20,6 +20,16 @@ impl Document {
     pub(crate) fn parse(json: &str) -> serde_json::Result<Self> {
         serde_json::from_str(json)
     }
+
+    pub(crate) fn commands(&self) -> Vec<&CommandEntry> {
+        self.entries
+            .iter()
+            .filter_map(|entry| match entry {
+                Entry::Command(e) => Some(e),
+                _ => None,
+            })
+            .collect()
+    }
 }
 
 impl Display for Document {

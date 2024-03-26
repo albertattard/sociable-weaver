@@ -14,7 +14,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_deserialize() {
+    fn return_deserialized_structure() {
         let json = r#"{
 "entries": [
   {

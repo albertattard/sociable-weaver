@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::{Command, Output};
 
 use serde::Deserialize;
 
@@ -10,16 +11,27 @@ pub(crate) struct CommandEntry {
     arguments: Option<Vec<String>>,
 }
 
+impl CommandEntry {
+    pub(crate) fn run(&self) -> std::io::Result<Output> {
+        Command::new(&self.command)
+            .args(self.arguments.as_ref().unwrap_or(&vec![]))
+            .output()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::entries::Document;
-    use crate::entries::Entry::Command;
-
     use super::*;
 
-    #[test]
-    fn test_deserialize_with_minimum_options() {
-        let json = r#"{
+    mod deserialized {
+        use crate::entries::Document;
+        use crate::entries::Entry::Command;
+
+        use super::*;
+
+        #[test]
+        fn return_deserialized_structure_when_given_minimum_options() {
+            let json = r#"{
 "entries": [
   {
     "type": "Command",
@@ -29,16 +41,43 @@ mod tests {
 ]
 }"#;
 
-        let expected = Document {
-            entries: vec![Command(CommandEntry {
-                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
-                working_dir: None,
-                command: "date".to_string(),
-                arguments: None,
-            })],
-        };
+            let expected = Document {
+                entries: vec![Command(CommandEntry {
+                    id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
+                    command: "date".to_string(),
+                    working_dir: None,
+                    arguments: None,
+                })],
+            };
 
-        let deserialized: Document = Document::parse(json).unwrap();
-        assert_eq!(expected, deserialized);
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
+    }
+
+    mod run {
+        use std::str::from_utf8;
+
+        use super::*;
+
+        #[test]
+        fn execute_command_and_return_result() {
+            let command = CommandEntry {
+                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
+                command: "date".to_string(),
+                working_dir: None,
+                arguments: None,
+            };
+
+            let result = command.run();
+            assert!(result.is_ok());
+
+            let output = result.unwrap();
+            assert!(output.status.success());
+            let date = from_utf8(&output.stdout)
+                .expect("Failed to parse stdout as UTF-8")
+                .trim();
+            assert!(!date.is_empty());
+        }
     }
 }
