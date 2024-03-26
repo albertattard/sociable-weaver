@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 use serde::Deserialize;
@@ -12,15 +12,25 @@ pub(crate) struct CommandEntry {
 }
 
 impl CommandEntry {
-    pub(crate) fn run(&self) -> std::io::Result<Output> {
+    pub(crate) fn run_from_dir<P: AsRef<Path>>(&self, current_dir: &P) -> std::io::Result<Output> {
         Command::new(&self.command)
+            .current_dir(self.current_dir(current_dir))
             .args(self.arguments.as_ref().unwrap_or(&vec![]))
             .output()
+    }
+
+    fn current_dir<P: AsRef<Path>>(&self, current_dir: &P) -> PathBuf {
+        self.working_dir.as_ref().map_or_else(
+            || current_dir.as_ref().to_path_buf(),
+            |path| current_dir.as_ref().join(path),
+        )
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::env;
+
     use super::*;
 
     mod deserialized {
@@ -55,6 +65,52 @@ mod tests {
         }
     }
 
+    mod current_dir {
+        use super::*;
+
+        #[test]
+        fn return_the_give_path_when_working_dir_is_missing() {
+            let command = CommandEntry {
+                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
+                command: "date".to_string(),
+                working_dir: None,
+                arguments: None,
+            };
+
+            let current_dir = current_dir();
+            let result = command.current_dir(&current_dir);
+            assert_eq!(current_dir, result);
+        }
+
+        #[test]
+        fn return_the_constructed_path_when_working_dir_is_relative() {
+            let command = CommandEntry {
+                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
+                command: "date".to_string(),
+                working_dir: Some(PathBuf::from("test")),
+                arguments: None,
+            };
+
+            let current_dir = current_dir();
+            let result = command.current_dir(&current_dir);
+            assert_eq!(current_dir.join("test"), result);
+        }
+
+        #[test]
+        fn return_the_working_dir_when_it_is_absolute() {
+            let command = CommandEntry {
+                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
+                command: "date".to_string(),
+                working_dir: Some(PathBuf::from("/test")),
+                arguments: None,
+            };
+
+            let current_dir = current_dir();
+            let result = command.current_dir(&current_dir);
+            assert_eq!(PathBuf::from("/test"), result);
+        }
+    }
+
     mod run {
         use std::str::from_utf8;
 
@@ -69,7 +125,7 @@ mod tests {
                 arguments: None,
             };
 
-            let result = command.run();
+            let result = command.run_from_dir(&current_dir());
             assert!(result.is_ok());
 
             let output = result.unwrap();
@@ -79,5 +135,9 @@ mod tests {
                 .trim();
             assert!(!date.is_empty());
         }
+    }
+
+    fn current_dir() -> PathBuf {
+        env::current_dir().expect("Failed to get the current working directory")
     }
 }
