@@ -1,7 +1,7 @@
+use std::{env, fs};
 use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use std::{env, fs};
 
 use clap::Parser;
 

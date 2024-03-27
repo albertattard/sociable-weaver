@@ -8,24 +8,26 @@ pub(crate) struct ChapterEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::entries::Entry::Chapter;
     use crate::Document;
+    use crate::domain::Entry::Chapter;
 
     use super::*;
 
     #[test]
     fn return_deserialized_structure() {
         let json = r#"{
-"entries": [
-  {
-    "type": "Chapter",
-    "id": "3a50daae-ab81-426f-a118-b505e7eecb49",
-    "title": "Prologue"
-  }
-]
+  "variables": [],
+  "entries": [
+    {
+      "type": "Chapter",
+      "id": "3a50daae-ab81-426f-a118-b505e7eecb49",
+      "title": "Prologue"
+    }
+  ]
 }"#;
 
         let expected = Document {
+            variables: vec![],
             entries: vec![Chapter(ChapterEntry {
                 id: "3a50daae-ab81-426f-a118-b505e7eecb49".to_string(),
                 title: "Prologue".to_string(),

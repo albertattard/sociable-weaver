@@ -2,16 +2,19 @@ use std::fmt::{Debug, Display, Formatter};
 
 use serde::Deserialize;
 
-use crate::entries::chapter::ChapterEntry;
-use crate::entries::command::CommandEntry;
-use crate::entries::markdown::MarkdownEntry;
+use crate::domain::chapter::ChapterEntry;
+use crate::domain::command::CommandEntry;
+use crate::domain::markdown::MarkdownEntry;
+use crate::domain::text_variable::TextVariable;
 
 pub(crate) mod chapter;
 pub(crate) mod command;
 pub(crate) mod markdown;
+pub(crate) mod text_variable;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct Document {
+    variables: Vec<Variable>,
     entries: Vec<Entry>,
 }
 
@@ -34,7 +37,8 @@ impl Document {
 
 impl Display for Document {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Entries")
+        f.debug_struct("Document")
+            .field("variables", &self.variables)
             .field("entries", &self.entries)
             .finish()
     }
@@ -47,4 +51,10 @@ pub(crate) enum Entry {
     Chapter(ChapterEntry),
     Markdown(MarkdownEntry),
     Command(CommandEntry),
+}
+
+#[derive(Debug, PartialEq, Deserialize)]
+#[serde(tag = "type")]
+pub(crate) enum Variable {
+    Text(TextVariable),
 }

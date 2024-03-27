@@ -1,13 +1,15 @@
 #![warn(missing_debug_implementations, rust_2018_idioms)]
 
-use crate::cla::Args;
-use crate::entries::Document;
-use colored::Colorize;
 use std::process::ExitCode;
 use std::str::from_utf8;
 
+use colored::Colorize;
+
+use crate::cla::Args;
+use crate::domain::Document;
+
 mod cla;
-mod entries;
+mod domain;
 
 fn main() -> ExitCode {
     let args = Args::create();

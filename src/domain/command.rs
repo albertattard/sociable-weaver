@@ -66,24 +66,26 @@ mod tests {
     use super::*;
 
     mod deserialized {
-        use crate::entries::Document;
-        use crate::entries::Entry::Command;
+        use crate::domain::Document;
+        use crate::domain::Entry::Command;
 
         use super::*;
 
         #[test]
         fn return_deserialized_structure_when_given_minimum_options() {
             let json = r#"{
-"entries": [
-  {
-    "type": "Command",
-    "id": "c865e693-2d56-48d1-9c9f-57a2a42d19d8",
-    "command": "date"
-  }
-]
+  "variables": [],
+  "entries": [
+    {
+      "type": "Command",
+      "id": "c865e693-2d56-48d1-9c9f-57a2a42d19d8",
+      "command": "date"
+    }
+  ]
 }"#;
 
             let expected = Document {
+                variables: vec![],
                 entries: vec![Command(CommandEntry {
                     id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                     command: "date".to_string(),
