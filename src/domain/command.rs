@@ -25,7 +25,7 @@ impl CommandEntry {
         if let Some(v) = &self.variables {
             v.iter()
                 .map(|name| (name, context.value(name)))
-                .filter_map(|(name, value)| value.map(|v| (format!("$VAR[{}]", name), v)))
+                .filter_map(|(name, value)| value.map(|v| (format!("${{{}}}", name), v)))
                 .collect()
         } else {
             vec![]
@@ -290,7 +290,7 @@ mod tests {
         #[test]
         fn execute_command_that_contains_variables() {
             let command = CommandEntry {
-                commands: vec!["echo 'Hello $VAR[NAME]!'".to_string()],
+                commands: vec!["echo 'Hello ${NAME}!'".to_string()],
                 working_dir: None,
                 variables: Some(vec!["NAME".to_string()]),
             };
@@ -320,7 +320,7 @@ mod tests {
 
             let command = CommandEntry {
                 commands: vec!["pwd".to_string()],
-                working_dir: Some("$VAR[PWD]".to_string()),
+                working_dir: Some("${PWD}".to_string()),
                 variables: Some(vec!["PWD".to_string()]),
             };
 
