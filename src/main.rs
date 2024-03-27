@@ -8,6 +8,7 @@ use crate::domain::{Context, Document};
 
 mod cla;
 mod domain;
+mod paths;
 
 fn main() -> ExitCode {
     let args = Args::create();

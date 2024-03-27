@@ -11,22 +11,16 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::Deserialize;
 
 use crate::domain::{Context, Runnable};
+use crate::paths;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
     commands: Vec<String>,
-    working_dir: Option<PathBuf>,
+    working_dir: Option<String>,
     variables: Option<Vec<String>>,
 }
 
 impl CommandEntry {
-    fn current_dir<P: AsRef<Path>>(&self, current_dir: &P) -> PathBuf {
-        self.working_dir.as_ref().map_or_else(
-            || current_dir.as_ref().to_path_buf(),
-            |path| current_dir.as_ref().join(path),
-        )
-    }
-
     fn variable_values(&self, context: &mut Context) -> Vec<(String, String)> {
         if let Some(v) = &self.variables {
             v.iter()
@@ -38,19 +32,36 @@ impl CommandEntry {
         }
     }
 
+    fn evaluate_current_dir<P: AsRef<Path>>(
+        &self,
+        current_dir: &P,
+        variables_values: &Vec<(String, String)>,
+    ) -> PathBuf {
+        self.working_dir.as_ref().map_or_else(
+            || current_dir.as_ref().to_path_buf(),
+            |path| {
+                current_dir
+                    .as_ref()
+                    .join(Self::evaluate(path.clone(), variables_values))
+            },
+        )
+    }
+
     fn evaluate_commands(&self, variables_values: &Vec<(String, String)>) -> Vec<String> {
         self.commands
             .iter()
             .cloned()
-            .map(|mut line| {
-                for var_val in variables_values {
-                    if line.contains(&var_val.0) {
-                        line = line.replace(&var_val.0, &var_val.1)
-                    }
-                }
-                line
-            })
+            .map(|line| Self::evaluate(line, variables_values))
             .collect()
+    }
+
+    fn evaluate(mut line: String, variables_values: &Vec<(String, String)>) -> String {
+        for var_val in variables_values {
+            if line.contains(&var_val.0) {
+                line = line.replace(&var_val.0, &var_val.1)
+            }
+        }
+        line
     }
 }
 
@@ -58,7 +69,7 @@ impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
         let variables_values = self.variable_values(context);
         let commands = self.evaluate_commands(&variables_values).join("\n");
-        let current_dir = self.current_dir(&context.current_dir);
+        let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
 
         ShellScript::new(&current_dir, &commands).run()
     }
@@ -87,29 +98,9 @@ impl ShellScript {
 
     pub(crate) fn run(self) -> std::io::Result<Output> {
         Command::new("/bin/sh")
-            .current_dir(&self.current_dir())
-            .args(["-c", &self.path_as_str()])
+            .current_dir(paths::parent_dir(&self.path))
+            .args(["-c", &paths::path_as_str(&self.path)])
             .output()
-    }
-
-    fn path_as_str(&self) -> String {
-        fs::canonicalize(&self.path)
-            .expect("Failed to canonicalize path")
-            .as_path()
-            .as_os_str()
-            .to_str()
-            .expect("failed to convert path")
-            .to_string()
-    }
-
-    fn current_dir(&self) -> PathBuf {
-        fs::canonicalize(&self.path)
-            .expect("Failed to canonicalize path")
-            .parent()
-            .map(|path| path.to_path_buf())
-            .unwrap_or_else(|| {
-                std::env::current_dir().expect("Failed to fetch the current directory")
-            })
     }
 
     fn create_file_path(directory: &Path) -> PathBuf {
@@ -159,8 +150,6 @@ impl Drop for ShellScript {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
-
     use super::*;
 
     mod deserialized {
@@ -198,6 +187,8 @@ mod tests {
     }
 
     mod current_dir {
+        use crate::paths;
+
         use super::*;
 
         #[test]
@@ -208,8 +199,8 @@ mod tests {
                 variables: None,
             };
 
-            let current_dir = current_dir();
-            let result = command.current_dir(&current_dir);
+            let current_dir = paths::current_dir();
+            let result = command.evaluate_current_dir(&current_dir, &vec![]);
             assert_eq!(current_dir, result);
         }
 
@@ -217,12 +208,12 @@ mod tests {
         fn return_the_constructed_path_when_working_dir_is_relative() {
             let command = CommandEntry {
                 commands: vec!["date".to_string()],
-                working_dir: Some(PathBuf::from("test")),
+                working_dir: Some("test".to_string()),
                 variables: None,
             };
 
-            let current_dir = current_dir();
-            let result = command.current_dir(&current_dir);
+            let current_dir = paths::current_dir();
+            let result = command.evaluate_current_dir(&current_dir, &vec![]);
             assert_eq!(current_dir.join("test"), result);
         }
 
@@ -230,12 +221,12 @@ mod tests {
         fn return_the_working_dir_when_it_is_absolute() {
             let command = CommandEntry {
                 commands: vec!["date".to_string()],
-                working_dir: Some(PathBuf::from("/test")),
+                working_dir: Some("/test".to_string()),
                 variables: None,
             };
 
-            let current_dir = current_dir();
-            let result = command.current_dir(&current_dir);
+            let current_dir = paths::current_dir();
+            let result = command.evaluate_current_dir(&current_dir, &vec![]);
             assert_eq!(PathBuf::from("/test"), result);
         }
     }
@@ -244,6 +235,7 @@ mod tests {
         use std::str::from_utf8;
 
         use crate::domain::ContextVariable;
+        use crate::paths;
 
         use super::*;
 
@@ -256,7 +248,7 @@ mod tests {
             };
 
             let mut context = Context {
-                current_dir: current_dir(),
+                current_dir: paths::current_dir(),
                 variables: vec![],
             };
 
@@ -280,7 +272,7 @@ mod tests {
             };
 
             let mut context = Context {
-                current_dir: current_dir(),
+                current_dir: paths::current_dir(),
                 variables: vec![],
             };
 
@@ -304,7 +296,7 @@ mod tests {
             };
 
             let mut context = Context {
-                current_dir: current_dir(),
+                current_dir: paths::current_dir(),
                 variables: vec![ContextVariable {
                     name: "NAME".to_string(),
                     value: "Albert".to_string(),
@@ -321,9 +313,34 @@ mod tests {
                 .trim();
             assert_eq!("Hello Albert!", echo);
         }
-    }
 
-    fn current_dir() -> PathBuf {
-        env::current_dir().expect("Failed to get the current working directory")
+        #[test]
+        fn execute_command_from_different_working_dir() {
+            let target = paths::current_dir().join("target");
+
+            let command = CommandEntry {
+                commands: vec!["pwd".to_string()],
+                working_dir: Some("$VAR[PWD]".to_string()),
+                variables: Some(vec!["PWD".to_string()]),
+            };
+
+            let mut context = Context {
+                current_dir: paths::current_dir(),
+                variables: vec![ContextVariable {
+                    name: "PWD".to_string(),
+                    value: "target".to_string(),
+                }],
+            };
+
+            let result = command.run(&mut context);
+            assert!(result.is_ok());
+
+            let output = result.unwrap();
+            assert!(output.status.success());
+            let pwd = from_utf8(&output.stdout)
+                .expect("Failed to parse stdout as UTF-8")
+                .trim();
+            assert_eq!(paths::path_as_str(&target), pwd);
+        }
     }
 }

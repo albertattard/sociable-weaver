@@ -1,9 +1,10 @@
 use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use std::{env, fs};
 
 use clap::Parser;
+
+use crate::paths;
 
 /// A simple application that builds documentation and tests code.
 #[derive(Parser, Debug)]
@@ -38,32 +39,21 @@ impl DocumentFile {
     }
 
     pub(crate) fn parent_dir(&self) -> PathBuf {
-        fs::canonicalize(&self.path)
-            .expect("Failed to canonicalize path")
-            .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| {
-                env::current_dir().expect("Failed to get the current working directory")
-            })
+        paths::parent_dir(&self.path)
     }
 
     pub(crate) fn read(&self) -> String {
-        read_to_string(&self.path)
-            .unwrap_or_else(|_| panic!("Failed to read JSON file: {}", self.path_as_str()))
-    }
-
-    fn path_as_str(&self) -> String {
-        fs::canonicalize(&self.path)
-            .expect("Failed to canonicalize path")
-            .as_os_str()
-            .to_str()
-            .expect("failed to convert path")
-            .to_string()
+        read_to_string(&self.path).unwrap_or_else(|_| {
+            panic!(
+                "Failed to read JSON file: {}",
+                paths::path_as_str(&self.path)
+            )
+        })
     }
 }
 
 impl Display for DocumentFile {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.path_as_str())
+        write!(f, "{}", paths::path_as_str(&self.path))
     }
 }
