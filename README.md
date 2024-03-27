@@ -39,7 +39,7 @@ Build documentation as code.
      --silent \
      --location \
      --output "${HOME}/.local/bin/sw" \
-     'https://github.com/albertattard/sociable-weaver/releases/download/20240326.112652/sw'
+     'https://github.com/albertattard/sociable-weaver/releases/download/20240327.060739/sw'
    $ chmod +x "${HOME}/.local/bin/sw"
    $ sudo rm -f '/usr/local/bin/sw'
    $ sudo ln -s "${HOME}/.local/bin/sw" '/usr/local/bin/sw'
