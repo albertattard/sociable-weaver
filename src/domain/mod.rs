@@ -107,10 +107,6 @@ impl Context {
         self
     }
 
-    pub(crate) fn change_current_dir(&mut self, change: PathBuf) {
-        self.current_dir = self.current_dir.join(change);
-    }
-
     fn current_dir() -> PathBuf {
         env::current_dir().expect("Failed to get the current working directory")
     }
