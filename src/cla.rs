@@ -5,7 +5,7 @@ use std::{env, fs};
 
 use clap::Parser;
 
-/// A simple application that parses markdown files and executes the shell code blocks.
+/// A simple application that builds documentation and tests code.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub(crate) struct Args {

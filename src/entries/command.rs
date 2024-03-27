@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
@@ -24,6 +26,36 @@ impl CommandEntry {
             || current_dir.as_ref().to_path_buf(),
             |path| current_dir.as_ref().join(path),
         )
+    }
+}
+
+impl Display for CommandEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if let Some(path) = &self.working_dir {
+            write!(
+                f,
+                "{} ",
+                fs::canonicalize(path)
+                    .expect("Failed to canonicalize path")
+                    .as_os_str()
+                    .to_str()
+                    .expect("failed to convert path")
+            )?;
+        }
+
+        write!(f, "$ {}", &self.command)?;
+
+        if let Some(args) = &self.arguments {
+            for arg in args {
+                if arg.contains(' ') {
+                    write!(f, " '{}'", arg)?;
+                } else {
+                    write!(f, " {}", arg)?;
+                }
+            }
+        }
+
+        Ok(())
     }
 }
 
