@@ -2,14 +2,13 @@ use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct ChapterEntry {
-    id: String,
     title: String,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::Document;
     use crate::domain::Entry::Chapter;
+    use crate::Document;
 
     use super::*;
 
@@ -20,7 +19,6 @@ mod tests {
   "entries": [
     {
       "type": "Chapter",
-      "id": "3a50daae-ab81-426f-a118-b505e7eecb49",
       "title": "Prologue"
     }
   ]
@@ -29,7 +27,6 @@ mod tests {
         let expected = Document {
             variables: vec![],
             entries: vec![Chapter(ChapterEntry {
-                id: "3a50daae-ab81-426f-a118-b505e7eecb49".to_string(),
                 title: "Prologue".to_string(),
             })],
         };

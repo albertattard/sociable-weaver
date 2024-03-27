@@ -7,7 +7,6 @@ use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
-    id: String,
     command: String,
     working_dir: Option<PathBuf>,
     arguments: Option<Vec<String>>,
@@ -78,7 +77,6 @@ mod tests {
   "entries": [
     {
       "type": "Command",
-      "id": "c865e693-2d56-48d1-9c9f-57a2a42d19d8",
       "command": "date"
     }
   ]
@@ -87,7 +85,6 @@ mod tests {
             let expected = Document {
                 variables: vec![],
                 entries: vec![Command(CommandEntry {
-                    id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                     command: "date".to_string(),
                     working_dir: None,
                     arguments: None,
@@ -105,7 +102,6 @@ mod tests {
         #[test]
         fn return_the_give_path_when_working_dir_is_missing() {
             let command = CommandEntry {
-                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                 command: "date".to_string(),
                 working_dir: None,
                 arguments: None,
@@ -119,7 +115,6 @@ mod tests {
         #[test]
         fn return_the_constructed_path_when_working_dir_is_relative() {
             let command = CommandEntry {
-                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                 command: "date".to_string(),
                 working_dir: Some(PathBuf::from("test")),
                 arguments: None,
@@ -133,7 +128,6 @@ mod tests {
         #[test]
         fn return_the_working_dir_when_it_is_absolute() {
             let command = CommandEntry {
-                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                 command: "date".to_string(),
                 working_dir: Some(PathBuf::from("/test")),
                 arguments: None,
@@ -153,7 +147,6 @@ mod tests {
         #[test]
         fn execute_command_and_return_result() {
             let command = CommandEntry {
-                id: "c865e693-2d56-48d1-9c9f-57a2a42d19d8".to_string(),
                 command: "date".to_string(),
                 working_dir: None,
                 arguments: None,
