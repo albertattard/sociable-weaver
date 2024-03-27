@@ -16,7 +16,7 @@ fn main() -> ExitCode {
         println!("Running file: {}", file);
         let json = file.read();
         let document = Document::parse(&json).expect("Failed to parse JSON file");
-        let mut context = Context::from(&document);
+        let mut context = Context::from(&document).with_current_dir(file.parent_dir());
 
         for command in document.runnables() {
             if command.execute(&mut context).is_err() {

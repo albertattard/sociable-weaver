@@ -102,6 +102,11 @@ impl Context {
             .map(|v| v.value.clone())
     }
 
+    pub(crate) fn with_current_dir(mut self, current_dir: PathBuf) -> Self {
+        self.current_dir = current_dir;
+        self
+    }
+
     fn current_dir() -> PathBuf {
         env::current_dir().expect("Failed to get the current working directory")
     }
