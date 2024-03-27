@@ -13,7 +13,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn return_deserialized_structure() {
+    fn return_deserialized_markdown() {
         let json = r#"{
   "variables": [],
   "entries": [

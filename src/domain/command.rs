@@ -71,7 +71,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn return_deserialized_structure_when_given_minimum_options() {
+        fn return_deserialized_command_when_given_minimum_options() {
             let json = r#"{
   "variables": [],
   "entries": [

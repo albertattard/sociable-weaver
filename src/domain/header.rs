@@ -23,7 +23,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn return_deserialized_structure() {
+    fn return_deserialized_header() {
         let json = r#"{
   "variables": [],
   "entries": [
