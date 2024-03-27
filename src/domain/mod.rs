@@ -2,13 +2,13 @@ use std::fmt::{Debug, Display, Formatter};
 
 use serde::Deserialize;
 
-use crate::domain::chapter::ChapterEntry;
 use crate::domain::command::CommandEntry;
+use crate::domain::header::HeaderEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
 
-pub(crate) mod chapter;
 pub(crate) mod command;
+pub(crate) mod header;
 pub(crate) mod markdown;
 pub(crate) mod text_variable;
 
@@ -48,7 +48,7 @@ impl Display for Document {
 #[derive(Debug, PartialEq, Deserialize)]
 #[serde(tag = "type")]
 pub(crate) enum Entry {
-    Chapter(ChapterEntry),
+    Header(HeaderEntry),
     Markdown(MarkdownEntry),
     Command(CommandEntry),
 }

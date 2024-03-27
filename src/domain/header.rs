@@ -1,13 +1,23 @@
 use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub(crate) struct ChapterEntry {
+pub(crate) enum HeaderLevel {
+    H1,
+    H2,
+    H3,
+    H4,
+}
+
+#[derive(Debug, PartialEq, Deserialize)]
+pub(crate) struct HeaderEntry {
+    level: HeaderLevel,
     title: String,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::Entry::Chapter;
+    use crate::domain::header::HeaderLevel::H1;
+    use crate::domain::Entry::Header;
     use crate::Document;
 
     use super::*;
@@ -18,7 +28,8 @@ mod tests {
   "variables": [],
   "entries": [
     {
-      "type": "Chapter",
+      "type": "Header",
+      "level": "H1",
       "title": "Prologue"
     }
   ]
@@ -26,7 +37,8 @@ mod tests {
 
         let expected = Document {
             variables: vec![],
-            entries: vec![Chapter(ChapterEntry {
+            entries: vec![Header(HeaderEntry {
+                level: H1,
                 title: "Prologue".to_string(),
             })],
         };
