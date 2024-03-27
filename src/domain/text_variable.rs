@@ -1,5 +1,6 @@
-use serde::Deserialize;
 use std::fmt::{Display, Formatter};
+
+use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct TextVariable {
@@ -8,6 +9,10 @@ pub(crate) struct TextVariable {
 }
 
 impl TextVariable {
+    pub(crate) fn name(&self) -> String {
+        self.name.clone()
+    }
+
     pub(crate) fn value(&self) -> String {
         /* TODO: We are starting with the default value for now, because that will suffice. We will
             then add more sophisticated implementation that reads variables from STDIN or files. */
@@ -56,6 +61,31 @@ mod tests {
                 variables: vec![Text(TextVariable {
                     name: "VAR_NAME".to_string(),
                     default_value: None,
+                })],
+                entries: vec![],
+            };
+
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
+
+        #[test]
+        fn return_deserialized_text_variable_when_given_all_options() {
+            let json = r#"{
+  "variables": [
+    {
+      "type": "Text",
+      "name": "VAR_NAME",
+      "default_value": "DEFAULT-VALUE"
+    }
+  ],
+  "entries": []
+}"#;
+
+            let expected = Document {
+                variables: vec![Text(TextVariable {
+                    name: "VAR_NAME".to_string(),
+                    default_value: Some("DEFAULT-VALUE".to_string()),
                 })],
                 entries: vec![],
             };

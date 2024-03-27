@@ -1,11 +1,17 @@
+use std::env;
 use std::fmt::{Debug, Display, Formatter};
+use std::path::PathBuf;
+use std::process::Output;
+use std::str::from_utf8;
 
+use colored::Colorize;
 use serde::Deserialize;
 
 use crate::domain::command::CommandEntry;
 use crate::domain::header::HeaderEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
+use crate::domain::Variable::Text;
 
 pub(crate) mod command;
 pub(crate) mod header;
@@ -24,7 +30,7 @@ impl Document {
         serde_json::from_str(json)
     }
 
-    pub(crate) fn commands(&self) -> Vec<&CommandEntry> {
+    pub(crate) fn runnables(&self) -> Vec<&impl Runnable> {
         self.entries
             .iter()
             .filter_map(|entry| match entry {
@@ -57,4 +63,101 @@ pub(crate) enum Entry {
 #[serde(tag = "type")]
 pub(crate) enum Variable {
     Text(TextVariable),
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct ContextVariable {
+    name: String,
+    value: String,
+}
+
+impl From<&Variable> for ContextVariable {
+    fn from(value: &Variable) -> Self {
+        match value {
+            Text(variable) => ContextVariable::from(variable),
+        }
+    }
+}
+
+impl From<&TextVariable> for ContextVariable {
+    fn from(value: &TextVariable) -> Self {
+        ContextVariable {
+            name: value.name(),
+            value: value.value(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) struct Context {
+    current_dir: PathBuf,
+    variables: Vec<ContextVariable>,
+}
+
+impl Context {
+    pub(crate) fn value(&self, name: &str) -> Option<String> {
+        self.variables
+            .iter()
+            .find(|v| v.name == name)
+            .map(|v| v.value.clone())
+    }
+
+    fn current_dir() -> PathBuf {
+        env::current_dir().expect("Failed to get the current working directory")
+    }
+}
+
+impl From<&Document> for Context {
+    fn from(document: &Document) -> Context {
+        Context {
+            current_dir: Context::current_dir(),
+            variables: document
+                .variables
+                .iter()
+                .map(ContextVariable::from)
+                .collect(),
+        }
+    }
+}
+
+pub(crate) trait Runnable: ToString {
+    fn run(&self, context: &mut Context) -> std::io::Result<Output>;
+
+    fn execute(&self, context: &mut Context) -> Result<(), String> {
+        println!("{}", self.to_string().bright_green());
+        let output = self
+            .run(context)
+            .expect("The command didn't complete as expected");
+
+        if output.status.success() {
+            let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
+
+            if !stdout.is_empty() {
+                println!("{}", stdout.on_green());
+            }
+
+            Ok(())
+        } else {
+            let x = &output.status.code().map_or(-1, |code| code);
+            println!(
+                "{} {}",
+                "Command returned error code:".red(),
+                x.to_string().on_red()
+            );
+            println!(
+                "{}",
+                from_utf8(&output.stdout)
+                    .expect("Failed to read STDOUT")
+                    .on_red()
+            );
+            println!(
+                "{}",
+                from_utf8(&output.stderr)
+                    .expect("Failed to read STDERR")
+                    .red()
+            );
+
+            Err(format!("Command returned error code: {}", x))
+        }
+    }
 }

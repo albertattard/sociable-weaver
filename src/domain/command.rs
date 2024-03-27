@@ -5,26 +5,61 @@ use std::process::{Command, Output};
 
 use serde::Deserialize;
 
+use crate::domain::{Context, Runnable};
+
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
     command: String,
     working_dir: Option<PathBuf>,
     arguments: Option<Vec<String>>,
+    variables: Option<Vec<String>>,
 }
 
 impl CommandEntry {
-    pub(crate) fn run_from_dir<P: AsRef<Path>>(&self, current_dir: &P) -> std::io::Result<Output> {
-        Command::new(&self.command)
-            .current_dir(self.current_dir(current_dir))
-            .args(self.arguments.as_ref().unwrap_or(&vec![]))
-            .output()
-    }
-
     fn current_dir<P: AsRef<Path>>(&self, current_dir: &P) -> PathBuf {
         self.working_dir.as_ref().map_or_else(
             || current_dir.as_ref().to_path_buf(),
             |path| current_dir.as_ref().join(path),
         )
+    }
+
+    fn variable_values(&self, context: &mut Context) -> Vec<(String, String)> {
+        if let Some(v) = &self.variables {
+            v.iter()
+                .map(|name| (name, context.value(name)))
+                .filter_map(|(name, value)| value.map(|v| (format!("${{{}}}", name), v)))
+                .collect()
+        } else {
+            vec![]
+        }
+    }
+
+    fn evaluate_arguments(&self, variables_values: &Vec<(String, String)>) -> Vec<String> {
+        self.arguments
+            .iter()
+            .flatten()
+            .cloned()
+            .map(|mut argument| {
+                for var_val in variables_values {
+                    if argument.contains(&var_val.0) {
+                        argument = argument.replace(&var_val.0, &var_val.1)
+                    }
+                }
+                argument
+            })
+            .collect()
+    }
+}
+
+impl Runnable for CommandEntry {
+    fn run(&self, context: &mut Context) -> std::io::Result<Output> {
+        let variables_values = self.variable_values(context);
+        let arguments = self.evaluate_arguments(&variables_values);
+
+        Command::new(&self.command)
+            .current_dir(self.current_dir(&context.current_dir))
+            .args(arguments)
+            .output()
     }
 }
 
@@ -88,6 +123,7 @@ mod tests {
                     command: "date".to_string(),
                     working_dir: None,
                     arguments: None,
+                    variables: None,
                 })],
             };
 
@@ -105,6 +141,7 @@ mod tests {
                 command: "date".to_string(),
                 working_dir: None,
                 arguments: None,
+                variables: None,
             };
 
             let current_dir = current_dir();
@@ -118,6 +155,7 @@ mod tests {
                 command: "date".to_string(),
                 working_dir: Some(PathBuf::from("test")),
                 arguments: None,
+                variables: None,
             };
 
             let current_dir = current_dir();
@@ -131,6 +169,7 @@ mod tests {
                 command: "date".to_string(),
                 working_dir: Some(PathBuf::from("/test")),
                 arguments: None,
+                variables: None,
             };
 
             let current_dir = current_dir();
@@ -142,25 +181,61 @@ mod tests {
     mod run {
         use std::str::from_utf8;
 
+        use crate::domain::ContextVariable;
+
         use super::*;
 
         #[test]
-        fn execute_command_and_return_result() {
+        fn execute_command() {
             let command = CommandEntry {
-                command: "date".to_string(),
+                command: "echo".to_string(),
                 working_dir: None,
-                arguments: None,
+                arguments: Some(vec!["Hello World!".to_string()]),
+                variables: None,
             };
 
-            let result = command.run_from_dir(&current_dir());
+            let mut context = Context {
+                current_dir: current_dir(),
+                variables: vec![],
+            };
+
+            let result = command.run(&mut context);
             assert!(result.is_ok());
 
             let output = result.unwrap();
             assert!(output.status.success());
-            let date = from_utf8(&output.stdout)
+            let echo = from_utf8(&output.stdout)
                 .expect("Failed to parse stdout as UTF-8")
                 .trim();
-            assert!(!date.is_empty());
+            assert_eq!("Hello World!", echo);
+        }
+
+        #[test]
+        fn execute_command_that_contains_variables() {
+            let command = CommandEntry {
+                command: "echo".to_string(),
+                working_dir: None,
+                arguments: Some(vec!["Hello ${NAME}!".to_string()]),
+                variables: Some(vec!["NAME".to_string()]),
+            };
+
+            let mut context = Context {
+                current_dir: current_dir(),
+                variables: vec![ContextVariable {
+                    name: "NAME".to_string(),
+                    value: "Albert".to_string(),
+                }],
+            };
+
+            let result = command.run(&mut context);
+            assert!(result.is_ok());
+
+            let output = result.unwrap();
+            assert!(output.status.success());
+            let echo = from_utf8(&output.stdout)
+                .expect("Failed to parse stdout as UTF-8")
+                .trim();
+            assert_eq!("Hello Albert!", echo);
         }
     }
 
