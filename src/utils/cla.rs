@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::paths;
+use crate::utils::paths;
 
 /// A simple application that builds documentation and tests code.
 #[derive(Parser, Debug)]

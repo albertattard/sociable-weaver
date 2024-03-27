@@ -11,7 +11,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::Deserialize;
 
 use crate::domain::{Context, Runnable};
-use crate::paths;
+use crate::utils::paths;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
@@ -187,7 +187,7 @@ mod tests {
     }
 
     mod current_dir {
-        use crate::paths;
+        use crate::utils::paths;
 
         use super::*;
 
@@ -235,7 +235,7 @@ mod tests {
         use std::str::from_utf8;
 
         use crate::domain::ContextVariable;
-        use crate::paths;
+        use crate::utils::paths;
 
         use super::*;
 

@@ -2,13 +2,12 @@
 
 use std::process::ExitCode;
 
-use crate::cla::Args;
 use crate::domain::Runnable;
 use crate::domain::{Context, Document};
+use crate::utils::cla::Args;
 
-mod cla;
 mod domain;
-mod paths;
+mod utils;
 
 fn main() -> ExitCode {
     let args = Args::create();
