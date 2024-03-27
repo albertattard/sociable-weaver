@@ -1,7 +1,12 @@
 use std::fmt::{Display, Formatter};
 use std::fs;
+use std::fs::File;
+use std::io::Write;
+use std::os::unix::prelude::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::Deserialize;
 
@@ -55,11 +60,27 @@ impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
         let variables_values = self.variable_values(context);
         let arguments = self.evaluate_arguments(&variables_values);
+        let current_dir = self.current_dir(&context.current_dir);
 
-        Command::new(&self.command)
-            .current_dir(self.current_dir(&context.current_dir))
-            .args(arguments)
-            .output()
+        let mut command: String = self.command.clone();
+        for arg in &arguments {
+            if arg.contains(' ') {
+                command.push_str(&format!(" '{}'", arg))
+            } else {
+                command.push_str(&format!(" {}", arg))
+            }
+        }
+
+        let shell = ShellScript::new(&current_dir, &command);
+        let output = shell.run();
+
+        if "cd" == self.command.as_str() {
+            context.change_current_dir(PathBuf::from(
+                &arguments.first().expect("The cd is expecting one argument"),
+            ));
+        }
+
+        output
     }
 }
 
@@ -90,6 +111,93 @@ impl Display for CommandEntry {
         }
 
         Ok(())
+    }
+}
+
+struct ShellScript {
+    path: PathBuf,
+}
+
+impl ShellScript {
+    pub(crate) fn new(directory: &Path, command: &str) -> Self {
+        let script_path = Self::create_file_path(directory);
+
+        Self::create_shell_script(&script_path)
+            .write_all(command.as_bytes())
+            .expect("Failed to create shell script");
+
+        ShellScript { path: script_path }
+    }
+
+    pub(crate) fn run(&self) -> std::io::Result<Output> {
+        Command::new("/bin/sh")
+            .current_dir(&self.current_dir())
+            .args(["-c", &self.path_as_str()])
+            .output()
+    }
+
+    fn path_as_str(&self) -> String {
+        fs::canonicalize(&self.path)
+            .expect("Failed to canonicalize path")
+            .as_path()
+            .as_os_str()
+            .to_str()
+            .expect("failed to convert path")
+            .to_string()
+    }
+
+    fn current_dir(&self) -> PathBuf {
+        fs::canonicalize(&self.path)
+            .expect("Failed to canonicalize path")
+            .parent()
+            .map(|path| path.to_path_buf())
+            .unwrap_or_else(|| {
+                std::env::current_dir().expect("Failed to fetch the current directory")
+            })
+    }
+
+    fn create_file_path(directory: &Path) -> PathBuf {
+        static COUNTER: AtomicUsize = AtomicUsize::new(1);
+        let index = COUNTER.fetch_add(1, Ordering::Relaxed);
+        directory.join(format!(
+            "command-{}-{}.sh",
+            index,
+            Self::millis_since_epoch()
+        ))
+    }
+
+    fn millis_since_epoch() -> u128 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_millis()
+    }
+
+    fn create_shell_script(path: &Path) -> File {
+        let shell_script = File::create(path).expect("Failed to create shell script");
+        Self::make_shell_script_executable(&shell_script);
+        shell_script
+    }
+
+    fn make_shell_script_executable(shell_script: &File) {
+        let metadata = shell_script
+            .metadata()
+            .expect("Failed to get the script metadata");
+
+        let mut permissions = metadata.permissions();
+        permissions.set_mode(0o755);
+
+        shell_script
+            .set_permissions(permissions)
+            .expect("Failed to set the script permissions");
+    }
+}
+
+impl Drop for ShellScript {
+    fn drop(&mut self) {
+        if fs::remove_file(&self.path).is_err() {
+            eprintln!("Failed to delete the shell script");
+        }
     }
 }
 
@@ -236,6 +344,35 @@ mod tests {
                 .expect("Failed to parse stdout as UTF-8")
                 .trim();
             assert_eq!("Hello Albert!", echo);
+        }
+
+        #[test]
+        fn execute_command_that_change_working_dir_relatively() {
+            let target = current_dir().join("target");
+            let test_dir_name = "test_dir";
+            let test_dir = target.join(test_dir_name);
+            if !test_dir.is_dir() {
+                fs::create_dir(&test_dir).expect("Failed to create test dir");
+            }
+
+            let command = CommandEntry {
+                command: "cd".to_string(),
+                working_dir: None,
+                arguments: Some(vec!["${DIR}".to_string()]),
+                variables: Some(vec!["DIR".to_string()]),
+            };
+
+            let mut context = Context {
+                current_dir: target,
+                variables: vec![ContextVariable {
+                    name: "DIR".to_string(),
+                    value: test_dir_name.to_string(),
+                }],
+            };
+
+            let result = command.run(&mut context);
+            assert!(result.is_ok());
+            assert_eq!(test_dir, context.current_dir);
         }
     }
 

@@ -107,6 +107,10 @@ impl Context {
         self
     }
 
+    pub(crate) fn change_current_dir(&mut self, change: PathBuf) {
+        self.current_dir = self.current_dir.join(change);
+    }
+
     fn current_dir() -> PathBuf {
         env::current_dir().expect("Failed to get the current working directory")
     }
@@ -135,34 +139,42 @@ pub(crate) trait Runnable: ToString {
             .expect("The command didn't complete as expected");
 
         if output.status.success() {
-            let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
-
-            if !stdout.is_empty() {
-                println!("{}", stdout.on_green());
-            }
-
-            Ok(())
+            Self::on_success(&output)
         } else {
-            let x = &output.status.code().map_or(-1, |code| code);
-            println!(
-                "{} {}",
-                "Command returned error code:".red(),
-                x.to_string().on_red()
-            );
-            println!(
-                "{}",
-                from_utf8(&output.stdout)
-                    .expect("Failed to read STDOUT")
-                    .on_red()
-            );
-            println!(
-                "{}",
-                from_utf8(&output.stderr)
-                    .expect("Failed to read STDERR")
-                    .red()
-            );
-
-            Err(format!("Command returned error code: {}", x))
+            Self::on_failure(&output)
         }
+    }
+
+    fn on_success(output: &Output) -> Result<(), String> {
+        let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
+
+        if !stdout.is_empty() {
+            println!("{}", stdout.on_green());
+        }
+
+        Ok(())
+    }
+
+    fn on_failure(output: &Output) -> Result<(), String> {
+        let x = &output.status.code().map_or(-1, |code| code);
+        println!(
+            "{} {}",
+            "Command returned error code:".red(),
+            x.to_string().on_red()
+        );
+        println!(
+            "{}",
+            from_utf8(&output.stdout)
+                .expect("Failed to read STDOUT")
+                .on_red()
+        );
+        println!(
+            "{}",
+            from_utf8(&output.stderr)
+                .expect("Failed to read STDERR")
+                .red()
+        );
+
+        Err(format!("Command returned error code: {}", x))
     }
 }
