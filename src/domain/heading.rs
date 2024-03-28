@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub(crate) enum HeaderLevel {
+pub(crate) enum HeadingLevel {
     H1,
     H2,
     H3,
@@ -9,26 +9,26 @@ pub(crate) enum HeaderLevel {
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
-pub(crate) struct HeaderEntry {
-    level: HeaderLevel,
+pub(crate) struct HeadingEntry {
+    level: HeadingLevel,
     title: String,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::header::HeaderLevel::H1;
-    use crate::domain::Entry::Header;
+    use crate::domain::heading::HeadingLevel::H1;
+    use crate::domain::Entry::Heading;
     use crate::Document;
 
     use super::*;
 
     #[test]
-    fn return_deserialized_header() {
+    fn return_deserialized_heading() {
         let json = r#"{
   "variables": [],
   "entries": [
     {
-      "type": "Header",
+      "type": "Heading",
       "level": "H1",
       "title": "Prologue"
     }
@@ -37,7 +37,7 @@ mod tests {
 
         let expected = Document {
             variables: vec![],
-            entries: vec![Header(HeaderEntry {
+            entries: vec![Heading(HeadingEntry {
                 level: H1,
                 title: "Prologue".to_string(),
             })],

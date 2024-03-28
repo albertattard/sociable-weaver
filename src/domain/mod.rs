@@ -8,13 +8,13 @@ use colored::Colorize;
 use serde::Deserialize;
 
 use crate::domain::command::CommandEntry;
-use crate::domain::header::HeaderEntry;
+use crate::domain::heading::HeadingEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
 use crate::domain::Variable::Text;
 
 pub(crate) mod command;
-pub(crate) mod header;
+pub(crate) mod heading;
 pub(crate) mod markdown;
 pub(crate) mod text_variable;
 
@@ -54,7 +54,7 @@ impl Display for Document {
 #[derive(Debug, PartialEq, Deserialize)]
 #[serde(tag = "type")]
 pub(crate) enum Entry {
-    Header(HeaderEntry),
+    Heading(HeadingEntry),
     Markdown(MarkdownEntry),
     Command(CommandEntry),
 }
@@ -129,10 +129,10 @@ pub(crate) trait Runnable: ToString {
     fn run(&self, context: &mut Context) -> std::io::Result<Output>;
 
     fn execute(&self, context: &mut Context) -> Result<(), String> {
-        println!("{}", self.to_string().bright_green());
+        println!("{}", self.to_string().truecolor(100, 100, 100));
         let output = self
             .run(context)
-            .expect("The command didn't complete as expected");
+            .expect("The command(s) didn't complete as expected");
 
         if output.status.success() {
             Self::on_success(&output)
@@ -145,7 +145,7 @@ pub(crate) trait Runnable: ToString {
         let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
 
         if !stdout.is_empty() {
-            println!("{}", stdout.on_green());
+            println!("{}", stdout.bright_green());
         }
 
         Ok(())
@@ -155,14 +155,14 @@ pub(crate) trait Runnable: ToString {
         let x = &output.status.code().map_or(-1, |code| code);
         println!(
             "{} {}",
-            "Command returned error code:".red(),
-            x.to_string().on_red()
+            "Command(s) returned error code:".red(),
+            x.to_string().red()
         );
         println!(
             "{}",
             from_utf8(&output.stdout)
                 .expect("Failed to read STDOUT")
-                .on_red()
+                .red()
         );
         println!(
             "{}",
@@ -171,6 +171,6 @@ pub(crate) trait Runnable: ToString {
                 .red()
         );
 
-        Err(format!("Command returned error code: {}", x))
+        Err(format!("Command(s) returned error code: {}", x))
     }
 }
