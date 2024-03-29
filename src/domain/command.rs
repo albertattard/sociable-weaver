@@ -18,6 +18,7 @@ pub(crate) struct CommandEntry {
     commands: Vec<String>,
     working_dir: Option<String>,
     variables: Option<Vec<String>>,
+    tags: Option<Vec<String>>,
 }
 
 impl CommandEntry {
@@ -180,7 +181,7 @@ mod tests {
     {
       "type": "Command",
       "commands": [
-        "date"
+        "echo \"Hello there!\""
       ]
     }
   ]
@@ -189,9 +190,45 @@ mod tests {
             let expected = Document {
                 variables: vec![],
                 entries: vec![Command(CommandEntry {
-                    commands: vec!["date".to_string()],
+                    commands: vec!["echo \"Hello there!\"".to_string()],
                     working_dir: None,
                     variables: None,
+                    tags: None,
+                })],
+            };
+
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
+
+        #[test]
+        fn return_deserialized_command_when_given_all_options() {
+            let json = r#"{
+  "variables": [],
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo \"Hello ${NAME}!\""
+      ],
+      "working_dir": "dir",
+      "variables": [
+        "NAME"
+      ],
+      "tags": [
+        "test"
+      ]
+    }
+  ]
+}"#;
+
+            let expected = Document {
+                variables: vec![],
+                entries: vec![Command(CommandEntry {
+                    commands: vec!["echo \"Hello ${NAME}!\"".to_string()],
+                    working_dir: Some("dir".to_string()),
+                    variables: Some(vec!["NAME".to_string()]),
+                    tags: Some(vec!["test".to_string()]),
                 })],
             };
 
@@ -211,6 +248,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 working_dir: None,
                 variables: None,
+                tags: None,
             };
 
             let current_dir = paths::current_dir();
@@ -224,6 +262,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 working_dir: Some("test".to_string()),
                 variables: None,
+                tags: None,
             };
 
             let current_dir = paths::current_dir();
@@ -237,6 +276,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 working_dir: Some("/test".to_string()),
                 variables: None,
+                tags: None,
             };
 
             let current_dir = paths::current_dir();
@@ -259,6 +299,7 @@ mod tests {
                 commands: vec!["echo 'Hello World!'".to_string()],
                 working_dir: None,
                 variables: None,
+                tags: None,
             };
 
             let mut context = Context {
@@ -283,6 +324,7 @@ mod tests {
                 commands: vec!["echo 'Hello'".to_string(), "echo 'World!'".to_string()],
                 working_dir: None,
                 variables: None,
+                tags: None,
             };
 
             let mut context = Context {
@@ -307,6 +349,7 @@ mod tests {
                 commands: vec!["echo 'Hello ${NAME}!'".to_string()],
                 working_dir: None,
                 variables: Some(vec!["NAME".to_string()]),
+                tags: None,
             };
 
             let mut context = Context {
@@ -336,6 +379,7 @@ mod tests {
                 commands: vec!["pwd".to_string()],
                 working_dir: Some("${PWD}".to_string()),
                 variables: Some(vec!["PWD".to_string()]),
+                tags: None,
             };
 
             let mut context = Context {
