@@ -11,7 +11,7 @@ use crate::utils::paths;
 #[command(author, version, about, long_about = None)]
 pub(crate) struct Args {
     /// Name of the JSON file to parse
-    #[arg(short, long, default_value = "book.json")]
+    #[arg(short, long, default_value = "sw-runbook.json")]
     file_name: String,
 }
 
