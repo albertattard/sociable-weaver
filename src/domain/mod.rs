@@ -127,21 +127,25 @@ impl From<&Document> for Context {
 
 pub(crate) trait Runnable: ToString {
     fn run(&self, context: &mut Context) -> std::io::Result<Output>;
+}
 
-    fn execute(&self, context: &mut Context) -> Result<(), String> {
-        println!("{}", self.to_string().truecolor(100, 100, 100));
-        let output = self
+pub(crate) struct Executor {}
+
+impl Executor {
+    pub(crate) fn execute(runnable: &dyn Runnable, context: &mut Context) -> Result<(), String> {
+        println!("{}", runnable.to_string().truecolor(100, 100, 100));
+        let output = runnable
             .run(context)
             .expect("The command(s) didn't complete as expected");
 
         if output.status.success() {
-            Self::on_success(&output)
+            Self::print_success(&output)
         } else {
-            Self::on_failure(&output)
+            Self::print_failure(&output)
         }
     }
 
-    fn on_success(output: &Output) -> Result<(), String> {
+    fn print_success(output: &Output) -> Result<(), String> {
         let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
 
         if !stdout.is_empty() {
@@ -151,7 +155,7 @@ pub(crate) trait Runnable: ToString {
         Ok(())
     }
 
-    fn on_failure(output: &Output) -> Result<(), String> {
+    fn print_failure(output: &Output) -> Result<(), String> {
         let x = &output.status.code().map_or(-1, |code| code);
         println!(
             "{} {}",

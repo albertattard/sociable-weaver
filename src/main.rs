@@ -2,7 +2,7 @@
 
 use std::process::ExitCode;
 
-use crate::domain::Runnable;
+use crate::domain::Executor;
 use crate::domain::{Context, Document};
 use crate::utils::cla::Args;
 
@@ -19,7 +19,7 @@ fn main() -> ExitCode {
         let mut context = Context::from(&document).with_current_dir(file.parent_dir());
 
         for command in document.runnables() {
-            if command.execute(&mut context).is_err() {
+            if Executor::execute(command, &mut context).is_err() {
                 return ExitCode::FAILURE;
             }
         }
