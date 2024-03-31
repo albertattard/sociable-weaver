@@ -105,6 +105,17 @@ set -e
         }
         line
     }
+
+    fn run_on_failure_commands(
+        &self,
+        variables_values: &Vec<(String, String)>,
+        current_dir: &Path,
+    ) {
+        self.evaluate_on_failure_commands(variables_values)
+            .inspect(|on_failure_commands| {
+                let _ = ShellScript::new(current_dir, on_failure_commands).run();
+            });
+    }
 }
 
 impl Runnable for CommandEntry {
@@ -117,11 +128,11 @@ impl Runnable for CommandEntry {
             .run()
             .inspect(|output| {
                 if !output.status.success() {
-                    self.evaluate_on_failure_commands(&variables_values)
-                        .inspect(|on_failure_commands| {
-                            let _ = ShellScript::new(&current_dir, on_failure_commands).run();
-                        });
+                    self.run_on_failure_commands(&variables_values, &current_dir);
                 }
+            })
+            .inspect_err(|_| {
+                self.run_on_failure_commands(&variables_values, &current_dir);
             })
     }
 }
@@ -487,6 +498,39 @@ mod tests {
                 .expect("Failed to parse stdout as UTF-8")
                 .trim();
             assert_eq!(paths::path_as_str(&target), pwd);
+        }
+
+        #[test]
+        fn execute_command_with_long_output() {
+            let command = CommandEntry {
+                commands: vec![
+                    "for i in {1..1000000}; do echo \"[${i}] Hello World!\"; done".to_string(),
+                ],
+                on_failure_commands: None,
+                working_dir: None,
+                variables: None,
+                tags: None,
+            };
+
+            let mut context = Context {
+                current_dir: paths::current_dir(),
+                variables: vec![],
+            };
+
+            let result = command.run(&mut context);
+            assert!(result.is_ok());
+
+            let output = result.unwrap();
+            assert!(output.status.success());
+            let echo = from_utf8(&output.stdout)
+                .expect("Failed to parse stdout as UTF-8")
+                .trim();
+
+            let mut expected = String::new();
+            for i in 1..1000001 {
+                expected.push_str(&format!("[{}] Hello World!\n", i))
+            }
+            assert_eq!(expected.trim(), echo);
         }
     }
 }
