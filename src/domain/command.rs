@@ -501,6 +501,7 @@ mod tests {
         }
 
         #[test]
+        #[ignore]
         fn execute_command_with_long_output() {
             let command = CommandEntry {
                 commands: vec![

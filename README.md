@@ -16,6 +16,7 @@ Build documentation as code.
    $ cargo clippy
    $ cargo build --release
    $ cargo test
+   $ cargo test -- --ignored
    ```
 
 2. Continuous delivery
