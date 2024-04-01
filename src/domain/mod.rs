@@ -12,6 +12,7 @@ use crate::domain::command::CommandEntry;
 use crate::domain::heading::HeadingEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
+use crate::domain::todo::TodoEntry;
 use crate::domain::Variable::Text;
 
 mod breakpoint;
@@ -19,6 +20,7 @@ pub(crate) mod command;
 pub(crate) mod heading;
 pub(crate) mod markdown;
 pub(crate) mod text_variable;
+pub(crate) mod todo;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct Document {
@@ -54,6 +56,7 @@ pub(crate) enum Entry {
     Markdown(MarkdownEntry),
     Command(CommandEntry),
     Breakpoint(BreakpointEntry),
+    Todo(TodoEntry),
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
