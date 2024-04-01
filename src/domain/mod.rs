@@ -30,14 +30,8 @@ impl Document {
         serde_json::from_str(json)
     }
 
-    pub(crate) fn runnables(&self) -> Vec<&impl Runnable> {
-        self.entries
-            .iter()
-            .filter_map(|entry| match entry {
-                Entry::Command(e) => Some(e),
-                _ => None,
-            })
-            .collect()
+    pub(crate) fn entries(&self) -> Vec<&Entry> {
+        self.entries.iter().collect()
     }
 }
 
@@ -57,6 +51,7 @@ pub(crate) enum Entry {
     Heading(HeadingEntry),
     Markdown(MarkdownEntry),
     Command(CommandEntry),
+    Breakpoint,
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
