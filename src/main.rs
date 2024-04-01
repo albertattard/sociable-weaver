@@ -3,6 +3,8 @@
 use std::io;
 use std::process::ExitCode;
 
+use colored::Colorize;
+
 use crate::domain::Entry::{Breakpoint, Command};
 use crate::domain::Executor;
 use crate::domain::{Context, Document};
@@ -27,14 +29,18 @@ fn main() -> ExitCode {
                         return ExitCode::FAILURE;
                     }
                 }
-                Breakpoint => {
-                    println!("Press enter to continue");
+                Breakpoint(breakpoint) => {
+                    /* TODO: make better use of 'polymorphism' */
+                    println!("{}", "Press enter to continue".cyan());
+                    if let Some(comment) = breakpoint.comment() {
+                        println!("{}", comment.cyan());
+                    }
                     let mut input = String::new();
                     if io::stdin().read_line(&mut input).is_err() {
                         return ExitCode::FAILURE;
                     }
                 }
-                _ => {}
+                _ => { /* Skip for now */ }
             }
         }
     }

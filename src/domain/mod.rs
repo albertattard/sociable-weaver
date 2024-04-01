@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::process::Output;
 use std::str::from_utf8;
 
+use crate::domain::breakpoint::BreakpointEntry;
 use colored::Colorize;
 use serde::Deserialize;
 
@@ -13,6 +14,7 @@ use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
 use crate::domain::Variable::Text;
 
+mod breakpoint;
 pub(crate) mod command;
 pub(crate) mod heading;
 pub(crate) mod markdown;
@@ -51,7 +53,7 @@ pub(crate) enum Entry {
     Heading(HeadingEntry),
     Markdown(MarkdownEntry),
     Command(CommandEntry),
-    Breakpoint,
+    Breakpoint(BreakpointEntry),
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
