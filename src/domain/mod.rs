@@ -178,3 +178,7 @@ impl Executor {
         Err(format!("Command(s) returned error code: {}", x))
     }
 }
+
+pub(crate) trait MarkdownRunnable {
+    fn to_markdown(&self) -> Result<String, String>;
+}

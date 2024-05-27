@@ -8,6 +8,7 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 
 use crate::domain::{Context, Runnable};
@@ -166,13 +167,13 @@ impl ShellScript {
     }
 
     fn create_file_path(directory: &Path) -> PathBuf {
+        static START_TIME: Lazy<u128> = Lazy::new(|| ShellScript::millis_since_epoch());
+        let start_time = *START_TIME;
+
         static COUNTER: AtomicUsize = AtomicUsize::new(1);
         let index = COUNTER.fetch_add(1, Ordering::Relaxed);
-        directory.join(format!(
-            ".sw-commands-{}-{}.sh",
-            index,
-            Self::millis_since_epoch()
-        ))
+
+        directory.join(format!(".sw-commands-{start_time}-{index}.sh"))
     }
 
     fn millis_since_epoch() -> u128 {

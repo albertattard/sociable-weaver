@@ -1,9 +1,16 @@
+use crate::domain::MarkdownRunnable;
 use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct MarkdownEntry {
     contents: Vec<String>,
     tags: Option<Vec<String>>,
+}
+
+impl MarkdownRunnable for MarkdownEntry {
+    fn to_markdown(&self) -> Result<String, String> {
+        todo!()
+    }
 }
 
 #[cfg(test)]

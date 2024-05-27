@@ -15,7 +15,7 @@ impl TextVariable {
 
     pub(crate) fn value(&self) -> String {
         /* TODO: We are starting with the default value for now, because that will suffice. We will
-            then add more sophisticated implementation that reads variables from STDIN or files. */
+        then add more sophisticated implementation that reads variables from STDIN or files. */
         self.default_value
             .as_ref()
             .expect("Only default values are currently supported")
