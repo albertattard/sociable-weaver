@@ -15,7 +15,7 @@ pub(crate) struct DisplayFileEntry {
 }
 
 impl MarkdownRunnable for DisplayFileEntry {
-    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
+    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
         let file_type = match self.path.rsplit_once('.') {
             None => "",
             Some((_, extension)) => extension,
@@ -28,7 +28,7 @@ impl MarkdownRunnable for DisplayFileEntry {
         .join(&self.path);
 
         let content = fs::read_to_string(&p);
-        if (content.is_err()) {
+        if content.is_err() {
             return Err(format!("Failed to read the file {}", self.path));
         }
 

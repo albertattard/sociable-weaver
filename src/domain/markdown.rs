@@ -9,15 +9,13 @@ pub(crate) struct MarkdownEntry {
 }
 
 impl MarkdownRunnable for MarkdownEntry {
-    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
+    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
         Ok(format!("{}\n", self.contents.join("\n")))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     mod deserialize_tests {
         use crate::domain::markdown::MarkdownEntry;
         use crate::domain::Document;

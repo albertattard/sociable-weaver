@@ -1,12 +1,8 @@
 #![warn(missing_debug_implementations, rust_2018_idioms)]
 
-use std::error::Error;
-use std::fmt::{Debug, Display};
 use std::fs::OpenOptions;
 use std::io;
 use std::io::{ErrorKind, Write};
-
-use colored::Colorize;
 
 use crate::domain::Entry::{Breakpoint, Command, DisplayFile, Heading, Markdown};
 use crate::domain::MarkdownRunnable;

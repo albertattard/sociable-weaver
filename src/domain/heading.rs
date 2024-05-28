@@ -17,7 +17,7 @@ pub(crate) struct HeadingEntry {
 }
 
 impl MarkdownRunnable for HeadingEntry {
-    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
+    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
         let prefix = match self.level {
             HeadingLevel::H1 => "#",
             HeadingLevel::H2 => "##",

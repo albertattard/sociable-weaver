@@ -5,6 +5,7 @@ use std::io::Write;
 use std::os::unix::prelude::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+use std::str::from_utf8;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -19,6 +20,7 @@ pub(crate) struct CommandEntry {
     commands: Vec<String>,
     on_failure_commands: Option<Vec<String>>,
     working_dir: Option<String>,
+    output: Option<CommandOutput>,
     variables: Option<Vec<String>>,
     tags: Option<Vec<String>>,
 }
@@ -125,6 +127,31 @@ set -e
     }
 }
 
+#[derive(Debug, PartialEq, Deserialize)]
+pub(crate) struct CommandOutput {
+    #[serde(default = "CommandOutput::default_show_value")]
+    show: bool,
+    #[serde(default = "CommandOutput::default_caption_value")]
+    caption: String,
+}
+
+impl CommandOutput {
+    fn with_caption(caption: String) -> Self {
+        CommandOutput {
+            show: true,
+            caption,
+        }
+    }
+
+    fn default_caption_value() -> String {
+        "Output:".to_string()
+    }
+
+    fn default_show_value() -> bool {
+        true
+    }
+}
+
 impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
         let variables_values = self.variable_values(context);
@@ -180,8 +207,31 @@ impl MarkdownRunnable for CommandEntry {
             });
 
         match result {
-            Ok(_) => Ok(md),
-            Err(e) => Err(e.to_string()),
+            Ok(output) => {
+                if let Some(command_output) = &self.output {
+                    if command_output.show {
+                        md.push_str("\n");
+                        md.push_str(&command_output.caption);
+                        md.push_str("\n\n```\n");
+                        md.push_str(from_utf8(&output.stdout).expect("Failed to get the output"));
+                        md.push_str("```\n");
+                    }
+                }
+
+                Ok(md)
+            }
+            Err(e) => {
+                let error = e.to_string();
+                if let Some(command_output) = &self.output {
+                    if command_output.show {
+                        md.push_str("\nError:\n\n```\n");
+                        md.push_str(&error);
+                        md.push_str("```\n");
+                    }
+                }
+
+                Err(error)
+            }
         }
     }
 }
@@ -289,6 +339,7 @@ mod tests {
                     commands: vec!["echo \"Hello there!\"".to_string()],
                     on_failure_commands: None,
                     working_dir: None,
+                    output: None,
                     variables: None,
                     tags: None,
                 })],
@@ -312,6 +363,10 @@ mod tests {
         "echo \"Failed to say hello ${NAME}!\""
       ],
       "working_dir": "dir",
+      "output": {
+        "show": false,
+        "caption": "The output is hidden"
+      },
       "variables": [
         "NAME"
       ],
@@ -330,6 +385,10 @@ mod tests {
                         "echo \"Failed to say hello ${NAME}!\"".to_string()
                     ]),
                     working_dir: Some("dir".to_string()),
+                    output: Some(CommandOutput {
+                        show: false,
+                        caption: "The output is hidden".to_string(),
+                    }),
                     variables: Some(vec!["NAME".to_string()]),
                     tags: Some(vec!["test".to_string()]),
                 })],
@@ -351,6 +410,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -366,6 +426,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 on_failure_commands: None,
                 working_dir: Some("test".to_string()),
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -381,6 +442,7 @@ mod tests {
                 commands: vec!["date".to_string()],
                 on_failure_commands: None,
                 working_dir: Some("/test".to_string()),
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -405,6 +467,7 @@ mod tests {
                 commands: vec!["echo 'Hello World!'".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -431,6 +494,7 @@ mod tests {
                 commands: vec!["echo 'Hello'".to_string(), "echo 'World!'".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -457,6 +521,7 @@ mod tests {
                 commands: vec!["echo 'Hello ${NAME}!'".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: Some(vec!["NAME".to_string()]),
                 tags: None,
             };
@@ -490,6 +555,7 @@ mod tests {
                     "EOF".to_string(),
                 ]),
                 working_dir: None,
+                output: None,
                 variables: Some(vec!["NAME".to_string()]),
                 tags: None,
             };
@@ -526,6 +592,7 @@ mod tests {
                 commands: vec!["pwd".to_string()],
                 on_failure_commands: None,
                 working_dir: Some("${PWD}".to_string()),
+                output: None,
                 variables: Some(vec!["PWD".to_string()]),
                 tags: None,
             };
@@ -558,6 +625,7 @@ mod tests {
                 ],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -596,6 +664,7 @@ mod tests {
                 commands: vec!["echo 1".to_string(), "echo 2".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -622,6 +691,7 @@ echo 2
                 commands: vec!["echo 1".to_string(), "echo 2".to_string()],
                 on_failure_commands: None,
                 working_dir: Some("target".to_string()),
+                output: None,
                 variables: None,
                 tags: None,
             };
@@ -651,6 +721,7 @@ echo 2
                 commands: vec!["echo '${NAME}'".to_string()],
                 on_failure_commands: None,
                 working_dir: None,
+                output: None,
                 variables: Some(vec!["NAME".to_string()]),
                 tags: None,
             };
@@ -666,6 +737,40 @@ echo 2
             assert_eq!(
                 Ok(r#"```shell
 echo 'Albert Attard'
+```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
+        fn format_commands_and_show_output() {
+            /* Given */
+            let entry = CommandEntry {
+                commands: vec!["echo 'Albert Attard'".to_string()],
+                on_failure_commands: None,
+                working_dir: None,
+                output: Some(CommandOutput::with_caption(
+                    "The command will print:".to_string(),
+                )),
+                variables: None,
+                tags: None,
+            };
+
+            /* When */
+            let md = entry.to_markdown(&mut Context::empty());
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```shell
+echo 'Albert Attard'
+```
+
+The command will print:
+
+```
+Albert Attard
 ```
 "#
                 .to_string()),
