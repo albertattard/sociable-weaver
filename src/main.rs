@@ -8,7 +8,7 @@ use std::io::{ErrorKind, Write};
 
 use colored::Colorize;
 
-use crate::domain::Entry::{Command, DisplayFile, Heading, Markdown};
+use crate::domain::Entry::{Breakpoint, Command, DisplayFile, Heading, Markdown};
 use crate::domain::MarkdownRunnable;
 use crate::domain::{Context, Document};
 use crate::utils::cla::Args;
@@ -34,22 +34,7 @@ fn main() -> io::Result<()> {
                 DisplayFile(entry) => append_to_file(path, entry.to_markdown(&mut context))?,
                 Heading(entry) => append_to_file(path, entry.to_markdown(&mut context))?,
                 Markdown(entry) => append_to_file(path, entry.to_markdown(&mut context))?,
-                // Command(command) => {
-                //     if Executor::execute(command, &mut context).is_err() {
-                //         return ExitCode::FAILURE;
-                //     }
-                // }
-                // Breakpoint(breakpoint) => {
-                //     /* TODO: make better use of 'polymorphism' */
-                //     println!("{}", "Press enter to continue".cyan());
-                //     if let Some(comment) = breakpoint.comment() {
-                //         println!("{}", comment.cyan());
-                //     }
-                //     let mut input = String::new();
-                //     if io::stdin().read_line(&mut input).is_err() {
-                //         return ExitCode::FAILURE;
-                //     }
-                // }
+                Breakpoint(_) => return Ok(()),
                 _ => { /* Skip for now */ }
             }
         }

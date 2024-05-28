@@ -129,9 +129,9 @@ impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
         let variables_values = self.variable_values(context);
         let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
-        let commands = self.format_shell_script(&variables_values);
+        let shell_script = self.format_shell_script(&variables_values);
 
-        ShellScript::new(&current_dir, &commands)
+        ShellScript::new(&current_dir, &shell_script)
             .run()
             .inspect(|output| {
                 if !output.status.success() {
@@ -164,7 +164,25 @@ impl MarkdownRunnable for CommandEntry {
             md.push_str(")\n");
         }
         md.push_str("```\n");
-        Ok(md)
+
+        /* TODO:  we need to clean this up */
+        let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
+        let shell_script = self.format_shell_script(&variables_values);
+        let result = ShellScript::new(&current_dir, &shell_script)
+            .run()
+            .inspect(|output| {
+                if !output.status.success() {
+                    self.run_on_failure_commands(&variables_values, &current_dir);
+                }
+            })
+            .inspect_err(|_| {
+                self.run_on_failure_commands(&variables_values, &current_dir);
+            });
+
+        match result {
+            Ok(_) => Ok(md),
+            Err(e) => Err(e.to_string()),
+        }
     }
 }
 
@@ -603,7 +621,7 @@ echo 2
             let entry = CommandEntry {
                 commands: vec!["echo 1".to_string(), "echo 2".to_string()],
                 on_failure_commands: None,
-                working_dir: Some("working-dir".to_string()),
+                working_dir: Some("target".to_string()),
                 variables: None,
                 tags: None,
             };
@@ -614,8 +632,8 @@ echo 2
             /* Then */
             assert_eq!(
                 Ok(r#"```shell
-# Running command from within the working-dir directory
-(cd 'working-dir'
+# Running command from within the target directory
+(cd 'target'
 echo 1
 echo 2
 )
