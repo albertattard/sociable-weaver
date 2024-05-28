@@ -88,60 +88,6 @@ impl From<&Document> for Context {
     }
 }
 
-pub(crate) trait Runnable: ToString {
-    fn run(&self, context: &mut Context) -> std::io::Result<Output>;
-}
-
-pub(crate) struct Executor {}
-
-impl Executor {
-    pub(crate) fn execute(runnable: &dyn Runnable, context: &mut Context) -> Result<(), String> {
-        println!("{}", runnable.to_string().truecolor(100, 100, 100));
-        let output = runnable
-            .run(context)
-            .expect("The command(s) didn't complete as expected");
-
-        if output.status.success() {
-            Self::print_success(&output)
-        } else {
-            Self::print_failure(&output)
-        }
-    }
-
-    fn print_success(output: &Output) -> Result<(), String> {
-        let stdout = from_utf8(&output.stdout).expect("Failed to read STDOUT");
-
-        if !stdout.is_empty() {
-            println!("{}", stdout.bright_green());
-        }
-
-        Ok(())
-    }
-
-    fn print_failure(output: &Output) -> Result<(), String> {
-        let x = &output.status.code().map_or(-1, |code| code);
-        println!(
-            "{} {}",
-            "Command(s) returned error code:".red(),
-            x.to_string().red()
-        );
-        println!(
-            "{}",
-            from_utf8(&output.stdout)
-                .expect("Failed to read STDOUT")
-                .red()
-        );
-        println!(
-            "{}",
-            from_utf8(&output.stderr)
-                .expect("Failed to read STDERR")
-                .red()
-        );
-
-        Err(format!("Command(s) returned error code: {}", x))
-    }
-}
-
 pub(crate) trait MarkdownRunnable {
     fn to_markdown(&self, context: &mut Context) -> Result<String, String>;
 }

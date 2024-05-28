@@ -12,7 +12,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 
-use crate::domain::{Context, MarkdownRunnable, Runnable};
+use crate::domain::{Context, MarkdownRunnable};
 use crate::utils::paths;
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -83,9 +83,16 @@ pub(crate) struct CommandOutput {
 }
 
 impl CommandOutput {
+    fn new() -> Self {
+        CommandOutput {
+            show: Self::default_show_value(),
+            caption: Self::default_caption_value(),
+        }
+    }
+
     fn with_caption(caption: String) -> Self {
         CommandOutput {
-            show: true,
+            show: Self::default_show_value(),
             caption,
         }
     }
@@ -99,46 +106,8 @@ impl CommandOutput {
     }
 }
 
-impl Runnable for CommandEntry {
-    fn run(&self, context: &mut Context) -> std::io::Result<Output> {
-        let current_dir = self.evaluate_current_dir(&context.current_dir);
-        let shell_script = self.format_shell_script();
-
-        ShellScript::new(&current_dir, &shell_script)
-            .run()
-            .inspect(|output| {
-                if !output.status.success() {
-                    self.run_on_failure_commands(&current_dir);
-                }
-            })
-            .inspect_err(|_| {
-                self.run_on_failure_commands(&current_dir);
-            })
-    }
-}
-
 impl MarkdownRunnable for CommandEntry {
     fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
-        let commands = self.commands.join("\n");
-
-        let mut md = String::new();
-        md.push_str("```shell\n");
-        if let Some(dir) = &self.working_dir {
-            md.push_str(&format!(
-                "# Running command from within the {} directory\n",
-                dir
-            ));
-            // TODO: Handle paths that have the ' in their name
-            md.push_str(&format!("(cd '{}'\n", dir));
-        }
-        md.push_str(commands.as_str());
-        md.push_str("\n");
-        if let Some(_) = &self.working_dir {
-            md.push_str(")\n");
-        }
-        md.push_str("```\n");
-
-        /* TODO:  we need to clean this up */
         let current_dir = self.evaluate_current_dir(&context.current_dir);
         let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
@@ -154,30 +123,47 @@ impl MarkdownRunnable for CommandEntry {
 
         match result {
             Ok(output) => {
-                if let Some(command_output) = &self.output {
-                    if command_output.show {
-                        md.push_str("\n");
-                        md.push_str(&command_output.caption);
-                        md.push_str("\n\n```\n");
-                        md.push_str(from_utf8(&output.stdout).expect("Failed to get the output"));
-                        md.push_str("```\n");
-                    }
-                }
+                if output.status.success() {
+                    let commands = self.commands.join("\n");
 
-                Ok(md)
-            }
-            Err(e) => {
-                let error = e.to_string();
-                if let Some(command_output) = &self.output {
-                    if command_output.show {
-                        md.push_str("\nError:\n\n```\n");
-                        md.push_str(&error);
-                        md.push_str("```\n");
+                    let mut markdown = String::new();
+                    markdown.push_str("```shell\n");
+                    if let Some(dir) = &self.working_dir {
+                        markdown.push_str(&format!(
+                            "# Running command from within the {} directory\n",
+                            dir
+                        ));
+                        // TODO: Handle paths that have the ' in their name
+                        markdown.push_str(&format!("(cd '{}'\n", dir));
                     }
-                }
+                    markdown.push_str(commands.as_str());
+                    markdown.push_str("\n");
+                    if let Some(_) = &self.working_dir {
+                        markdown.push_str(")\n");
+                    }
+                    markdown.push_str("```\n");
 
-                Err(error)
+                    if let Some(command_output) = &self.output {
+                        if command_output.show {
+                            markdown.push_str("\n");
+                            markdown.push_str(&command_output.caption);
+                            markdown.push_str("\n\n```\n");
+                            markdown.push_str(
+                                from_utf8(&output.stdout).expect("Failed to get the output"),
+                            );
+                            markdown.push_str("```\n");
+                        }
+                    }
+
+                    Ok(markdown)
+                } else {
+                    Err(from_utf8(&output.stderr)
+                        .expect("Failed to get the error")
+                        .to_string())
+                }
             }
+
+            Err(e) => Err(e.to_string()),
         }
     }
 }
@@ -394,149 +380,89 @@ mod tests {
         }
     }
 
-    mod run {
-        use std::str::from_utf8;
-
-        use crate::utils::paths;
-
-        use super::*;
-
-        #[test]
-        fn execute_single_command() {
-            let command = CommandEntry {
-                commands: vec!["echo 'Hello World!'".to_string()],
-                on_failure_commands: None,
-                working_dir: None,
-                output: None,
-                tags: None,
-            };
-
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-            };
-
-            let result = command.run(&mut context);
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(output.status.success());
-            let echo = from_utf8(&output.stdout)
-                .expect("Failed to parse stdout as UTF-8")
-                .trim();
-            assert_eq!("Hello World!", echo);
-        }
-
-        #[test]
-        fn execute_multiple_commands() {
-            let command = CommandEntry {
-                commands: vec!["echo 'Hello'".to_string(), "echo 'World!'".to_string()],
-                on_failure_commands: None,
-                working_dir: None,
-                output: None,
-                tags: None,
-            };
-
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-            };
-
-            let result = command.run(&mut context);
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(output.status.success());
-            let echo = from_utf8(&output.stdout)
-                .expect("Failed to parse stdout as UTF-8")
-                .trim();
-            assert_eq!("Hello\nWorld!", echo);
-        }
-
-        #[test]
-        fn execute_on_error_command_when_command_fails() {
-            let command = CommandEntry {
-                commands: vec!["failing on purpose".to_string()],
-                on_failure_commands: Some(vec![
-                    "cat << EOF > './target/error.txt'".to_string(),
-                    "It failed!".to_string(),
-                    "EOF".to_string(),
-                ]),
-                working_dir: None,
-                output: None,
-                tags: None,
-            };
-
-            let result = command.run(&mut Context::empty());
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(!output.status.success());
-
-            let error_message = fs::read_to_string("./target/error.txt");
-            assert!(error_message.is_ok());
-            assert_eq!(
-                "It failed!\n",
-                error_message
-                    .expect("Failed to read the error message")
-                    .as_str()
-            );
-        }
-
-        #[test]
-        fn execute_command_from_different_working_dir() {
-            let target = paths::current_dir().join("target");
-
-            let command = CommandEntry {
-                commands: vec!["pwd".to_string()],
-                on_failure_commands: None,
-                working_dir: Some("target".to_string()),
-                output: None,
-                tags: None,
-            };
-
-            let result = command.run(&mut Context::empty());
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(output.status.success());
-            let pwd = from_utf8(&output.stdout)
-                .expect("Failed to parse stdout as UTF-8")
-                .trim();
-            assert_eq!(paths::path_as_str(&target), pwd);
-        }
-
-        #[test]
-        #[ignore]
-        fn execute_command_with_long_output() {
-            let command = CommandEntry {
-                commands: vec![
-                    "for i in {1..1000000}; do echo \"[${i}] Hello World!\"; done".to_string(),
-                ],
-                on_failure_commands: None,
-                working_dir: None,
-                output: None,
-                tags: None,
-            };
-
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-            };
-
-            let result = command.run(&mut context);
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(output.status.success());
-            let echo = from_utf8(&output.stdout)
-                .expect("Failed to parse stdout as UTF-8")
-                .trim();
-
-            let mut expected = String::new();
-            for i in 1..1000001 {
-                expected.push_str(&format!("[{}] Hello World!\n", i))
-            }
-            assert_eq!(expected.trim(), echo);
-        }
-    }
+    // mod run {
+    //     use std::str::from_utf8;
+    //
+    //     use crate::utils::paths;
+    //
+    //     use super::*;
+    //
+    //     #[test]
+    //     fn execute_single_command() {
+    //         let command = CommandEntry {
+    //             commands: vec!["echo 'Hello World!'".to_string()],
+    //             on_failure_commands: None,
+    //             working_dir: None,
+    //             output: None,
+    //             tags: None,
+    //         };
+    //
+    //         let mut context = Context {
+    //             current_dir: paths::current_dir(),
+    //         };
+    //
+    //         let result = command.run(&mut context);
+    //         assert!(result.is_ok());
+    //
+    //         let output = result.unwrap();
+    //         assert!(output.status.success());
+    //         let echo = from_utf8(&output.stdout)
+    //             .expect("Failed to parse stdout as UTF-8")
+    //             .trim();
+    //         assert_eq!("Hello World!", echo);
+    //     }
+    //
+    //     #[test]
+    //     fn execute_multiple_commands() {
+    //         let command = CommandEntry {
+    //             commands: vec!["echo 'Hello'".to_string(), "echo 'World!'".to_string()],
+    //             on_failure_commands: None,
+    //             working_dir: None,
+    //             output: None,
+    //             tags: None,
+    //         };
+    //
+    //         let mut context = Context {
+    //             current_dir: paths::current_dir(),
+    //         };
+    //
+    //         let result = command.run(&mut context);
+    //         assert!(result.is_ok());
+    //
+    //         let output = result.unwrap();
+    //         assert!(output.status.success());
+    //         let echo = from_utf8(&output.stdout)
+    //             .expect("Failed to parse stdout as UTF-8")
+    //             .trim();
+    //         assert_eq!("Hello\nWorld!", echo);
+    //     }
+    //
+    //     #[test]
+    //     fn execute_command_from_different_working_dir() {
+    //         let target = paths::current_dir().join("target");
+    //
+    //         let command = CommandEntry {
+    //             commands: vec!["pwd".to_string()],
+    //             on_failure_commands: None,
+    //             working_dir: Some("target".to_string()),
+    //             output: None,
+    //             tags: None,
+    //         };
+    //
+    //         let result = command.run(&mut Context::empty());
+    //         assert!(result.is_ok());
+    //
+    //         let output = result.unwrap();
+    //         assert!(output.status.success());
+    //         let pwd = from_utf8(&output.stdout)
+    //             .expect("Failed to parse stdout as UTF-8")
+    //             .trim();
+    //         assert_eq!(paths::path_as_str(&target), pwd);
+    //     }
+    //
+    //     #[test]
+    //     #[ignore]
+    // }
 
     mod markdown_runnable_tests {
         use super::*;
@@ -629,5 +555,63 @@ Albert Attard
                 md
             );
         }
+
+        #[test]
+        fn format_error_when_command_fails() {
+            let command = CommandEntry {
+                commands: vec!["failing on purpose".to_string()],
+                on_failure_commands: Some(vec![
+                    "cat << EOF > './target/error.txt'".to_string(),
+                    "It failed!".to_string(),
+                    "EOF".to_string(),
+                ]),
+                working_dir: None,
+                output: None,
+                tags: None,
+            };
+
+            let result = command.to_markdown(&mut Context::empty());
+            assert!(result.is_err());
+
+            let error = result.err().unwrap();
+            assert!(error.len() > 0);
+
+            let error_message = fs::read_to_string("./target/error.txt");
+            assert!(error_message.is_ok());
+            assert_eq!(
+                "It failed!\n",
+                error_message
+                    .expect("Failed to read the error message")
+                    .as_str()
+            );
+        }
+    }
+
+    #[test]
+    fn format_command_with_long_output() {
+        let command = CommandEntry {
+            commands: vec!["for i in {1..10000}; do echo \"[${i}] Hello World!\"; done".to_string()],
+            on_failure_commands: None,
+            working_dir: None,
+            output: Some(CommandOutput::new()),
+            tags: None,
+        };
+
+        let mut context = Context {
+            current_dir: paths::current_dir(),
+        };
+
+        let result = command.to_markdown(&mut context);
+        assert!(result.is_ok());
+
+        let output = result.unwrap();
+
+        let mut expected = String::new();
+        expected.push_str("```shell\nfor i in {1..10000}; do echo \"[${i}] Hello World!\"; done\n```\n\nOutput:\n\n```\n");
+        for i in 1..10001 {
+            expected.push_str(&format!("[{}] Hello World!\n", i))
+        }
+        expected.push_str("```\n");
+        assert_eq!(expected, output);
     }
 }
