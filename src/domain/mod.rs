@@ -1,10 +1,7 @@
 use std::env;
 use std::fmt::{Debug, Display, Formatter};
 use std::path::PathBuf;
-use std::process::Output;
-use std::str::from_utf8;
 
-use colored::Colorize;
 use serde::Deserialize;
 
 use crate::domain::breakpoint::BreakpointEntry;

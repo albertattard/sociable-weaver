@@ -55,7 +55,7 @@ impl MarkdownRunnable for DisplayFileEntry {
         let mut md = String::new();
         md.push_str("```");
         md.push_str(file_type);
-        md.push_str("\n");
+        md.push('\n');
         md.push_str(content.as_str());
         md.push_str("```\n");
         Ok(md)
@@ -149,7 +149,7 @@ public class Main {
 }
 "#;
 
-            let path = write_fixture("./target/fixtures/Main.java", java_file);
+            write_fixture("./target/fixtures/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
@@ -201,7 +201,7 @@ public class Main {
 }
 "#;
 
-            let path = write_fixture("./target/fixtures/Main.java", java_file);
+            write_fixture("./target/fixtures/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {

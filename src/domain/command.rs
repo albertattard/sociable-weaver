@@ -14,6 +14,7 @@ use serde::Deserialize;
 
 use crate::domain::{Context, MarkdownRunnable};
 use crate::utils::paths;
+use crate::utils::paths::current_dir;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
@@ -25,11 +26,10 @@ pub(crate) struct CommandEntry {
 }
 
 impl CommandEntry {
-    fn evaluate_current_dir<P: AsRef<Path>>(&self, current_dir: &P) -> PathBuf {
-        self.working_dir.as_ref().map_or_else(
-            || current_dir.as_ref().to_path_buf(),
-            |path| current_dir.as_ref().join(path.clone()),
-        )
+    fn evaluate_current_dir(&self) -> PathBuf {
+        self.working_dir
+            .as_ref()
+            .map_or_else(|| current_dir(), |path| current_dir().join(path.clone()))
     }
 
     fn format_shell_script(&self) -> String {
@@ -107,8 +107,8 @@ impl CommandOutput {
 }
 
 impl MarkdownRunnable for CommandEntry {
-    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
-        let current_dir = self.evaluate_current_dir(&context.current_dir);
+    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
+        let current_dir = self.evaluate_current_dir();
         let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
             .run()
@@ -343,7 +343,7 @@ mod tests {
             };
 
             let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir);
+            let result = command.evaluate_current_dir();
             assert_eq!(current_dir, result);
         }
 
@@ -359,7 +359,7 @@ mod tests {
             };
 
             let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir);
+            let result = command.evaluate_current_dir();
             assert_eq!(current_dir.join("test"), result);
         }
 
@@ -374,8 +374,7 @@ mod tests {
                 tags: None,
             };
 
-            let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir);
+            let result = command.evaluate_current_dir();
             assert_eq!(PathBuf::from("/test"), result);
         }
     }

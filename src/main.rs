@@ -50,7 +50,7 @@ fn create_file(path: &str, text: &str) -> io::Result<()> {
 }
 
 fn append_to_file(path: &str, result: Result<String, String>) -> io::Result<()> {
-    let mut file = OpenOptions::new().write(true).append(true).open(path)?;
+    let mut file = OpenOptions::new().append(true).open(path)?;
 
     match result {
         Ok(text) => writeln!(file, "{}", text),
