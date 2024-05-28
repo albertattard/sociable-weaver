@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::domain::MarkdownRunnable;
+use crate::domain::{Context, MarkdownRunnable};
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) enum HeadingLevel {
@@ -17,7 +17,7 @@ pub(crate) struct HeadingEntry {
 }
 
 impl MarkdownRunnable for HeadingEntry {
-    fn to_markdown(&self) -> Result<String, String> {
+    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
         let prefix = match self.level {
             HeadingLevel::H1 => "#",
             HeadingLevel::H2 => "##",
@@ -76,7 +76,7 @@ mod tests {
             };
 
             /* When */
-            let md = h1.to_markdown();
+            let md = h1.to_markdown(&mut Context::empty());
 
             /* Then */
             assert_eq!(Ok("# Heading Level 1\n".to_string()), md);
@@ -91,7 +91,7 @@ mod tests {
             };
 
             /* When */
-            let md = h2.to_markdown();
+            let md = h2.to_markdown(&mut Context::empty());
 
             /* Then */
             assert_eq!(Ok("## Heading Level 2\n".to_string()), md);
@@ -106,7 +106,7 @@ mod tests {
             };
 
             /* When */
-            let md = h3.to_markdown();
+            let md = h3.to_markdown(&mut Context::empty());
 
             /* Then */
             assert_eq!(Ok("### Heading Level 3\n".to_string()), md);
@@ -121,7 +121,7 @@ mod tests {
             };
 
             /* When */
-            let md = h4.to_markdown();
+            let md = h4.to_markdown(&mut Context::empty());
 
             /* Then */
             assert_eq!(Ok("#### Heading Level 4\n".to_string()), md);

@@ -11,7 +11,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 
-use crate::domain::{Context, Runnable};
+use crate::domain::{Context, MarkdownRunnable, Runnable};
 use crate::utils::paths;
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -50,7 +50,7 @@ impl CommandEntry {
         )
     }
 
-    fn evaluate_commands(&self, variables_values: &Vec<(String, String)>) -> String {
+    fn format_shell_script(&self, variables_values: &Vec<(String, String)>) -> String {
         let mut commands = String::new();
         commands.push_str(
             r#"#!/bin/sh
@@ -62,6 +62,12 @@ set -e
 
 "#,
         );
+        commands.push_str(&self.evaluate_variables(variables_values));
+        commands
+    }
+
+    fn evaluate_variables(&self, variables_values: &Vec<(String, String)>) -> String {
+        let mut commands = String::new();
         for command in Self::evaluate_vec(&self.commands, variables_values) {
             commands.push_str(format!("{}\n", command).as_str());
         }
@@ -123,7 +129,7 @@ impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
         let variables_values = self.variable_values(context);
         let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
-        let commands = self.evaluate_commands(&variables_values);
+        let commands = self.format_shell_script(&variables_values);
 
         ShellScript::new(&current_dir, &commands)
             .run()
@@ -135,6 +141,30 @@ impl Runnable for CommandEntry {
             .inspect_err(|_| {
                 self.run_on_failure_commands(&variables_values, &current_dir);
             })
+    }
+}
+
+impl MarkdownRunnable for CommandEntry {
+    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
+        let variables_values = self.variable_values(context);
+        let commands = self.evaluate_variables(&variables_values);
+
+        let mut md = String::new();
+        md.push_str("```shell\n");
+        if let Some(dir) = &self.working_dir {
+            md.push_str(&format!(
+                "# Running command from within the {} directory\n",
+                dir
+            ));
+            // TODO: Handle paths that have the ' in their name
+            md.push_str(&format!("(cd '{}'\n", dir));
+        }
+        md.push_str(commands.as_str());
+        if let Some(_) = &self.working_dir {
+            md.push_str(")\n");
+        }
+        md.push_str("```\n");
+        Ok(md)
     }
 }
 
@@ -533,6 +563,96 @@ mod tests {
                 expected.push_str(&format!("[{}] Hello World!\n", i))
             }
             assert_eq!(expected.trim(), echo);
+        }
+    }
+
+    mod markdown_runnable_tests {
+        use crate::domain::ContextVariable;
+
+        use super::*;
+
+        #[test]
+        fn format_multiple_commands() {
+            /* Given */
+            let entry = CommandEntry {
+                commands: vec!["echo 1".to_string(), "echo 2".to_string()],
+                on_failure_commands: None,
+                working_dir: None,
+                variables: None,
+                tags: None,
+            };
+
+            /* When */
+            let md = entry.to_markdown(&mut Context::empty());
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```shell
+echo 1
+echo 2
+```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
+        fn format_commands_in_working_dir() {
+            /* Given */
+            let entry = CommandEntry {
+                commands: vec!["echo 1".to_string(), "echo 2".to_string()],
+                on_failure_commands: None,
+                working_dir: Some("working-dir".to_string()),
+                variables: None,
+                tags: None,
+            };
+
+            /* When */
+            let md = entry.to_markdown(&mut Context::empty());
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```shell
+# Running command from within the working-dir directory
+(cd 'working-dir'
+echo 1
+echo 2
+)
+```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
+        fn format_commands_with_variables() {
+            /* Given */
+            let entry = CommandEntry {
+                commands: vec!["echo '${NAME}'".to_string()],
+                on_failure_commands: None,
+                working_dir: None,
+                variables: Some(vec!["NAME".to_string()]),
+                tags: None,
+            };
+            let context = &mut Context::empty().with_variable(ContextVariable {
+                name: "NAME".to_string(),
+                value: "Albert Attard".to_string(),
+            });
+
+            /* When */
+            let md = entry.to_markdown(context);
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```shell
+echo 'Albert Attard'
+```
+"#
+                .to_string()),
+                md
+            );
         }
     }
 }

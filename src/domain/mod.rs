@@ -4,19 +4,22 @@ use std::path::PathBuf;
 use std::process::Output;
 use std::str::from_utf8;
 
-use crate::domain::breakpoint::BreakpointEntry;
 use colored::Colorize;
 use serde::Deserialize;
 
+use crate::domain::breakpoint::BreakpointEntry;
 use crate::domain::command::CommandEntry;
+use crate::domain::display_file::DisplayFileEntry;
 use crate::domain::heading::HeadingEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::text_variable::TextVariable;
 use crate::domain::todo::TodoEntry;
 use crate::domain::Variable::Text;
+use crate::utils::paths::current_dir;
 
 mod breakpoint;
 pub(crate) mod command;
+mod display_file;
 pub(crate) mod heading;
 pub(crate) mod markdown;
 pub(crate) mod text_variable;
@@ -52,10 +55,11 @@ impl Display for Document {
 #[derive(Debug, PartialEq, Deserialize)]
 #[serde(tag = "type")]
 pub(crate) enum Entry {
+    Breakpoint(BreakpointEntry),
+    Command(CommandEntry),
+    DisplayFile(DisplayFileEntry),
     Heading(HeadingEntry),
     Markdown(MarkdownEntry),
-    Command(CommandEntry),
-    Breakpoint(BreakpointEntry),
     Todo(TodoEntry),
 }
 
@@ -95,6 +99,18 @@ pub(crate) struct Context {
 }
 
 impl Context {
+    pub(crate) fn empty() -> Self {
+        Context {
+            current_dir: current_dir(),
+            variables: vec![],
+        }
+    }
+
+    pub(crate) fn with_variable(mut self, variable: ContextVariable) -> Self {
+        self.variables.push(variable);
+        self
+    }
+
     pub(crate) fn value(&self, name: &str) -> Option<String> {
         self.variables
             .iter()
@@ -180,5 +196,5 @@ impl Executor {
 }
 
 pub(crate) trait MarkdownRunnable {
-    fn to_markdown(&self) -> Result<String, String>;
+    fn to_markdown(&self, context: &mut Context) -> Result<String, String>;
 }

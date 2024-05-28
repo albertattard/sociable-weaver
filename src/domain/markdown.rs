@@ -1,5 +1,6 @@
-use crate::domain::MarkdownRunnable;
 use serde::Deserialize;
+
+use crate::domain::{Context, MarkdownRunnable};
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct MarkdownEntry {
@@ -8,21 +9,25 @@ pub(crate) struct MarkdownEntry {
 }
 
 impl MarkdownRunnable for MarkdownEntry {
-    fn to_markdown(&self) -> Result<String, String> {
-        todo!()
+    fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
+        Ok(format!("{}\n", self.contents.join("\n")))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::Entry::Markdown;
-    use crate::Document;
-
     use super::*;
 
-    #[test]
-    fn return_deserialized_markdown_when_given_minimum_options() {
-        let json = r#"{
+    mod deserialize_tests {
+        use crate::domain::markdown::MarkdownEntry;
+        use crate::domain::Document;
+        use crate::domain::Entry::Markdown;
+
+        use super::*;
+
+        #[test]
+        fn return_deserialized_markdown_when_given_minimum_options() {
+            let json = r#"{
   "variables": [],
   "entries": [
     {
@@ -34,21 +39,21 @@ mod tests {
   ]
 }"#;
 
-        let expected = Document {
-            variables: vec![],
-            entries: vec![Markdown(MarkdownEntry {
-                contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
-                tags: None,
-            })],
-        };
+            let expected = Document {
+                variables: vec![],
+                entries: vec![Markdown(MarkdownEntry {
+                    contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
+                    tags: None,
+                })],
+            };
 
-        let deserialized: Document = Document::parse(json).unwrap();
-        assert_eq!(expected, deserialized);
-    }
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
 
-    #[test]
-    fn return_deserialized_markdown_when_given_all_options() {
-        let json = r#"{
+        #[test]
+        fn return_deserialized_markdown_when_given_all_options() {
+            let json = r#"{
   "variables": [],
   "entries": [
     {
@@ -63,15 +68,16 @@ mod tests {
   ]
 }"#;
 
-        let expected = Document {
-            variables: vec![],
-            entries: vec![Markdown(MarkdownEntry {
-                contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
-                tags: Some(vec!["test".to_string()]),
-            })],
-        };
+            let expected = Document {
+                variables: vec![],
+                entries: vec![Markdown(MarkdownEntry {
+                    contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
+                    tags: Some(vec!["test".to_string()]),
+                })],
+            };
 
-        let deserialized: Document = Document::parse(json).unwrap();
-        assert_eq!(expected, deserialized);
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
     }
 }
