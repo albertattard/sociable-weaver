@@ -12,7 +12,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 
-use crate::domain::{Context, MarkdownRunnable};
+use crate::domain::MarkdownRunnable;
 use crate::utils::paths;
 use crate::utils::paths::current_dir;
 
@@ -107,7 +107,7 @@ impl CommandOutput {
 }
 
 impl MarkdownRunnable for CommandEntry {
-    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
+    fn to_markdown(&self) -> Result<String, String> {
         let current_dir = self.evaluate_current_dir();
         let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
@@ -400,7 +400,7 @@ mod tests {
     //             current_dir: paths::current_dir(),
     //         };
     //
-    //         let result = command.run(&mut context);
+    //         let result = command.run();
     //         assert!(result.is_ok());
     //
     //         let output = result.unwrap();
@@ -425,7 +425,7 @@ mod tests {
     //             current_dir: paths::current_dir(),
     //         };
     //
-    //         let result = command.run(&mut context);
+    //         let result = command.run();
     //         assert!(result.is_ok());
     //
     //         let output = result.unwrap();
@@ -448,7 +448,7 @@ mod tests {
     //             tags: None,
     //         };
     //
-    //         let result = command.run(&mut Context::empty());
+    //         let result = command.run();
     //         assert!(result.is_ok());
     //
     //         let output = result.unwrap();
@@ -478,7 +478,7 @@ mod tests {
             };
 
             /* When */
-            let md = entry.to_markdown(&mut Context::empty());
+            let md = entry.to_markdown();
 
             /* Then */
             assert_eq!(
@@ -504,7 +504,7 @@ echo 2
             };
 
             /* When */
-            let md = entry.to_markdown(&mut Context::empty());
+            let md = entry.to_markdown();
 
             /* Then */
             assert_eq!(
@@ -536,7 +536,7 @@ echo 2
             };
 
             /* When */
-            let md = entry.to_markdown(&mut Context::empty());
+            let md = entry.to_markdown();
 
             /* Then */
             assert_eq!(
@@ -569,7 +569,7 @@ Albert Attard
                 tags: None,
             };
 
-            let result = command.to_markdown(&mut Context::empty());
+            let result = command.to_markdown();
             assert!(result.is_err());
 
             let error = result.err().unwrap();
@@ -596,11 +596,7 @@ Albert Attard
             tags: None,
         };
 
-        let mut context = Context {
-            current_dir: paths::current_dir(),
-        };
-
-        let result = command.to_markdown(&mut context);
+        let result = command.to_markdown();
         assert!(result.is_ok());
 
         let output = result.unwrap();

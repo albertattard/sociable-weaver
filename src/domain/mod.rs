@@ -1,6 +1,4 @@
-use std::env;
 use std::fmt::{Debug, Display, Formatter};
-use std::path::PathBuf;
 
 use serde::Deserialize;
 
@@ -10,7 +8,6 @@ use crate::domain::display_file::DisplayFileEntry;
 use crate::domain::heading::HeadingEntry;
 use crate::domain::markdown::MarkdownEntry;
 use crate::domain::todo::TodoEntry;
-use crate::utils::paths::current_dir;
 
 pub(crate) mod breakpoint;
 pub(crate) mod command;
@@ -55,36 +52,6 @@ pub(crate) enum Entry {
     Todo(TodoEntry),
 }
 
-#[derive(Debug, PartialEq)]
-pub(crate) struct Context {
-    current_dir: PathBuf,
-}
-
-impl Context {
-    pub(crate) fn empty() -> Self {
-        Context {
-            current_dir: current_dir(),
-        }
-    }
-
-    pub(crate) fn with_current_dir(mut self, current_dir: PathBuf) -> Self {
-        self.current_dir = current_dir;
-        self
-    }
-
-    fn current_dir() -> PathBuf {
-        env::current_dir().expect("Failed to get the current working directory")
-    }
-}
-
-impl From<&Document> for Context {
-    fn from(_document: &Document) -> Context {
-        Context {
-            current_dir: Context::current_dir(),
-        }
-    }
-}
-
 pub(crate) trait MarkdownRunnable {
-    fn to_markdown(&self, context: &mut Context) -> Result<String, String>;
+    fn to_markdown(&self) -> Result<String, String>;
 }

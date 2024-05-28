@@ -38,10 +38,6 @@ impl DocumentFile {
         DocumentFile { path }
     }
 
-    pub(crate) fn parent_dir(&self) -> PathBuf {
-        paths::parent_dir(&self.path)
-    }
-
     pub(crate) fn read(&self) -> String {
         read_to_string(&self.path).unwrap_or_else(|_| {
             panic!(

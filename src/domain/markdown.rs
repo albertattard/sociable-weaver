@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::domain::{Context, MarkdownRunnable};
+use crate::domain::MarkdownRunnable;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct MarkdownEntry {
@@ -9,7 +9,7 @@ pub(crate) struct MarkdownEntry {
 }
 
 impl MarkdownRunnable for MarkdownEntry {
-    fn to_markdown(&self, _context: &mut Context) -> Result<String, String> {
+    fn to_markdown(&self) -> Result<String, String> {
         Ok(format!("{}\n", self.contents.join("\n")))
     }
 }
