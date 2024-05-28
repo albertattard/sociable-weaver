@@ -53,5 +53,5 @@ pub(crate) enum Entry {
 }
 
 pub(crate) trait MarkdownRunnable {
-    fn to_markdown(&self) -> Result<String, String>;
+    fn run_markdown(&self) -> Result<String, String>;
 }

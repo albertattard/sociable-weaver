@@ -107,7 +107,7 @@ impl CommandOutput {
 }
 
 impl MarkdownRunnable for CommandEntry {
-    fn to_markdown(&self) -> Result<String, String> {
+    fn run_markdown(&self) -> Result<String, String> {
         let current_dir = self.evaluate_current_dir();
         let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
@@ -478,7 +478,7 @@ mod tests {
             };
 
             /* When */
-            let md = entry.to_markdown();
+            let md = entry.run_markdown();
 
             /* Then */
             assert_eq!(
@@ -504,7 +504,7 @@ echo 2
             };
 
             /* When */
-            let md = entry.to_markdown();
+            let md = entry.run_markdown();
 
             /* Then */
             assert_eq!(
@@ -536,7 +536,7 @@ echo 2
             };
 
             /* When */
-            let md = entry.to_markdown();
+            let md = entry.run_markdown();
 
             /* Then */
             assert_eq!(
@@ -569,7 +569,7 @@ Albert Attard
                 tags: None,
             };
 
-            let result = command.to_markdown();
+            let result = command.run_markdown();
             assert!(result.is_err());
 
             let error = result.err().unwrap();
@@ -596,7 +596,7 @@ Albert Attard
             tags: None,
         };
 
-        let result = command.to_markdown();
+        let result = command.run_markdown();
         assert!(result.is_ok());
 
         let output = result.unwrap();

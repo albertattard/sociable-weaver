@@ -9,7 +9,7 @@ pub(crate) struct MarkdownEntry {
 }
 
 impl MarkdownRunnable for MarkdownEntry {
-    fn to_markdown(&self) -> Result<String, String> {
+    fn run_markdown(&self) -> Result<String, String> {
         Ok(format!("{}\n", self.contents.join("\n")))
     }
 }

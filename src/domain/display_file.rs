@@ -15,7 +15,7 @@ pub(crate) struct DisplayFileEntry {
 }
 
 impl MarkdownRunnable for DisplayFileEntry {
-    fn to_markdown(&self) -> Result<String, String> {
+    fn run_markdown(&self) -> Result<String, String> {
         let file_type = match self.path.rsplit_once('.') {
             None => "",
             Some((_, extension)) => extension,
@@ -161,7 +161,7 @@ public class Main {
             };
 
             /* When */
-            let md = entry.to_markdown();
+            let md = entry.run_markdown();
 
             /* Then */
             assert_eq!(
@@ -213,7 +213,7 @@ public class Main {
             };
 
             /* When */
-            let md = entry.to_markdown();
+            let md = entry.run_markdown();
 
             /* Then */
             assert_eq!(

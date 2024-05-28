@@ -17,7 +17,7 @@ pub(crate) struct HeadingEntry {
 }
 
 impl MarkdownRunnable for HeadingEntry {
-    fn to_markdown(&self) -> Result<String, String> {
+    fn run_markdown(&self) -> Result<String, String> {
         let prefix = match self.level {
             HeadingLevel::H1 => "#",
             HeadingLevel::H2 => "##",
@@ -78,7 +78,7 @@ mod tests {
             };
 
             /* When */
-            let md = h1.to_markdown();
+            let md = h1.run_markdown();
 
             /* Then */
             assert_eq!(Ok("# Heading Level 1\n".to_string()), md);
@@ -93,7 +93,7 @@ mod tests {
             };
 
             /* When */
-            let md = h2.to_markdown();
+            let md = h2.run_markdown();
 
             /* Then */
             assert_eq!(Ok("## Heading Level 2\n".to_string()), md);
@@ -108,7 +108,7 @@ mod tests {
             };
 
             /* When */
-            let md = h3.to_markdown();
+            let md = h3.run_markdown();
 
             /* Then */
             assert_eq!(Ok("### Heading Level 3\n".to_string()), md);
@@ -123,7 +123,7 @@ mod tests {
             };
 
             /* When */
-            let md = h4.to_markdown();
+            let md = h4.run_markdown();
 
             /* Then */
             assert_eq!(Ok("#### Heading Level 4\n".to_string()), md);

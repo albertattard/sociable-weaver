@@ -25,10 +25,10 @@ fn main() -> io::Result<()> {
 
         for entry in document.entries() {
             match entry {
-                Command(entry) => append_to_file(path, entry.to_markdown())?,
-                DisplayFile(entry) => append_to_file(path, entry.to_markdown())?,
-                Heading(entry) => append_to_file(path, entry.to_markdown())?,
-                Markdown(entry) => append_to_file(path, entry.to_markdown())?,
+                Command(entry) => append_to_file(path, entry.run_markdown())?,
+                DisplayFile(entry) => append_to_file(path, entry.run_markdown())?,
+                Heading(entry) => append_to_file(path, entry.run_markdown())?,
+                Markdown(entry) => append_to_file(path, entry.run_markdown())?,
                 Breakpoint(_) => return Ok(()),
                 _ => { /* Skip for now */ }
             }
