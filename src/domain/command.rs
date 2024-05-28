@@ -21,38 +21,18 @@ pub(crate) struct CommandEntry {
     on_failure_commands: Option<Vec<String>>,
     working_dir: Option<String>,
     output: Option<CommandOutput>,
-    variables: Option<Vec<String>>,
     tags: Option<Vec<String>>,
 }
 
 impl CommandEntry {
-    fn variable_values(&self, context: &mut Context) -> Vec<(String, String)> {
-        if let Some(v) = &self.variables {
-            v.iter()
-                .map(|name| (name, context.value(name)))
-                .filter_map(|(name, value)| value.map(|v| (format!("${{{}}}", name), v)))
-                .collect()
-        } else {
-            vec![]
-        }
-    }
-
-    fn evaluate_current_dir<P: AsRef<Path>>(
-        &self,
-        current_dir: &P,
-        variables_values: &Vec<(String, String)>,
-    ) -> PathBuf {
+    fn evaluate_current_dir<P: AsRef<Path>>(&self, current_dir: &P) -> PathBuf {
         self.working_dir.as_ref().map_or_else(
             || current_dir.as_ref().to_path_buf(),
-            |path| {
-                current_dir
-                    .as_ref()
-                    .join(Self::evaluate(path.clone(), variables_values))
-            },
+            |path| current_dir.as_ref().join(path.clone()),
         )
     }
 
-    fn format_shell_script(&self, variables_values: &Vec<(String, String)>) -> String {
+    fn format_shell_script(&self) -> String {
         let mut commands = String::new();
         commands.push_str(
             r#"#!/bin/sh
@@ -64,22 +44,11 @@ set -e
 
 "#,
         );
-        commands.push_str(&self.evaluate_variables(variables_values));
+        commands.push_str(&self.commands.join("\n"));
         commands
     }
 
-    fn evaluate_variables(&self, variables_values: &Vec<(String, String)>) -> String {
-        let mut commands = String::new();
-        for command in Self::evaluate_vec(&self.commands, variables_values) {
-            commands.push_str(format!("{}\n", command).as_str());
-        }
-        commands
-    }
-
-    fn evaluate_on_failure_commands(
-        &self,
-        variables_values: &Vec<(String, String)>,
-    ) -> Option<String> {
+    fn evaluate_on_failure_commands(&self) -> Option<String> {
         self.on_failure_commands.as_ref().map(|on_failure_commands| {
             let mut commands = String::new();
             commands.push_str(
@@ -91,36 +60,14 @@ set -e
 
 "#,
             );
-            for command in Self::evaluate_vec(on_failure_commands, variables_values) {
-                commands.push_str(format!("{}\n", command).as_str());
-            }
+
+            commands.push_str(&on_failure_commands.join("\n"));
             commands
         })
     }
 
-    fn evaluate_vec(commands: &[String], variables_values: &Vec<(String, String)>) -> Vec<String> {
-        commands
-            .iter()
-            .cloned()
-            .map(|line| Self::evaluate(line, variables_values))
-            .collect()
-    }
-
-    fn evaluate(mut line: String, variables_values: &Vec<(String, String)>) -> String {
-        for var_val in variables_values {
-            if line.contains(&var_val.0) {
-                line = line.replace(&var_val.0, &var_val.1)
-            }
-        }
-        line
-    }
-
-    fn run_on_failure_commands(
-        &self,
-        variables_values: &Vec<(String, String)>,
-        current_dir: &Path,
-    ) {
-        self.evaluate_on_failure_commands(variables_values)
+    fn run_on_failure_commands(&self, current_dir: &Path) {
+        self.evaluate_on_failure_commands()
             .inspect(|on_failure_commands| {
                 let _ = ShellScript::new(current_dir, on_failure_commands).run();
             });
@@ -154,27 +101,25 @@ impl CommandOutput {
 
 impl Runnable for CommandEntry {
     fn run(&self, context: &mut Context) -> std::io::Result<Output> {
-        let variables_values = self.variable_values(context);
-        let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
-        let shell_script = self.format_shell_script(&variables_values);
+        let current_dir = self.evaluate_current_dir(&context.current_dir);
+        let shell_script = self.format_shell_script();
 
         ShellScript::new(&current_dir, &shell_script)
             .run()
             .inspect(|output| {
                 if !output.status.success() {
-                    self.run_on_failure_commands(&variables_values, &current_dir);
+                    self.run_on_failure_commands(&current_dir);
                 }
             })
             .inspect_err(|_| {
-                self.run_on_failure_commands(&variables_values, &current_dir);
+                self.run_on_failure_commands(&current_dir);
             })
     }
 }
 
 impl MarkdownRunnable for CommandEntry {
     fn to_markdown(&self, context: &mut Context) -> Result<String, String> {
-        let variables_values = self.variable_values(context);
-        let commands = self.evaluate_variables(&variables_values);
+        let commands = self.commands.join("\n");
 
         let mut md = String::new();
         md.push_str("```shell\n");
@@ -187,23 +132,24 @@ impl MarkdownRunnable for CommandEntry {
             md.push_str(&format!("(cd '{}'\n", dir));
         }
         md.push_str(commands.as_str());
+        md.push_str("\n");
         if let Some(_) = &self.working_dir {
             md.push_str(")\n");
         }
         md.push_str("```\n");
 
         /* TODO:  we need to clean this up */
-        let current_dir = self.evaluate_current_dir(&context.current_dir, &variables_values);
-        let shell_script = self.format_shell_script(&variables_values);
+        let current_dir = self.evaluate_current_dir(&context.current_dir);
+        let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
             .run()
             .inspect(|output| {
                 if !output.status.success() {
-                    self.run_on_failure_commands(&variables_values, &current_dir);
+                    self.run_on_failure_commands(&current_dir);
                 }
             })
             .inspect_err(|_| {
-                self.run_on_failure_commands(&variables_values, &current_dir);
+                self.run_on_failure_commands(&current_dir);
             });
 
         match result {
@@ -322,7 +268,6 @@ mod tests {
         #[test]
         fn return_deserialized_command_when_given_minimum_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Command",
@@ -334,13 +279,12 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Command(CommandEntry {
                     commands: vec!["echo \"Hello there!\"".to_string()],
                     on_failure_commands: None,
                     working_dir: None,
                     output: None,
-                    variables: None,
+
                     tags: None,
                 })],
             };
@@ -352,7 +296,6 @@ mod tests {
         #[test]
         fn return_deserialized_command_when_given_all_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Command",
@@ -378,7 +321,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Command(CommandEntry {
                     commands: vec!["echo \"Hello ${NAME}!\"".to_string()],
                     on_failure_commands: Some(vec![
@@ -389,7 +331,6 @@ mod tests {
                         show: false,
                         caption: "The output is hidden".to_string(),
                     }),
-                    variables: Some(vec!["NAME".to_string()]),
                     tags: Some(vec!["test".to_string()]),
                 })],
             };
@@ -411,12 +352,12 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-                variables: None,
+
                 tags: None,
             };
 
             let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir, &vec![]);
+            let result = command.evaluate_current_dir(&current_dir);
             assert_eq!(current_dir, result);
         }
 
@@ -427,12 +368,12 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: Some("test".to_string()),
                 output: None,
-                variables: None,
+
                 tags: None,
             };
 
             let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir, &vec![]);
+            let result = command.evaluate_current_dir(&current_dir);
             assert_eq!(current_dir.join("test"), result);
         }
 
@@ -443,12 +384,12 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: Some("/test".to_string()),
                 output: None,
-                variables: None,
+
                 tags: None,
             };
 
             let current_dir = paths::current_dir();
-            let result = command.evaluate_current_dir(&current_dir, &vec![]);
+            let result = command.evaluate_current_dir(&current_dir);
             assert_eq!(PathBuf::from("/test"), result);
         }
     }
@@ -456,7 +397,6 @@ mod tests {
     mod run {
         use std::str::from_utf8;
 
-        use crate::domain::ContextVariable;
         use crate::utils::paths;
 
         use super::*;
@@ -468,13 +408,11 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-                variables: None,
                 tags: None,
             };
 
             let mut context = Context {
                 current_dir: paths::current_dir(),
-                variables: vec![],
             };
 
             let result = command.run(&mut context);
@@ -495,13 +433,11 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-                variables: None,
                 tags: None,
             };
 
             let mut context = Context {
                 current_dir: paths::current_dir(),
-                variables: vec![],
             };
 
             let result = command.run(&mut context);
@@ -516,59 +452,20 @@ mod tests {
         }
 
         #[test]
-        fn execute_command_that_contains_variables() {
-            let command = CommandEntry {
-                commands: vec!["echo 'Hello ${NAME}!'".to_string()],
-                on_failure_commands: None,
-                working_dir: None,
-                output: None,
-                variables: Some(vec!["NAME".to_string()]),
-                tags: None,
-            };
-
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-                variables: vec![ContextVariable {
-                    name: "NAME".to_string(),
-                    value: "Albert".to_string(),
-                }],
-            };
-
-            let result = command.run(&mut context);
-            assert!(result.is_ok());
-
-            let output = result.unwrap();
-            assert!(output.status.success());
-            let echo = from_utf8(&output.stdout)
-                .expect("Failed to parse stdout as UTF-8")
-                .trim();
-            assert_eq!("Hello Albert!", echo);
-        }
-
-        #[test]
         fn execute_on_error_command_when_command_fails() {
             let command = CommandEntry {
                 commands: vec!["failing on purpose".to_string()],
                 on_failure_commands: Some(vec![
                     "cat << EOF > './target/error.txt'".to_string(),
-                    "It failed ${NAME}!".to_string(),
+                    "It failed!".to_string(),
                     "EOF".to_string(),
                 ]),
                 working_dir: None,
                 output: None,
-                variables: Some(vec!["NAME".to_string()]),
                 tags: None,
             };
 
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-                variables: vec![ContextVariable {
-                    name: "NAME".to_string(),
-                    value: "Albert".to_string(),
-                }],
-            };
-
-            let result = command.run(&mut context);
+            let result = command.run(&mut Context::empty());
             assert!(result.is_ok());
 
             let output = result.unwrap();
@@ -577,7 +474,7 @@ mod tests {
             let error_message = fs::read_to_string("./target/error.txt");
             assert!(error_message.is_ok());
             assert_eq!(
-                "It failed Albert!\n",
+                "It failed!\n",
                 error_message
                     .expect("Failed to read the error message")
                     .as_str()
@@ -591,21 +488,12 @@ mod tests {
             let command = CommandEntry {
                 commands: vec!["pwd".to_string()],
                 on_failure_commands: None,
-                working_dir: Some("${PWD}".to_string()),
+                working_dir: Some("target".to_string()),
                 output: None,
-                variables: Some(vec!["PWD".to_string()]),
                 tags: None,
             };
 
-            let mut context = Context {
-                current_dir: paths::current_dir(),
-                variables: vec![ContextVariable {
-                    name: "PWD".to_string(),
-                    value: "target".to_string(),
-                }],
-            };
-
-            let result = command.run(&mut context);
+            let result = command.run(&mut Context::empty());
             assert!(result.is_ok());
 
             let output = result.unwrap();
@@ -626,13 +514,11 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-                variables: None,
                 tags: None,
             };
 
             let mut context = Context {
                 current_dir: paths::current_dir(),
-                variables: vec![],
             };
 
             let result = command.run(&mut context);
@@ -653,8 +539,6 @@ mod tests {
     }
 
     mod markdown_runnable_tests {
-        use crate::domain::ContextVariable;
-
         use super::*;
 
         #[test]
@@ -665,7 +549,6 @@ mod tests {
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-                variables: None,
                 tags: None,
             };
 
@@ -692,7 +575,6 @@ echo 2
                 on_failure_commands: None,
                 working_dir: Some("target".to_string()),
                 output: None,
-                variables: None,
                 tags: None,
             };
 
@@ -715,36 +597,6 @@ echo 2
         }
 
         #[test]
-        fn format_commands_with_variables() {
-            /* Given */
-            let entry = CommandEntry {
-                commands: vec!["echo '${NAME}'".to_string()],
-                on_failure_commands: None,
-                working_dir: None,
-                output: None,
-                variables: Some(vec!["NAME".to_string()]),
-                tags: None,
-            };
-            let context = &mut Context::empty().with_variable(ContextVariable {
-                name: "NAME".to_string(),
-                value: "Albert Attard".to_string(),
-            });
-
-            /* When */
-            let md = entry.to_markdown(context);
-
-            /* Then */
-            assert_eq!(
-                Ok(r#"```shell
-echo 'Albert Attard'
-```
-"#
-                .to_string()),
-                md
-            );
-        }
-
-        #[test]
         fn format_commands_and_show_output() {
             /* Given */
             let entry = CommandEntry {
@@ -754,7 +606,7 @@ echo 'Albert Attard'
                 output: Some(CommandOutput::with_caption(
                     "The command will print:".to_string(),
                 )),
-                variables: None,
+
                 tags: None,
             };
 

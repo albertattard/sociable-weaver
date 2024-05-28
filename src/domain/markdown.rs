@@ -21,12 +21,9 @@ mod tests {
         use crate::domain::Document;
         use crate::domain::Entry::Markdown;
 
-        use super::*;
-
         #[test]
         fn return_deserialized_markdown_when_given_minimum_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Markdown",
@@ -38,7 +35,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Markdown(MarkdownEntry {
                     contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
                     tags: None,
@@ -52,7 +48,6 @@ mod tests {
         #[test]
         fn return_deserialized_markdown_when_given_all_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Markdown",
@@ -67,7 +62,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Markdown(MarkdownEntry {
                     contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
                     tags: Some(vec!["test".to_string()]),

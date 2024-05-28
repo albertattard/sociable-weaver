@@ -75,7 +75,6 @@ mod tests {
         #[test]
         fn return_deserialized_markdown_when_given_minimum_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "DisplayFile",
@@ -85,7 +84,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![DisplayFile(DisplayFileEntry {
                     path: "./some/path/File.java".to_string(),
                     from_line: None,
@@ -102,7 +100,6 @@ mod tests {
         #[test]
         fn return_deserialized_markdown_when_given_all_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "DisplayFile",
@@ -115,7 +112,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![DisplayFile(DisplayFileEntry {
                     path: "./some/path/File.java".to_string(),
                     from_line: Some(5),

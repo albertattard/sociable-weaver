@@ -36,7 +36,6 @@ mod tests {
         #[test]
         fn return_deserialized_breakpoint_when_given_minimum_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Breakpoint"
@@ -45,7 +44,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Breakpoint(BreakpointEntry { comment: None })],
             };
 
@@ -56,7 +54,6 @@ mod tests {
         #[test]
         fn return_deserialized_breakpoint_when_given_all_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Breakpoint",
@@ -66,7 +63,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Breakpoint(BreakpointEntry {
                     comment: Some("Testing breakpoints".to_string()),
                 })],

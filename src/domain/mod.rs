@@ -12,22 +12,18 @@ use crate::domain::command::CommandEntry;
 use crate::domain::display_file::DisplayFileEntry;
 use crate::domain::heading::HeadingEntry;
 use crate::domain::markdown::MarkdownEntry;
-use crate::domain::text_variable::TextVariable;
 use crate::domain::todo::TodoEntry;
-use crate::domain::Variable::Text;
 use crate::utils::paths::current_dir;
 
-mod breakpoint;
+pub(crate) mod breakpoint;
 pub(crate) mod command;
-mod display_file;
+pub(crate) mod display_file;
 pub(crate) mod heading;
 pub(crate) mod markdown;
-pub(crate) mod text_variable;
 pub(crate) mod todo;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct Document {
-    variables: Vec<Variable>,
     entries: Vec<Entry>,
 }
 
@@ -45,7 +41,6 @@ impl Document {
 impl Display for Document {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Document")
-            .field("variables", &self.variables)
             .field("entries", &self.entries)
             .finish()
     }
@@ -63,59 +58,16 @@ pub(crate) enum Entry {
     Todo(TodoEntry),
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
-#[serde(tag = "type")]
-pub(crate) enum Variable {
-    Text(TextVariable),
-}
-
-#[derive(Debug, PartialEq)]
-pub(crate) struct ContextVariable {
-    name: String,
-    value: String,
-}
-
-impl From<&Variable> for ContextVariable {
-    fn from(value: &Variable) -> Self {
-        match value {
-            Text(variable) => ContextVariable::from(variable),
-        }
-    }
-}
-
-impl From<&TextVariable> for ContextVariable {
-    fn from(value: &TextVariable) -> Self {
-        ContextVariable {
-            name: value.name(),
-            value: value.value(),
-        }
-    }
-}
-
 #[derive(Debug, PartialEq)]
 pub(crate) struct Context {
     current_dir: PathBuf,
-    variables: Vec<ContextVariable>,
 }
 
 impl Context {
     pub(crate) fn empty() -> Self {
         Context {
             current_dir: current_dir(),
-            variables: vec![],
         }
-    }
-
-    pub(crate) fn with_variable(mut self, variable: ContextVariable) -> Self {
-        self.variables.push(variable);
-        self
-    }
-
-    pub(crate) fn value(&self, name: &str) -> Option<String> {
-        self.variables
-            .iter()
-            .find(|v| v.name == name)
-            .map(|v| v.value.clone())
     }
 
     pub(crate) fn with_current_dir(mut self, current_dir: PathBuf) -> Self {
@@ -129,14 +81,9 @@ impl Context {
 }
 
 impl From<&Document> for Context {
-    fn from(document: &Document) -> Context {
+    fn from(_document: &Document) -> Context {
         Context {
             current_dir: Context::current_dir(),
-            variables: document
-                .variables
-                .iter()
-                .map(ContextVariable::from)
-                .collect(),
         }
     }
 }

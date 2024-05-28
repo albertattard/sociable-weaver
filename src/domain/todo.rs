@@ -25,7 +25,7 @@ impl Display for TodoEntry {
 mod tests {
     use super::*;
 
-    mod deserialized {
+    mod deserialize_tests {
         use crate::domain::Document;
         use crate::domain::Entry::Todo;
 
@@ -34,7 +34,6 @@ mod tests {
         #[test]
         fn return_deserialized_breakpoint_when_given_minimum_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Todo"
@@ -43,7 +42,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Todo(TodoEntry { comments: None })],
             };
 
@@ -54,7 +52,6 @@ mod tests {
         #[test]
         fn return_deserialized_breakpoint_when_given_all_options() {
             let json = r#"{
-  "variables": [],
   "entries": [
     {
       "type": "Todo",
@@ -64,7 +61,6 @@ mod tests {
 }"#;
 
             let expected = Document {
-                variables: vec![],
                 entries: vec![Todo(TodoEntry {
                     comments: Some(vec!["Testing todo".to_string()]),
                 })],

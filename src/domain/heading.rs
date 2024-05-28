@@ -31,16 +31,18 @@ impl MarkdownRunnable for HeadingEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::heading::HeadingLevel::H1;
-    use crate::domain::Entry::Heading;
-    use crate::Document;
-
     use super::*;
 
-    #[test]
-    fn return_deserialized_heading() {
-        let json = r#"{
-  "variables": [],
+    mod deserialize_tests {
+        use crate::domain::heading::HeadingLevel::H1;
+        use crate::domain::Entry::Heading;
+        use crate::Document;
+
+        use super::*;
+
+        #[test]
+        fn return_deserialized_heading() {
+            let json = r#"{
   "entries": [
     {
       "type": "Heading",
@@ -50,20 +52,20 @@ mod tests {
   ]
 }"#;
 
-        let expected = Document {
-            variables: vec![],
-            entries: vec![Heading(HeadingEntry {
-                level: H1,
-                title: "Prologue".to_string(),
-            })],
-        };
+            let expected = Document {
+                entries: vec![Heading(HeadingEntry {
+                    level: H1,
+                    title: "Prologue".to_string(),
+                })],
+            };
 
-        let deserialized: Document = Document::parse(json).unwrap();
-        assert_eq!(expected, deserialized);
+            let deserialized: Document = Document::parse(json).unwrap();
+            assert_eq!(expected, deserialized);
+        }
     }
 
     mod markdown_runnable_tests {
-        use crate::domain::heading::HeadingLevel::{H2, H3, H4};
+        use crate::domain::heading::HeadingLevel::{H1, H2, H3, H4};
 
         use super::*;
 
