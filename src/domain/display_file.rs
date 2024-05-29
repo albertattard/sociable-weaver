@@ -149,11 +149,11 @@ public class Main {
 }
 "#;
 
-            write_fixture("./target/fixtures/Main.java", java_file);
+            write_fixture("./target/fixtures/1/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./fixtures/Main.java".to_string(),
+                path: "./fixtures/1/Main.java".to_string(),
                 from_line: None,
                 number_of_lines: None,
                 working_dir: Some("target".to_string()),
@@ -201,11 +201,11 @@ public class Main {
 }
 "#;
 
-            write_fixture("./target/fixtures/Main.java", java_file);
+            write_fixture("./target/fixtures/2/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./fixtures/Main.java".to_string(),
+                path: "./fixtures/2/Main.java".to_string(),
                 from_line: Some(8),
                 number_of_lines: Some(3),
                 working_dir: Some("target".to_string()),

@@ -8,6 +8,7 @@ pub(crate) enum HeadingLevel {
     H2,
     H3,
     H4,
+    H5,
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -23,6 +24,7 @@ impl MarkdownRunnable for HeadingEntry {
             HeadingLevel::H2 => "##",
             HeadingLevel::H3 => "###",
             HeadingLevel::H4 => "####",
+            HeadingLevel::H5 => "#####",
         };
 
         Ok(format!("{} {}\n", prefix, self.title))
@@ -65,7 +67,7 @@ mod tests {
     }
 
     mod markdown_runnable_tests {
-        use crate::domain::heading::HeadingLevel::{H1, H2, H3, H4};
+        use crate::domain::heading::HeadingLevel::{H1, H2, H3, H4, H5};
 
         use super::*;
 
@@ -127,6 +129,21 @@ mod tests {
 
             /* Then */
             assert_eq!(Ok("#### Heading Level 4\n".to_string()), md);
+        }
+
+        #[test]
+        fn format_h5() {
+            /* Given */
+            let h5 = HeadingEntry {
+                level: H5,
+                title: "Heading Level 5".to_string(),
+            };
+
+            /* When */
+            let md = h5.run_markdown();
+
+            /* Then */
+            assert_eq!(Ok("##### Heading Level 5\n".to_string()), md);
         }
     }
 }
