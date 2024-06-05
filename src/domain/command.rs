@@ -19,6 +19,8 @@ use crate::utils::paths::current_dir;
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
     commands: Vec<String>,
+    #[serde(default)]
+    should_fail: bool,
     on_failure_commands: Option<Vec<String>>,
     working_dir: Option<String>,
     output: Option<CommandOutput>,
@@ -80,6 +82,8 @@ pub(crate) struct CommandOutput {
     show: bool,
     #[serde(default = "CommandOutput::default_caption_value")]
     caption: String,
+    #[serde(default = "CommandOutput::default_content_type_value")]
+    content_type: String,
 }
 
 impl CommandOutput {
@@ -87,6 +91,7 @@ impl CommandOutput {
         CommandOutput {
             show: Self::default_show_value(),
             caption: Self::default_caption_value(),
+            content_type: Self::default_content_type_value(),
         }
     }
 
@@ -94,20 +99,50 @@ impl CommandOutput {
         CommandOutput {
             show: Self::default_show_value(),
             caption,
+            content_type: Self::default_content_type_value(),
         }
+    }
+
+    fn default_show_value() -> bool {
+        true
     }
 
     fn default_caption_value() -> String {
         "Output:".to_string()
     }
 
-    fn default_show_value() -> bool {
-        true
+    fn default_content_type_value() -> String {
+        "".to_string()
     }
 }
 
 impl MarkdownRunnable for CommandEntry {
     fn run_markdown(&self) -> Result<String, String> {
+        if let Some(tags) = &self.tags {
+            if tags.contains(&"skip".to_string()) {
+                let commands = self.commands.join("\n");
+
+                let mut markdown = String::new();
+                markdown.push_str("```shell\n");
+                if let Some(dir) = &self.working_dir {
+                    markdown.push_str(&format!(
+                        "# Running command from within the {} directory\n",
+                        dir
+                    ));
+                    // TODO: Handle paths that have the ' in their name
+                    markdown.push_str(&format!("(cd '{}'\n", dir));
+                }
+                markdown.push_str(commands.as_str());
+                markdown.push_str("\n");
+                if let Some(_) = &self.working_dir {
+                    markdown.push_str(")\n");
+                }
+                markdown.push_str("```\n");
+
+                return Ok(markdown);
+            }
+        }
+
         let current_dir = self.evaluate_current_dir();
         let shell_script = self.format_shell_script();
         let result = ShellScript::new(&current_dir, &shell_script)
@@ -123,7 +158,7 @@ impl MarkdownRunnable for CommandEntry {
 
         match result {
             Ok(output) => {
-                if output.status.success() {
+                if !self.should_fail == output.status.success() {
                     let commands = self.commands.join("\n");
 
                     let mut markdown = String::new();
@@ -145,13 +180,27 @@ impl MarkdownRunnable for CommandEntry {
 
                     if let Some(command_output) = &self.output {
                         if command_output.show {
-                            markdown.push_str("\n");
-                            markdown.push_str(&command_output.caption);
-                            markdown.push_str("\n\n```\n");
-                            markdown.push_str(
-                                from_utf8(&output.stdout).expect("Failed to get the output"),
-                            );
-                            markdown.push_str("```\n");
+                            let stdout =
+                                from_utf8(&output.stdout).expect("Failed to get the output");
+                            if !stdout.is_empty() {
+                                markdown.push('\n');
+                                markdown.push_str(&command_output.caption);
+                                markdown.push_str("\n\n```");
+                                markdown.push_str(&command_output.content_type);
+                                markdown.push('\n');
+                                markdown.push_str(stdout);
+                                markdown.push_str("```\n");
+                            }
+
+                            let stderr =
+                                from_utf8(&output.stderr).expect("Failed to get the error");
+                            if !stderr.is_empty() {
+                                markdown.push_str("\n");
+                                markdown.push_str("Failed!!");
+                                markdown.push_str("\n\n```\n");
+                                markdown.push_str(stderr);
+                                markdown.push_str("```\n");
+                            }
                         }
                     }
 
@@ -267,10 +316,10 @@ mod tests {
             let expected = Document {
                 entries: vec![Command(CommandEntry {
                     commands: vec!["echo \"Hello there!\"".to_string()],
+                    should_fail: false,
                     on_failure_commands: None,
                     working_dir: None,
                     output: None,
-
                     tags: None,
                 })],
             };
@@ -288,13 +337,15 @@ mod tests {
       "commands": [
         "echo \"Hello ${NAME}!\""
       ],
+      "should_fail": true,
       "on_failure_commands": [
         "echo \"Failed to say hello ${NAME}!\""
       ],
       "working_dir": "dir",
       "output": {
         "show": false,
-        "caption": "The output is hidden"
+        "caption": "The output is hidden",
+        "content_type": "xml"
       },
       "variables": [
         "NAME"
@@ -309,6 +360,7 @@ mod tests {
             let expected = Document {
                 entries: vec![Command(CommandEntry {
                     commands: vec!["echo \"Hello ${NAME}!\"".to_string()],
+                    should_fail: true,
                     on_failure_commands: Some(vec![
                         "echo \"Failed to say hello ${NAME}!\"".to_string()
                     ]),
@@ -316,6 +368,7 @@ mod tests {
                     output: Some(CommandOutput {
                         show: false,
                         caption: "The output is hidden".to_string(),
+                        content_type: "xml".to_string(),
                     }),
                     tags: Some(vec!["test".to_string()]),
                 })],
@@ -335,10 +388,10 @@ mod tests {
         fn return_the_give_path_when_working_dir_is_missing() {
             let command = CommandEntry {
                 commands: vec!["date".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
-
                 tags: None,
             };
 
@@ -351,10 +404,10 @@ mod tests {
         fn return_the_constructed_path_when_working_dir_is_relative() {
             let command = CommandEntry {
                 commands: vec!["date".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: Some("test".to_string()),
                 output: None,
-
                 tags: None,
             };
 
@@ -367,10 +420,10 @@ mod tests {
         fn return_the_working_dir_when_it_is_absolute() {
             let command = CommandEntry {
                 commands: vec!["date".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: Some("/test".to_string()),
                 output: None,
-
                 tags: None,
             };
 
@@ -379,98 +432,15 @@ mod tests {
         }
     }
 
-    // mod run {
-    //     use std::str::from_utf8;
-    //
-    //     use crate::utils::paths;
-    //
-    //     use super::*;
-    //
-    //     #[test]
-    //     fn execute_single_command() {
-    //         let command = CommandEntry {
-    //             commands: vec!["echo 'Hello World!'".to_string()],
-    //             on_failure_commands: None,
-    //             working_dir: None,
-    //             output: None,
-    //             tags: None,
-    //         };
-    //
-    //         let mut context = Context {
-    //             current_dir: paths::current_dir(),
-    //         };
-    //
-    //         let result = command.run();
-    //         assert!(result.is_ok());
-    //
-    //         let output = result.unwrap();
-    //         assert!(output.status.success());
-    //         let echo = from_utf8(&output.stdout)
-    //             .expect("Failed to parse stdout as UTF-8")
-    //             .trim();
-    //         assert_eq!("Hello World!", echo);
-    //     }
-    //
-    //     #[test]
-    //     fn execute_multiple_commands() {
-    //         let command = CommandEntry {
-    //             commands: vec!["echo 'Hello'".to_string(), "echo 'World!'".to_string()],
-    //             on_failure_commands: None,
-    //             working_dir: None,
-    //             output: None,
-    //             tags: None,
-    //         };
-    //
-    //         let mut context = Context {
-    //             current_dir: paths::current_dir(),
-    //         };
-    //
-    //         let result = command.run();
-    //         assert!(result.is_ok());
-    //
-    //         let output = result.unwrap();
-    //         assert!(output.status.success());
-    //         let echo = from_utf8(&output.stdout)
-    //             .expect("Failed to parse stdout as UTF-8")
-    //             .trim();
-    //         assert_eq!("Hello\nWorld!", echo);
-    //     }
-    //
-    //     #[test]
-    //     fn execute_command_from_different_working_dir() {
-    //         let target = paths::current_dir().join("target");
-    //
-    //         let command = CommandEntry {
-    //             commands: vec!["pwd".to_string()],
-    //             on_failure_commands: None,
-    //             working_dir: Some("target".to_string()),
-    //             output: None,
-    //             tags: None,
-    //         };
-    //
-    //         let result = command.run();
-    //         assert!(result.is_ok());
-    //
-    //         let output = result.unwrap();
-    //         assert!(output.status.success());
-    //         let pwd = from_utf8(&output.stdout)
-    //             .expect("Failed to parse stdout as UTF-8")
-    //             .trim();
-    //         assert_eq!(paths::path_as_str(&target), pwd);
-    //     }
-    //
-    //     #[test]
-    //     #[ignore]
-    // }
-
     mod markdown_runnable_tests {
         use super::*;
 
         #[test]
-        fn format_multiple_commands() {
+        fn run_multiple_commands() {
             /* Given */
             let entry = CommandEntry {
                 commands: vec!["echo 1".to_string(), "echo 2".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: None,
                 output: None,
@@ -493,10 +463,11 @@ echo 2
         }
 
         #[test]
-        fn format_commands_in_working_dir() {
+        fn run_commands_in_working_dir() {
             /* Given */
             let entry = CommandEntry {
                 commands: vec!["echo 1".to_string(), "echo 2".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: Some("target".to_string()),
                 output: None,
@@ -522,16 +493,16 @@ echo 2
         }
 
         #[test]
-        fn format_commands_and_show_output() {
+        fn run_commands_and_show_output() {
             /* Given */
             let entry = CommandEntry {
                 commands: vec!["echo 'Albert Attard'".to_string()],
+                should_fail: false,
                 on_failure_commands: None,
                 working_dir: None,
                 output: Some(CommandOutput::with_caption(
                     "The command will print:".to_string(),
                 )),
-
                 tags: None,
             };
 
@@ -556,9 +527,10 @@ Albert Attard
         }
 
         #[test]
-        fn format_error_when_command_fails() {
+        fn run_error_when_command_fails() {
             let command = CommandEntry {
                 commands: vec!["failing on purpose".to_string()],
+                should_fail: true,
                 on_failure_commands: Some(vec![
                     "cat << EOF > './target/error.txt'".to_string(),
                     "It failed!".to_string(),
@@ -570,10 +542,7 @@ Albert Attard
             };
 
             let result = command.run_markdown();
-            assert!(result.is_err());
-
-            let error = result.err().unwrap();
-            assert!(error.len() > 0);
+            assert!(result.is_ok());
 
             let error_message = fs::read_to_string("./target/error.txt");
             assert!(error_message.is_ok());
@@ -584,29 +553,32 @@ Albert Attard
                     .as_str()
             );
         }
-    }
 
-    #[test]
-    fn format_command_with_long_output() {
-        let command = CommandEntry {
-            commands: vec!["for i in {1..10000}; do echo \"[${i}] Hello World!\"; done".to_string()],
-            on_failure_commands: None,
-            working_dir: None,
-            output: Some(CommandOutput::new()),
-            tags: None,
-        };
+        #[test]
+        fn run_command_with_long_output() {
+            let command = CommandEntry {
+                commands: vec![
+                    "for i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done".to_string()
+                ],
+                should_fail: false,
+                on_failure_commands: None,
+                working_dir: None,
+                output: Some(CommandOutput::new()),
+                tags: None,
+            };
 
-        let result = command.run_markdown();
-        assert!(result.is_ok());
+            let result = command.run_markdown();
+            assert!(result.is_ok());
 
-        let output = result.unwrap();
+            let output = result.unwrap();
 
-        let mut expected = String::new();
-        expected.push_str("```shell\nfor i in {1..10000}; do echo \"[${i}] Hello World!\"; done\n```\n\nOutput:\n\n```\n");
-        for i in 1..10001 {
-            expected.push_str(&format!("[{}] Hello World!\n", i))
+            let mut expected = String::new();
+            expected.push_str("```shell\nfor i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done\n```\n\nOutput:\n\n```\n");
+            for i in 1..100001 {
+                expected.push_str(&format!("[{}] The quick brown fox jumps over the lazy dog!\n", i))
+            }
+            expected.push_str("```\n");
+            assert_eq!(expected, output);
         }
-        expected.push_str("```\n");
-        assert_eq!(expected, output);
     }
 }
