@@ -1,5 +1,4 @@
 use std::fs;
-use std::path::PathBuf;
 
 use serde::Deserialize;
 
@@ -10,7 +9,6 @@ pub(crate) struct DisplayFileEntry {
     path: String,
     from_line: Option<usize>,
     number_of_lines: Option<usize>,
-    working_dir: Option<String>,
     tags: Option<Vec<String>>,
 }
 
@@ -21,20 +19,14 @@ impl MarkdownRunnable for DisplayFileEntry {
             Some((_, extension)) => extension,
         };
 
-        let p = match &self.working_dir {
-            None => PathBuf::new(),
-            Some(dir) => PathBuf::from(dir),
-        }
-        .join(&self.path);
-
-        let content = fs::read_to_string(&p);
+        let content = fs::read_to_string(&self.path);
         if content.is_err() {
             return Err(format!("Failed to read the file {}", self.path));
         }
 
         let mut content = content.expect(&format!("Failed to read the file {}", self.path));
-        if let Some(from) = self.from_line {
-            let skip_n_lines = content.lines().skip(from);
+        if let Some(from_base_1) = self.from_line {
+            let skip_n_lines = content.lines().skip(from_base_1 - 1);
 
             content = if let Some(n) = self.number_of_lines {
                 skip_n_lines
@@ -52,12 +44,7 @@ impl MarkdownRunnable for DisplayFileEntry {
                 .collect()
         }
 
-        let mut md = String::new();
-        md.push_str("```");
-        md.push_str(file_type);
-        md.push('\n');
-        md.push_str(content.as_str());
-        md.push_str("```\n");
+        let md = format!("```{file_type}\n{content}```\n");
         Ok(md)
     }
 }
@@ -88,7 +75,6 @@ mod tests {
                     path: "./some/path/File.java".to_string(),
                     from_line: None,
                     number_of_lines: None,
-                    working_dir: None,
                     tags: None,
                 })],
             };
@@ -105,7 +91,6 @@ mod tests {
       "type": "DisplayFile",
       "from_line": 5,
       "number_of_lines": 3,
-      "working_dir": "some-directory",
       "path": "./some/path/File.java"
     }
   ]
@@ -116,7 +101,6 @@ mod tests {
                     path: "./some/path/File.java".to_string(),
                     from_line: Some(5),
                     number_of_lines: Some(3),
-                    working_dir: Some("some-directory".to_string()),
                     tags: None,
                 })],
             };
@@ -134,7 +118,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn format_java_file() {
+        fn run_java_file() {
             let java_file = r#"package demo;
 
 import org.springframework.boot.SpringApplication;
@@ -153,10 +137,9 @@ public class Main {
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./fixtures/1/Main.java".to_string(),
+                path: "./target/fixtures/1/Main.java".to_string(),
                 from_line: None,
                 number_of_lines: None,
-                working_dir: Some("target".to_string()),
                 tags: None,
             };
 
@@ -186,7 +169,7 @@ public class Main {
         }
 
         #[test]
-        fn format_java_lines_from_file() {
+        fn run_java_lines_from_file() {
             let java_file = r#"package demo;
 
 import org.springframework.boot.SpringApplication;
@@ -205,10 +188,9 @@ public class Main {
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./fixtures/2/Main.java".to_string(),
-                from_line: Some(8),
+                path: "./target/fixtures/2/Main.java".to_string(),
+                from_line: Some(9),
                 number_of_lines: Some(3),
-                working_dir: Some("target".to_string()),
                 tags: None,
             };
 
