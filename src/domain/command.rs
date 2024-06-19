@@ -25,6 +25,7 @@ pub(crate) struct CommandEntry {
     working_dir: Option<String>,
     output: Option<CommandOutput>,
     tags: Option<Vec<String>>,
+    indent: Option<usize>,
 }
 
 impl CommandEntry {
@@ -74,6 +75,78 @@ set -e
                 let _ = ShellScript::new(current_dir, on_failure_commands).run();
             });
     }
+
+    fn format_commands_as_markdown(&self) -> String {
+        let mut markdown = String::new();
+        markdown.push_str("```shell\n");
+        if let Some(dir) = &self.working_dir {
+            markdown.push_str(&format!(
+                "# Running command from within the {} directory\n",
+                dir
+            ));
+            // TODO: Handle paths that have the ' in their name
+            markdown.push_str(&format!("(cd '{}'\n", dir));
+        }
+        markdown.push_str(&self.commands.join("\n"));
+        markdown.push_str("\n");
+        if let Some(_) = &self.working_dir {
+            markdown.push_str(")\n");
+        }
+        markdown.push_str("```\n");
+        markdown
+    }
+
+    fn format_output_as_markdown(caption: &str, content_type: &str, output: &Output) -> String {
+        let mut markdown = String::new();
+
+        let stdout = from_utf8(&output.stdout).expect("Failed to get the output");
+        if !stdout.is_empty() {
+            markdown.push('\n');
+            markdown.push_str(caption);
+            markdown.push_str("\n\n```");
+            markdown.push_str(content_type);
+            markdown.push('\n');
+            markdown.push_str(stdout);
+            markdown.push_str("```\n");
+        }
+
+        let stderr = from_utf8(&output.stderr).expect("Failed to get the error");
+        if !stderr.is_empty() {
+            markdown.push_str("\n");
+            markdown.push_str("_stderr_");
+            markdown.push_str("\n\n```\n");
+            markdown.push_str(stderr);
+            markdown.push_str("```\n");
+        }
+
+        markdown
+    }
+
+    /* TODO: Move this to a common place */
+    fn add_indent(&self, markdown: String) -> String {
+        match &self.indent {
+            None => markdown,
+            Some(indentation) => {
+                let mut indented = String::new();
+                for line in markdown.split("\n") {
+                    if line.is_empty() {
+                        indented.push('\n');
+                    } else {
+                        indented.push_str(&format!(
+                            "{:>indented_length$}\n",
+                            line,
+                            indented_length = line.len() + indentation
+                        ));
+                    }
+                }
+
+                /* TODO: See why we have a dandling new-line at the end */
+                indented.remove(indented.len() - 1);
+
+                indented
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -108,7 +181,7 @@ impl CommandOutput {
     }
 
     fn default_caption_value() -> String {
-        "Output:".to_string()
+        "_stdout_".to_string()
     }
 
     fn default_content_type_value() -> String {
@@ -118,28 +191,11 @@ impl CommandOutput {
 
 impl MarkdownRunnable for CommandEntry {
     fn run_markdown(&self) -> Result<String, String> {
+        let mut markdown = self.format_commands_as_markdown();
+
         if let Some(tags) = &self.tags {
             if tags.contains(&"skip".to_string()) {
-                let commands = self.commands.join("\n");
-
-                let mut markdown = String::new();
-                markdown.push_str("```shell\n");
-                if let Some(dir) = &self.working_dir {
-                    markdown.push_str(&format!(
-                        "# Running command from within the {} directory\n",
-                        dir
-                    ));
-                    // TODO: Handle paths that have the ' in their name
-                    markdown.push_str(&format!("(cd '{}'\n", dir));
-                }
-                markdown.push_str(commands.as_str());
-                markdown.push_str("\n");
-                if let Some(_) = &self.working_dir {
-                    markdown.push_str(")\n");
-                }
-                markdown.push_str("```\n");
-
-                return Ok(markdown);
+                return Ok(self.add_indent(markdown));
             }
         }
 
@@ -159,56 +215,20 @@ impl MarkdownRunnable for CommandEntry {
         match result {
             Ok(output) => {
                 if !self.should_fail == output.status.success() {
-                    let commands = self.commands.join("\n");
-
-                    let mut markdown = String::new();
-                    markdown.push_str("```shell\n");
-                    if let Some(dir) = &self.working_dir {
-                        markdown.push_str(&format!(
-                            "# Running command from within the {} directory\n",
-                            dir
-                        ));
-                        // TODO: Handle paths that have the ' in their name
-                        markdown.push_str(&format!("(cd '{}'\n", dir));
-                    }
-                    markdown.push_str(commands.as_str());
-                    markdown.push_str("\n");
-                    if let Some(_) = &self.working_dir {
-                        markdown.push_str(")\n");
-                    }
-                    markdown.push_str("```\n");
-
                     if let Some(command_output) = &self.output {
                         if command_output.show {
-                            let stdout =
-                                from_utf8(&output.stdout).expect("Failed to get the output");
-                            if !stdout.is_empty() {
-                                markdown.push('\n');
-                                markdown.push_str(&command_output.caption);
-                                markdown.push_str("\n\n```");
-                                markdown.push_str(&command_output.content_type);
-                                markdown.push('\n');
-                                markdown.push_str(stdout);
-                                markdown.push_str("```\n");
-                            }
-
-                            let stderr =
-                                from_utf8(&output.stderr).expect("Failed to get the error");
-                            if !stderr.is_empty() {
-                                markdown.push_str("\n");
-                                markdown.push_str("Failed!!");
-                                markdown.push_str("\n\n```\n");
-                                markdown.push_str(stderr);
-                                markdown.push_str("```\n");
-                            }
+                            markdown.push_str(&Self::format_output_as_markdown(
+                                &command_output.caption,
+                                &command_output.content_type,
+                                &output,
+                            ));
                         }
                     }
 
-                    Ok(markdown)
+                    Ok(self.add_indent(markdown))
                 } else {
-                    Err(from_utf8(&output.stderr)
-                        .expect("Failed to get the error")
-                        .to_string())
+                    markdown.push_str(&Self::format_output_as_markdown("Error", "", &output));
+                    Err(self.add_indent(markdown))
                 }
             }
 
@@ -321,6 +341,7 @@ mod tests {
                     working_dir: None,
                     output: None,
                     tags: None,
+                    indent: None,
                 })],
             };
 
@@ -352,7 +373,8 @@ mod tests {
       ],
       "tags": [
         "test"
-      ]
+      ],
+      "indent": 3
     }
   ]
 }"#;
@@ -371,6 +393,7 @@ mod tests {
                         content_type: "xml".to_string(),
                     }),
                     tags: Some(vec!["test".to_string()]),
+                    indent: Some(3),
                 })],
             };
 
@@ -393,6 +416,7 @@ mod tests {
                 working_dir: None,
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             let current_dir = paths::current_dir();
@@ -409,6 +433,7 @@ mod tests {
                 working_dir: Some("test".to_string()),
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             let current_dir = paths::current_dir();
@@ -425,6 +450,7 @@ mod tests {
                 working_dir: Some("/test".to_string()),
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             let result = command.evaluate_current_dir();
@@ -445,6 +471,7 @@ mod tests {
                 working_dir: None,
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             /* When */
@@ -463,6 +490,39 @@ echo 2
         }
 
         #[test]
+        fn run_indented_commands() {
+            /* Given */
+            let entry = CommandEntry {
+                commands: vec!["echo 'Test'".to_string()],
+                should_fail: false,
+                on_failure_commands: None,
+                working_dir: None,
+                output: Some(CommandOutput::new()),
+                tags: None,
+                indent: Some(3),
+            };
+
+            /* When */
+            let md = entry.run_markdown();
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"   ```shell
+   echo 'Test'
+   ```
+
+   _stdout_
+
+   ```
+   Test
+   ```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
         fn run_commands_in_working_dir() {
             /* Given */
             let entry = CommandEntry {
@@ -472,6 +532,7 @@ echo 2
                 working_dir: Some("target".to_string()),
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             /* When */
@@ -504,6 +565,7 @@ echo 2
                     "The command will print:".to_string(),
                 )),
                 tags: None,
+                indent: None,
             };
 
             /* When */
@@ -539,6 +601,7 @@ Albert Attard
                 working_dir: None,
                 output: None,
                 tags: None,
+                indent: None,
             };
 
             let result = command.run_markdown();
@@ -562,9 +625,10 @@ Albert Attard
                 ],
                 should_fail: false,
                 on_failure_commands: None,
-                working_dir: None,
+                working_dir: Some("./target".to_string()),
                 output: Some(CommandOutput::new()),
                 tags: None,
+                indent: None,
             };
 
             let result = command.run_markdown();
@@ -573,9 +637,12 @@ Albert Attard
             let output = result.unwrap();
 
             let mut expected = String::new();
-            expected.push_str("```shell\nfor i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done\n```\n\nOutput:\n\n```\n");
+            expected.push_str("```shell\n# Running command from within the ./target directory\n(cd './target'\nfor i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done\n)\n```\n\n_stdout_\n\n```\n");
             for i in 1..100001 {
-                expected.push_str(&format!("[{}] The quick brown fox jumps over the lazy dog!\n", i))
+                expected.push_str(&format!(
+                    "[{}] The quick brown fox jumps over the lazy dog!\n",
+                    i
+                ))
             }
             expected.push_str("```\n");
             assert_eq!(expected, output);

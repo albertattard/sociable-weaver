@@ -7,16 +7,49 @@ use crate::domain::MarkdownRunnable;
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct DisplayFileEntry {
     path: String,
+    content_type: Option<String>,
     from_line: Option<usize>,
     number_of_lines: Option<usize>,
     tags: Option<Vec<String>>,
+    indent: Option<usize>,
+}
+
+impl DisplayFileEntry {
+    /* TODO: Move this to a common place */
+    fn add_indent(&self, markdown: String) -> String {
+        match &self.indent {
+            None => markdown,
+            Some(indentation) => {
+                let mut indented = String::new();
+                for line in markdown.split("\n") {
+                    if line.is_empty() {
+                        indented.push('\n');
+                    } else {
+                        indented.push_str(&format!(
+                            "{:>indented_length$}\n",
+                            line,
+                            indented_length = line.len() + indentation
+                        ));
+                    }
+                }
+
+                /* TODO: See why we have a dandling new-line at the end */
+                indented.remove(indented.len() - 1);
+
+                indented
+            }
+        }
+    }
 }
 
 impl MarkdownRunnable for DisplayFileEntry {
     fn run_markdown(&self) -> Result<String, String> {
-        let file_type = match self.path.rsplit_once('.') {
-            None => "",
-            Some((_, extension)) => extension,
+        let file_type = match &self.content_type {
+            None => match self.path.rsplit_once('.') {
+                None => "",
+                Some((_, extension)) => extension,
+            },
+            Some(c) => c,
         };
 
         let content = fs::read_to_string(&self.path);
@@ -45,7 +78,7 @@ impl MarkdownRunnable for DisplayFileEntry {
         }
 
         let md = format!("```{file_type}\n{content}```\n");
-        Ok(md)
+        Ok(self.add_indent(md))
     }
 }
 
@@ -73,9 +106,11 @@ mod tests {
             let expected = Document {
                 entries: vec![DisplayFile(DisplayFileEntry {
                     path: "./some/path/File.java".to_string(),
+                    content_type: None,
                     from_line: None,
                     number_of_lines: None,
                     tags: None,
+                    indent: None,
                 })],
             };
 
@@ -89,6 +124,7 @@ mod tests {
   "entries": [
     {
       "type": "DisplayFile",
+      "content_type": "something",
       "from_line": 5,
       "number_of_lines": 3,
       "path": "./some/path/File.java"
@@ -99,9 +135,11 @@ mod tests {
             let expected = Document {
                 entries: vec![DisplayFile(DisplayFileEntry {
                     path: "./some/path/File.java".to_string(),
+                    content_type: Some("something".to_string()),
                     from_line: Some(5),
                     number_of_lines: Some(3),
                     tags: None,
+                    indent: None,
                 })],
             };
 
@@ -138,9 +176,11 @@ public class Main {
             /* Given */
             let entry = DisplayFileEntry {
                 path: "./target/fixtures/1/Main.java".to_string(),
+                content_type: None,
                 from_line: None,
                 number_of_lines: None,
                 tags: None,
+                indent: None,
             };
 
             /* When */
@@ -189,9 +229,11 @@ public class Main {
             /* Given */
             let entry = DisplayFileEntry {
                 path: "./target/fixtures/2/Main.java".to_string(),
+                content_type: None,
                 from_line: Some(9),
                 number_of_lines: Some(3),
                 tags: None,
+                indent: None,
             };
 
             /* When */
@@ -204,6 +246,94 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 ```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
+        fn run_java_lines_from_file_with_different_content_type() {
+            let java_file = r#"package demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main {
+
+    public static void main(final String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+}
+"#;
+
+            write_fixture("./target/fixtures/3/Main.java", java_file);
+
+            /* Given */
+            let entry = DisplayFileEntry {
+                path: "./target/fixtures/3/Main.java".to_string(),
+                content_type: Some("txt".to_string()),
+                from_line: Some(9),
+                number_of_lines: Some(3),
+                tags: None,
+                indent: None,
+            };
+
+            /* When */
+            let md = entry.run_markdown();
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```txt
+    public static void main(final String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
+        fn run_java_lines_from_file_with_indentation() {
+            let java_file = r#"package demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main {
+
+    public static void main(final String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+}
+"#;
+
+            write_fixture("./target/fixtures/4/Main.java", java_file);
+
+            /* Given */
+            let entry = DisplayFileEntry {
+                path: "./target/fixtures/4/Main.java".to_string(),
+                content_type: None,
+                from_line: Some(9),
+                number_of_lines: Some(3),
+                tags: None,
+                indent: Some(3),
+            };
+
+            /* When */
+            let md = entry.run_markdown();
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"   ```java
+       public static void main(final String[] args) {
+           SpringApplication.run(Main.class, args);
+       }
+   ```
 "#
                 .to_string()),
                 md
