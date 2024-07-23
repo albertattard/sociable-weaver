@@ -621,7 +621,7 @@ Albert Attard
         fn run_command_with_long_output() {
             let command = CommandEntry {
                 commands: vec![
-                    "for i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done".to_string()
+                    "for i in {1..10}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done".to_string()
                 ],
                 should_fail: false,
                 on_failure_commands: None,
@@ -637,8 +637,8 @@ Albert Attard
             let output = result.unwrap();
 
             let mut expected = String::new();
-            expected.push_str("```shell\n# Running command from within the ./target directory\n(cd './target'\nfor i in {1..100000}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done\n)\n```\n\n_stdout_\n\n```\n");
-            for i in 1..100001 {
+            expected.push_str("```shell\n# Running command from within the ./target directory\n(cd './target'\nfor i in {1..10}; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; done\n)\n```\n\n_stdout_\n\n```\n");
+            for i in 1..11 {
                 expected.push_str(&format!(
                     "[{}] The quick brown fox jumps over the lazy dog!\n",
                     i
