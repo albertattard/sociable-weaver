@@ -8,7 +8,7 @@ Build documentation as code.
 
    This application is developed with the
    [rust](https://www.rust-lang.org/tools/install) programming language, version
-   `1.76`.
+   `1.79`.
 
    ```shell
    $ cargo clean
@@ -40,8 +40,6 @@ Build documentation as code.
      --silent \
      --location \
      --output "${HOME}/.local/bin/sw" \
-     'https://github.com/albertattard/sociable-weaver/releases/download/20240327.060739/sw'
+     'https://github.com/albertattard/sociable-weaver/releases/latest/download/sw'
    $ chmod +x "${HOME}/.local/bin/sw"
-   $ sudo rm -f '/usr/local/bin/sw'
-   $ sudo ln -s "${HOME}/.local/bin/sw" '/usr/local/bin/sw'
    ```
