@@ -650,10 +650,10 @@ Albert Attard
             assert_eq!(expected, output);
         }
 
-        /* The `tree` command has been retuning inconsistent formatting and was causing issues in
-            the `README.md` file. This is dependent on the shell from which the command is executed.
-            The `tree` command returns fancy characters when run from zsh. Adding the
-            `--charset=ascii` to the `tree` command addresses this issue. */
+        /// The `tree` command has been retuning inconsistent formatting and was causing issues in
+        /// the `README.md` file. This is dependent on the shell from which the command is executed.
+        /// The `tree` command returns fancy characters when run from zsh. Adding the
+        /// `--charset=ascii` to the `tree` command addresses this issue. */
         #[test]
         fn run_tree_command() {
             if Path::new("./target/fixtures/tree").exists() {
@@ -669,7 +669,7 @@ Albert Attard
                 .expect("Failed to setup the fixture directory");
 
             let command = CommandEntry {
-                commands: vec!["tree --charset=ascii './target/fixtures/tree'".to_string()],
+                commands: vec!["tree --charset=ascii --noreport './target/fixtures/tree'".to_string()],
                 should_fail: false,
                 on_failure_commands: None,
                 working_dir: None,
@@ -686,7 +686,7 @@ Albert Attard
             let mut expected = String::new();
             expected.push_str(
                 r#"  ```shell
-  tree --charset=ascii './target/fixtures/tree'
+  tree --charset=ascii --noreport './target/fixtures/tree'
   ```
 
   _stdout_
@@ -696,8 +696,6 @@ Albert Attard
   |-- a
   `-- b
       `-- c
-
-  2 directories, 2 files
   ```
 "#,
             );
