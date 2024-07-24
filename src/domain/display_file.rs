@@ -77,6 +77,12 @@ impl MarkdownRunnable for DisplayFileEntry {
                 .collect()
         }
 
+        /* Append a new-line at the end if the content does not have that otherwise the markdown
+        closing '```' will be on the same line as the last line from the file. */
+        if !content.ends_with('\n') {
+            content.push('\n');
+        }
+
         let md = format!("```{file_type}\n{content}```\n");
         Ok(self.add_indent(md))
     }
@@ -209,6 +215,58 @@ public class Main {
         }
 
         #[test]
+        fn run_java_file_without_new_line_at_the_end() {
+            let java_file = r#"package demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main {
+
+    public static void main(final String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+}"#; // No new-line at the end
+
+            write_fixture("./target/fixtures/2/Main.java", java_file);
+
+            /* Given */
+            let entry = DisplayFileEntry {
+                path: "./target/fixtures/2/Main.java".to_string(),
+                content_type: None,
+                from_line: None,
+                number_of_lines: None,
+                tags: None,
+                indent: None,
+            };
+
+            /* When */
+            let md = entry.run_markdown();
+
+            /* Then */
+            assert_eq!(
+                Ok(r#"```java
+package demo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main {
+
+    public static void main(final String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
+}
+```
+"#
+                .to_string()),
+                md
+            );
+        }
+
+        #[test]
         fn run_java_lines_from_file() {
             let java_file = r#"package demo;
 
@@ -224,11 +282,11 @@ public class Main {
 }
 "#;
 
-            write_fixture("./target/fixtures/2/Main.java", java_file);
+            write_fixture("./target/fixtures/3/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./target/fixtures/2/Main.java".to_string(),
+                path: "./target/fixtures/3/Main.java".to_string(),
                 content_type: None,
                 from_line: Some(9),
                 number_of_lines: Some(3),
@@ -268,11 +326,11 @@ public class Main {
 }
 "#;
 
-            write_fixture("./target/fixtures/3/Main.java", java_file);
+            write_fixture("./target/fixtures/4/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./target/fixtures/3/Main.java".to_string(),
+                path: "./target/fixtures/4/Main.java".to_string(),
                 content_type: Some("txt".to_string()),
                 from_line: Some(9),
                 number_of_lines: Some(3),
@@ -312,11 +370,11 @@ public class Main {
 }
 "#;
 
-            write_fixture("./target/fixtures/4/Main.java", java_file);
+            write_fixture("./target/fixtures/5/Main.java", java_file);
 
             /* Given */
             let entry = DisplayFileEntry {
-                path: "./target/fixtures/4/Main.java".to_string(),
+                path: "./target/fixtures/5/Main.java".to_string(),
                 content_type: None,
                 from_line: Some(9),
                 number_of_lines: Some(3),

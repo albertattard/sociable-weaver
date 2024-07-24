@@ -669,7 +669,9 @@ Albert Attard
                 .expect("Failed to setup the fixture directory");
 
             let command = CommandEntry {
-                commands: vec!["tree --charset=ascii --noreport './target/fixtures/tree'".to_string()],
+                commands: vec![
+                    "tree --charset=ascii --noreport './target/fixtures/tree'".to_string()
+                ],
                 should_fail: false,
                 on_failure_commands: None,
                 working_dir: None,
