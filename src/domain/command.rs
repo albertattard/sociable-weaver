@@ -460,6 +460,8 @@ mod tests {
 
     mod markdown_runnable_tests {
         use super::*;
+        use crate::create_file;
+        use std::fs::{create_dir, create_dir_all, remove_dir_all};
 
         #[test]
         fn run_multiple_commands() {
@@ -645,6 +647,60 @@ Albert Attard
                 ))
             }
             expected.push_str("```\n");
+            assert_eq!(expected, output);
+        }
+
+        /* The `tree` command has been retuning inconsistent formatting and was causing issues in
+            the `README.md` file. This is dependent on the shell from which the command is executed.
+            The `tree` command returns fancy characters when run from zsh. Adding the
+            `--charset=ascii` to the `tree` command addresses this issue. */
+        #[test]
+        fn run_tree_command() {
+            if Path::new("./target/fixtures/tree").exists() {
+                remove_dir_all("./target/fixtures/tree")
+                    .expect("Failed to setup the fixture directory");
+            }
+            create_dir_all("./target/fixtures/tree")
+                .expect("Failed to setup the fixture directory");
+            create_file("./target/fixtures/tree/a", "A")
+                .expect("Failed to setup the fixture directory");
+            create_dir("./target/fixtures/tree/b").expect("Failed to setup the fixture directory");
+            create_file("./target/fixtures/tree/b/c", "C")
+                .expect("Failed to setup the fixture directory");
+
+            let command = CommandEntry {
+                commands: vec!["tree --charset=ascii './target/fixtures/tree'".to_string()],
+                should_fail: false,
+                on_failure_commands: None,
+                working_dir: None,
+                output: Some(CommandOutput::new()),
+                tags: None,
+                indent: Some(2),
+            };
+
+            let result = command.run_markdown();
+            assert!(result.is_ok());
+
+            let output = result.unwrap();
+
+            let mut expected = String::new();
+            expected.push_str(
+                r#"  ```shell
+  tree --charset=ascii './target/fixtures/tree'
+  ```
+
+  _stdout_
+
+  ```
+  ./target/fixtures/tree
+  |-- a
+  `-- b
+      `-- c
+
+  2 directories, 2 files
+  ```
+"#,
+            );
             assert_eq!(expected, output);
         }
     }
