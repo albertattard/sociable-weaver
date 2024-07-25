@@ -272,7 +272,7 @@ impl ShellScript {
         static COUNTER: AtomicUsize = AtomicUsize::new(1);
         let index = COUNTER.fetch_add(1, Ordering::Relaxed);
 
-        directory.join(format!(".sw-commands-{index}-{start_time}.sh"))
+        directory.join(format!(".sw-commands-{start_time}-{index}.sh"))
     }
 
     fn millis_since_epoch() -> u128 {
