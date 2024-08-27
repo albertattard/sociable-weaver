@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::PathBuf;
 
 use serde::Deserialize;
 
@@ -40,6 +41,19 @@ impl DisplayFileEntry {
             }
         }
     }
+
+    fn path(&self) -> PathBuf {
+        let path = &self.path;
+
+        if path.starts_with("~") {
+            if let Some(home_dir) = dirs::home_dir() {
+                let stripped_path = path.strip_prefix("~").unwrap();
+                return home_dir.join(stripped_path);
+            }
+        }
+
+        return PathBuf::from(path);
+    }
 }
 
 impl MarkdownRunnable for DisplayFileEntry {
@@ -52,7 +66,7 @@ impl MarkdownRunnable for DisplayFileEntry {
             Some(c) => c,
         };
 
-        let content = fs::read_to_string(&self.path);
+        let content = fs::read_to_string(&self.path());
         if content.is_err() {
             return Err(format!("Failed to read the file {}", self.path));
         }
