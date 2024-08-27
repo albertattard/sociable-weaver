@@ -34,12 +34,10 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Markdown(MarkdownEntry {
-                    contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
-                    tags: None,
-                })],
-            };
+            let expected = Document::new(vec![Markdown(MarkdownEntry {
+                contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
+                tags: None,
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -61,12 +59,10 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Markdown(MarkdownEntry {
-                    contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
-                    tags: Some(vec!["test".to_string()]),
-                })],
-            };
+            let expected = Document::new(vec![Markdown(MarkdownEntry {
+                contents: vec!["We make mistakes, and we make more mistakes, and some more, and that's how we learn.".to_string()],
+                tags: Some(vec!["test".to_string()]),
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);

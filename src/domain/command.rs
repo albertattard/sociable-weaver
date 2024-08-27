@@ -333,17 +333,15 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Command(CommandEntry {
-                    commands: vec!["echo \"Hello there!\"".to_string()],
-                    should_fail: false,
-                    on_failure_commands: None,
-                    working_dir: None,
-                    output: None,
-                    tags: None,
-                    indent: None,
-                })],
-            };
+            let expected = Document::new(vec![Command(CommandEntry {
+                commands: vec!["echo \"Hello there!\"".to_string()],
+                should_fail: false,
+                on_failure_commands: None,
+                working_dir: None,
+                output: None,
+                tags: None,
+                indent: None,
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -379,23 +377,21 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Command(CommandEntry {
-                    commands: vec!["echo \"Hello ${NAME}!\"".to_string()],
-                    should_fail: true,
-                    on_failure_commands: Some(vec![
-                        "echo \"Failed to say hello ${NAME}!\"".to_string()
-                    ]),
-                    working_dir: Some("dir".to_string()),
-                    output: Some(CommandOutput {
-                        show: false,
-                        caption: "The output is hidden".to_string(),
-                        content_type: "xml".to_string(),
-                    }),
-                    tags: Some(vec!["test".to_string()]),
-                    indent: Some(3),
-                })],
-            };
+            let expected = Document::new(vec![Command(CommandEntry {
+                commands: vec!["echo \"Hello ${NAME}!\"".to_string()],
+                should_fail: true,
+                on_failure_commands: Some(
+                    vec!["echo \"Failed to say hello ${NAME}!\"".to_string()],
+                ),
+                working_dir: Some("dir".to_string()),
+                output: Some(CommandOutput {
+                    show: false,
+                    caption: "The output is hidden".to_string(),
+                    content_type: "xml".to_string(),
+                }),
+                tags: Some(vec!["test".to_string()]),
+                indent: Some(3),
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -459,9 +455,11 @@ mod tests {
     }
 
     mod markdown_runnable_tests {
-        use super::*;
-        use crate::create_file;
         use std::fs::{create_dir, create_dir_all, remove_dir_all};
+
+        use crate::create_file;
+
+        use super::*;
 
         #[test]
         fn run_multiple_commands() {

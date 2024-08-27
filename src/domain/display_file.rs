@@ -109,16 +109,14 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![DisplayFile(DisplayFileEntry {
-                    path: "./some/path/File.java".to_string(),
-                    content_type: None,
-                    from_line: None,
-                    number_of_lines: None,
-                    tags: None,
-                    indent: None,
-                })],
-            };
+            let expected = Document::new(vec![DisplayFile(DisplayFileEntry {
+                path: "./some/path/File.java".to_string(),
+                content_type: None,
+                from_line: None,
+                number_of_lines: None,
+                tags: None,
+                indent: None,
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -138,16 +136,14 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![DisplayFile(DisplayFileEntry {
-                    path: "./some/path/File.java".to_string(),
-                    content_type: Some("something".to_string()),
-                    from_line: Some(5),
-                    number_of_lines: Some(3),
-                    tags: None,
-                    indent: None,
-                })],
-            };
+            let expected = Document::new(vec![DisplayFile(DisplayFileEntry {
+                path: "./some/path/File.java".to_string(),
+                content_type: Some("something".to_string()),
+                from_line: Some(5),
+                number_of_lines: Some(3),
+                tags: None,
+                indent: None,
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);

@@ -41,9 +41,7 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Todo(TodoEntry { comments: None })],
-            };
+            let expected = Document::new(vec![Todo(TodoEntry { comments: None })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -60,11 +58,9 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Todo(TodoEntry {
-                    comments: Some(vec!["Testing todo".to_string()]),
-                })],
-            };
+            let expected = Document::new(vec![Todo(TodoEntry {
+                comments: Some(vec!["Testing todo".to_string()]),
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);

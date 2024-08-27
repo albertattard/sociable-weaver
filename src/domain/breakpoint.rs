@@ -43,9 +43,7 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Breakpoint(BreakpointEntry { comment: None })],
-            };
+            let expected = Document::new(vec![Breakpoint(BreakpointEntry { comment: None })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);
@@ -62,11 +60,9 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Breakpoint(BreakpointEntry {
-                    comment: Some("Testing breakpoints".to_string()),
-                })],
-            };
+            let expected = Document::new(vec![Breakpoint(BreakpointEntry {
+                comment: Some("Testing breakpoints".to_string()),
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);

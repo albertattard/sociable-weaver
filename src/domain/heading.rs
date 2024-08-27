@@ -54,12 +54,10 @@ mod tests {
   ]
 }"#;
 
-            let expected = Document {
-                entries: vec![Heading(HeadingEntry {
-                    level: H1,
-                    title: "Prologue".to_string(),
-                })],
-            };
+            let expected = Document::new(vec![Heading(HeadingEntry {
+                level: H1,
+                title: "Prologue".to_string(),
+            })]);
 
             let deserialized: Document = Document::parse(json).unwrap();
             assert_eq!(expected, deserialized);

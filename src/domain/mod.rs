@@ -22,6 +22,10 @@ pub(crate) struct Document {
 }
 
 impl Document {
+    pub(crate) fn new(entries: Vec<Entry>) -> Self {
+        return Document { entries };
+    }
+
     /* TODO: Don't leak the serde result */
     pub(crate) fn parse(json: &str) -> serde_json::Result<Self> {
         serde_json::from_str(json)
