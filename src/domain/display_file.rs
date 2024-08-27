@@ -58,20 +58,22 @@ impl DisplayFileEntry {
 
 impl MarkdownRunnable for DisplayFileEntry {
     fn run_markdown(&self) -> Result<String, String> {
+        let path = &self.path();
+
         let file_type = match &self.content_type {
-            None => match self.path.rsplit_once('.') {
+            None => match path.extension() {
                 None => "",
-                Some((_, extension)) => extension,
+                Some(extension) => extension.to_str().unwrap_or_else(|| ""),
             },
             Some(c) => c,
         };
 
-        let content = fs::read_to_string(&self.path());
+        let content = fs::read_to_string(path);
         if content.is_err() {
-            return Err(format!("Failed to read the file {}", self.path));
+            return Err(format!("Failed to read the file {:?}", path));
         }
 
-        let mut content = content.expect(&format!("Failed to read the file {}", self.path));
+        let mut content = content.expect(&format!("Failed to read the file {:?}", path));
         if let Some(from_base_1) = self.from_line {
             let skip_n_lines = content.lines().skip(from_base_1 - 1);
 
