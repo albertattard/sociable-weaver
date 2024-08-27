@@ -47,7 +47,13 @@ impl DisplayFileEntry {
 
         if path.starts_with("~") {
             if let Some(home_dir) = dirs::home_dir() {
-                let stripped_path = path.strip_prefix("~").unwrap();
+                let stripped_path =
+                    if path.starts_with("~/") {
+                        path.strip_prefix("~/").unwrap()
+                    } else {
+                        path.strip_prefix("~").unwrap()
+                    };
+
                 return home_dir.join(stripped_path);
             }
         }
@@ -221,7 +227,7 @@ public class Main {
 }
 ```
 "#
-                .to_string()),
+                    .to_string()),
                 md
             );
         }
@@ -273,7 +279,7 @@ public class Main {
 }
 ```
 "#
-                .to_string()),
+                    .to_string()),
                 md
             );
         }
@@ -317,7 +323,7 @@ public class Main {
     }
 ```
 "#
-                .to_string()),
+                    .to_string()),
                 md
             );
         }
@@ -361,7 +367,7 @@ public class Main {
     }
 ```
 "#
-                .to_string()),
+                    .to_string()),
                 md
             );
         }
@@ -405,7 +411,7 @@ public class Main {
        }
    ```
 "#
-                .to_string()),
+                    .to_string()),
                 md
             );
         }
@@ -426,6 +432,27 @@ public class Main {
             write!(file, "{}", content).expect("Failed to create fixture file");
 
             path
+        }
+    }
+
+    mod path_test {
+        use super::*;
+
+        #[test]
+        fn convert_tilda_into_user_home_directory() {
+            let entry = DisplayFileEntry {
+                path: "~/.m2/toolchains.xml".to_string(),
+                content_type: None,
+                from_line: None,
+                number_of_lines: None,
+                tags: None,
+                indent: None,
+            };
+
+            if let Some(homeDir) = dirs::home_dir().unwrap().to_str() {
+                let expected = PathBuf::from(format!("{homeDir}/.m2/toolchains.xml"));
+                assert_eq!(expected, entry.path())
+            }
         }
     }
 }
