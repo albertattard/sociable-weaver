@@ -47,12 +47,11 @@ impl DisplayFileEntry {
 
         if path.starts_with("~") {
             if let Some(home_dir) = dirs::home_dir() {
-                let stripped_path =
-                    if path.starts_with("~/") {
-                        path.strip_prefix("~/").unwrap()
-                    } else {
-                        path.strip_prefix("~").unwrap()
-                    };
+                let stripped_path = if path.starts_with("~/") {
+                    path.strip_prefix("~/").unwrap()
+                } else {
+                    path.strip_prefix("~").unwrap()
+                };
 
                 return home_dir.join(stripped_path);
             }
@@ -227,7 +226,7 @@ public class Main {
 }
 ```
 "#
-                    .to_string()),
+                .to_string()),
                 md
             );
         }
@@ -279,7 +278,7 @@ public class Main {
 }
 ```
 "#
-                    .to_string()),
+                .to_string()),
                 md
             );
         }
@@ -323,7 +322,7 @@ public class Main {
     }
 ```
 "#
-                    .to_string()),
+                .to_string()),
                 md
             );
         }
@@ -367,7 +366,7 @@ public class Main {
     }
 ```
 "#
-                    .to_string()),
+                .to_string()),
                 md
             );
         }
@@ -411,7 +410,7 @@ public class Main {
        }
    ```
 "#
-                    .to_string()),
+                .to_string()),
                 md
             );
         }
