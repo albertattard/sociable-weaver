@@ -23,7 +23,7 @@ pub(crate) struct Document {
 
 impl Document {
     pub(crate) fn new(entries: Vec<Entry>) -> Self {
-        return Document { entries };
+        Document { entries }
     }
 
     /* TODO: Don't leak the serde result */

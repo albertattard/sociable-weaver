@@ -15,6 +15,7 @@ use serde::Deserialize;
 use crate::domain::MarkdownRunnable;
 use crate::utils::paths;
 use crate::utils::paths::current_dir;
+use crate::utils::strings::indent_by;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub(crate) struct CommandEntry {
@@ -122,30 +123,8 @@ set -e
         markdown
     }
 
-    /* TODO: Move this to a common place */
     fn add_indent(&self, markdown: String) -> String {
-        match &self.indent {
-            None => markdown,
-            Some(indentation) => {
-                let mut indented = String::new();
-                for line in markdown.split("\n") {
-                    if line.is_empty() {
-                        indented.push('\n');
-                    } else {
-                        indented.push_str(&format!(
-                            "{:>indented_length$}\n",
-                            line,
-                            indented_length = line.len() + indentation
-                        ));
-                    }
-                }
-
-                /* TODO: See why we have a dandling new-line at the end */
-                indented.remove(indented.len() - 1);
-
-                indented
-            }
-        }
+        indent_by(markdown, &self.indent)
     }
 }
 
