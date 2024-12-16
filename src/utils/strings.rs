@@ -43,6 +43,22 @@ mod tests {
     }
 
     #[test]
+    fn return_the_text_indented_by_four_spaces_skipping_blank_lines() {
+        let text = "Hello\n\nWorld".to_string();
+        let result = indent_by(text, &Some(4));
+        let expected = "    Hello\n\n    World";
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn return_the_text_indented_by_four_spaces_preserve_trailing_new_line() {
+        let text = "Hello\nWorld\n".to_string();
+        let result = indent_by(text, &Some(4));
+        let expected = "    Hello\n    World\n";
+        assert_eq!(result, expected);
+    }
+
+    #[test]
     fn return_the_unicode_text_indented_by_four_spaces() {
         let text = "Hello\nKöln".to_string();
         let result = indent_by(text, &Some(4));
