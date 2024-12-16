@@ -2,17 +2,15 @@ pub(crate) fn indent_by(text: String, indent: &Option<usize>) -> String {
     match indent {
         None => text,
         Some(indentation) => {
+            let padding = " ".repeat(*indentation);
+
             let mut indented = String::new();
             for line in text.split("\n") {
-                if line.is_empty() {
-                    indented.push('\n');
-                } else {
-                    indented.push_str(&format!(
-                        "{:>indented_length$}\n",
-                        line,
-                        indented_length = line.chars().count() + indentation
-                    ));
+                if !line.is_empty() {
+                    indented.push_str(&padding);
+                    indented.push_str(line);
                 }
+                indented.push('\n');
             }
 
             /* A new-line is automatically appended which will result in an extra new-line at the end */
