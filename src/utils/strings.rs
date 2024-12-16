@@ -5,19 +5,27 @@ pub(crate) fn indent_by(text: String, indent: &Option<usize>) -> String {
             let padding = " ".repeat(*indentation);
 
             let mut indented = String::new();
-            for line in text.split("\n") {
-                if !line.is_empty() {
-                    indented.push_str(&padding);
-                    indented.push_str(line);
-                }
-                indented.push('\n');
+            let mut lines = text.split("\n");
+
+            if let Some(first_line) = lines.next() {
+                pad_and_append_if_not_empty(&padding, first_line, &mut indented);
             }
 
-            /* A new-line is automatically appended which will result in an extra new-line at the end */
-            indented.remove(indented.len() - 1);
+            for line in lines {
+                indented.push('\n');
+                pad_and_append_if_not_empty(&padding, line, &mut indented);
+            }
 
             indented
         }
+    }
+}
+
+#[inline(always)]
+fn pad_and_append_if_not_empty(padding: &String, line: &str, indented: &mut String) {
+    if !line.is_empty() {
+        indented.push_str(&padding);
+        indented.push_str(line);
     }
 }
 
@@ -42,9 +50,9 @@ mod tests {
 
     #[test]
     fn return_the_text_indented_by_four_spaces_skipping_blank_lines() {
-        let text = "Hello\n\nWorld".to_string();
+        let text = "\nHello\n\nWorld".to_string();
         let result = indent_by(text, &Some(4));
-        let expected = "    Hello\n\n    World";
+        let expected = "\n    Hello\n\n    World";
         assert_eq!(result, expected);
     }
 
