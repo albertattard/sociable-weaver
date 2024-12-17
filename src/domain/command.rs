@@ -97,7 +97,13 @@ set -e
         markdown
     }
 
-    fn format_output_as_markdown(caption: &str, content_type: &str, output: &Output) -> String {
+    fn format_output_as_markdown(
+        caption: &str,
+        content_type: &str,
+        error_caption: &str,
+        error_content_type: &str,
+        output: &Output,
+    ) -> String {
         let mut markdown = String::new();
 
         let stdout = from_utf8(&output.stdout).expect("Failed to get the output");
@@ -113,9 +119,11 @@ set -e
 
         let stderr = from_utf8(&output.stderr).expect("Failed to get the error");
         if !stderr.is_empty() {
-            markdown.push_str("\n");
-            markdown.push_str("_stderr_");
-            markdown.push_str("\n\n```\n");
+            markdown.push('\n');
+            markdown.push_str(error_caption);
+            markdown.push_str("\n\n```");
+            markdown.push_str(error_content_type);
+            markdown.push('\n');
             markdown.push_str(stderr);
             markdown.push_str("```\n");
         }
@@ -136,6 +144,10 @@ pub(crate) struct CommandOutput {
     caption: String,
     #[serde(default = "CommandOutput::default_content_type_value")]
     content_type: String,
+    #[serde(default = "CommandOutput::default_error_caption_value")]
+    error_caption: String,
+    #[serde(default = "CommandOutput::default_error_content_type_value")]
+    error_content_type: String,
 }
 
 impl CommandOutput {
@@ -144,6 +156,8 @@ impl CommandOutput {
             show: Self::default_show_value(),
             caption: Self::default_caption_value(),
             content_type: Self::default_content_type_value(),
+            error_caption: Self::default_error_caption_value(),
+            error_content_type: Self::default_error_content_type_value(),
         }
     }
 
@@ -152,6 +166,8 @@ impl CommandOutput {
             show: Self::default_show_value(),
             caption,
             content_type: Self::default_content_type_value(),
+            error_caption: Self::default_error_caption_value(),
+            error_content_type: Self::default_error_content_type_value(),
         }
     }
 
@@ -164,6 +180,14 @@ impl CommandOutput {
     }
 
     fn default_content_type_value() -> String {
+        "".to_string()
+    }
+
+    fn default_error_caption_value() -> String {
+        "_stderr_".to_string()
+    }
+
+    fn default_error_content_type_value() -> String {
         "".to_string()
     }
 }
@@ -199,6 +223,8 @@ impl MarkdownRunnable for CommandEntry {
                             markdown.push_str(&Self::format_output_as_markdown(
                                 &command_output.caption,
                                 &command_output.content_type,
+                                &command_output.error_caption,
+                                &command_output.error_content_type,
                                 &output,
                             ));
                         }
@@ -206,7 +232,9 @@ impl MarkdownRunnable for CommandEntry {
 
                     Ok(self.add_indent(markdown))
                 } else {
-                    markdown.push_str(&Self::format_output_as_markdown("Error", "", &output));
+                    markdown.push_str(&Self::format_output_as_markdown(
+                        "Error", "", "Error", "", &output,
+                    ));
                     Err(self.add_indent(markdown))
                 }
             }
@@ -342,8 +370,10 @@ mod tests {
       "working_dir": "dir",
       "output": {
         "show": false,
-        "caption": "The output is hidden",
-        "content_type": "xml"
+        "caption": "The standard output is hidden",
+        "content_type": "xml",
+        "error_caption": "The standard error is hidden",
+        "error_content_type": "txt"
       },
       "variables": [
         "NAME"
@@ -365,8 +395,10 @@ mod tests {
                 working_dir: Some("dir".to_string()),
                 output: Some(CommandOutput {
                     show: false,
-                    caption: "The output is hidden".to_string(),
+                    caption: "The standard output is hidden".to_string(),
                     content_type: "xml".to_string(),
+                    error_caption: "The standard error is hidden".to_string(),
+                    error_content_type: "txt".to_string(),
                 }),
                 tags: Some(vec!["test".to_string()]),
                 indent: Some(3),
