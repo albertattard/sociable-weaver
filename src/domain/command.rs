@@ -33,7 +33,7 @@ impl CommandEntry {
     fn evaluate_current_dir(&self) -> PathBuf {
         self.working_dir
             .as_ref()
-            .map_or_else(|| current_dir(), |path| current_dir().join(path.clone()))
+            .map_or_else(current_dir, |path| current_dir().join(path.clone()))
     }
 
     fn format_shell_script(&self) -> String {
@@ -89,8 +89,8 @@ set -e
             markdown.push_str(&format!("(cd '{}'\n", dir));
         }
         markdown.push_str(&self.commands.join("\n"));
-        markdown.push_str("\n");
-        if let Some(_) = &self.working_dir {
+        markdown.push('\n');
+        if self.working_dir.is_some() {
             markdown.push_str(")\n");
         }
         markdown.push_str("```\n");
@@ -217,7 +217,7 @@ impl MarkdownRunnable for CommandEntry {
 
         match result {
             Ok(output) => {
-                if !self.should_fail == output.status.success() {
+                if self.should_fail != output.status.success() {
                     if let Some(command_output) = &self.output {
                         if command_output.show {
                             markdown.push_str(&Self::format_output_as_markdown(
@@ -273,7 +273,7 @@ impl ShellScript {
     }
 
     fn create_file_path(directory: &Path) -> PathBuf {
-        static START_TIME: Lazy<u128> = Lazy::new(|| ShellScript::millis_since_epoch());
+        static START_TIME: Lazy<u128> = Lazy::new(ShellScript::millis_since_epoch);
         let start_time = *START_TIME;
 
         static COUNTER: AtomicUsize = AtomicUsize::new(1);

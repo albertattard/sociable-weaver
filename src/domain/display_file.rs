@@ -36,7 +36,7 @@ impl DisplayFileEntry {
             }
         }
 
-        return PathBuf::from(path);
+        PathBuf::from(path)
     }
 }
 
@@ -47,7 +47,7 @@ impl MarkdownRunnable for DisplayFileEntry {
         let file_type = match &self.content_type {
             None => match path.extension() {
                 None => "",
-                Some(extension) => extension.to_str().unwrap_or_else(|| ""),
+                Some(extension) => extension.to_str().unwrap_or(""),
             },
             Some(c) => c,
         };
@@ -57,7 +57,7 @@ impl MarkdownRunnable for DisplayFileEntry {
             return Err(format!("Failed to read the file {:?}", path));
         }
 
-        let mut content = content.expect(&format!("Failed to read the file {:?}", path));
+        let mut content = content.unwrap_or_else(|_| panic!("Failed to read the file {:?}", path));
         if let Some(from_base_1) = self.from_line {
             let skip_n_lines = content.lines().skip(from_base_1 - 1);
 

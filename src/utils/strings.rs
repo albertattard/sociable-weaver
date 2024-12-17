@@ -22,9 +22,9 @@ pub(crate) fn indent_by(text: String, indent: &Option<usize>) -> String {
 }
 
 #[inline(always)]
-fn pad_and_append_if_not_empty(padding: &String, line: &str, indented: &mut String) {
+fn pad_and_append_if_not_empty(padding: &str, line: &str, indented: &mut String) {
     if !line.is_empty() {
-        indented.push_str(&padding);
+        indented.push_str(padding);
         indented.push_str(line);
     }
 }
