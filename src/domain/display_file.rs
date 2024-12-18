@@ -62,19 +62,32 @@ impl MarkdownRunnable for DisplayFileEntry {
             let skip_n_lines = content.lines().skip(from_base_1 - 1);
 
             content = if let Some(n) = self.number_of_lines {
-                skip_n_lines
-                    .take(n)
-                    .map(|line| format!("{}\n", line))
-                    .collect()
+                skip_n_lines.take(n).fold(String::new(), |mut acc, line| {
+                    if !line.is_empty() {
+                        acc.push_str(line);
+                    }
+                    acc.push('\n');
+                    acc
+                })
             } else {
-                skip_n_lines.map(|line| format!("{}\n", line)).collect()
+                // skip_n_lines.map(|line| format!("{}\n", line)).collect()
+                skip_n_lines.fold(String::new(), |mut acc, line| {
+                    acc.push_str(line);
+                    acc.push('\n');
+                    acc
+                })
             };
         } else if let Some(n) = self.number_of_lines {
             content = content
                 .lines()
                 .take(n)
-                .map(|line| format!("{}\n", line))
-                .collect()
+                .fold(String::new(), |mut acc, line| {
+                    if !line.is_empty() {
+                        acc.push_str(line);
+                    }
+                    acc.push('\n');
+                    acc
+                })
         }
 
         /* Append a new-line at the end if the content does not have that otherwise the markdown
