@@ -22,6 +22,7 @@ pub(crate) struct Document {
 }
 
 impl Document {
+    #[cfg(test)]
     pub(crate) fn new(entries: Vec<Entry>) -> Self {
         Document { entries }
     }

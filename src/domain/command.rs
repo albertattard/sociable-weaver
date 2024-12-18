@@ -151,6 +151,7 @@ pub(crate) struct CommandOutput {
 }
 
 impl CommandOutput {
+    #[cfg(test)]
     fn new() -> Self {
         CommandOutput {
             show: Self::default_show_value(),
@@ -161,6 +162,7 @@ impl CommandOutput {
         }
     }
 
+    #[cfg(test)]
     fn with_caption(caption: String) -> Self {
         CommandOutput {
             show: Self::default_show_value(),

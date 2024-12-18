@@ -7,11 +7,7 @@ pub(crate) struct BreakpointEntry {
     comment: Option<String>,
 }
 
-impl BreakpointEntry {
-    pub(crate) fn comment(&self) -> Option<String> {
-        self.comment.clone()
-    }
-}
+impl BreakpointEntry {}
 
 impl Display for BreakpointEntry {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
