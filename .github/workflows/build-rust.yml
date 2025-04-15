@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'rust/**'
+      - '.github/workflows/build-rust.yml'
+      - '!**/README.md'
+      - '!**/LICENSE'
 
 permissions:
   contents: write
