@@ -18,6 +18,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,17 +30,14 @@ jobs:
           rustup update
 
       - name: Build application
-        working-directory: rust
         run: |
           cargo build --release
 
       - name: Run the tests
-        working-directory: rust
         run: |
           cargo test
 
       - name: Extract version
-        working-directory: rust
         run: |
           VERSION=$(date +%Y%m%d.%H%M%S)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
