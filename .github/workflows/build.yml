@@ -27,14 +27,17 @@ jobs:
           rustup update
 
       - name: Build application
+        working-directory: rust
         run: |
           cargo build --release
 
       - name: Run the tests
+        working-directory: rust
         run: |
           cargo test
 
       - name: Extract version
+        working-directory: rust
         run: |
           VERSION=$(date +%Y%m%d.%H%M%S)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -47,4 +50,4 @@ jobs:
           tag_name: ${{ env.VERSION }}
           name: Release ${{ env.VERSION }}
           body: ${{ github.event.commits[0].message }}
-          files: target/release/sw
+          files: rust/target/release/sw
