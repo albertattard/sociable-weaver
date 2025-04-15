@@ -1,0 +1,55 @@
+name: Build Java Application
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'java/**'
+      - '.github/workflows/build-java.yml'
+      - '!**/README.md'
+      - '!**/LICENSE'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: java
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: Build application
+        run: |
+          ./mvnw clean native:compile
+
+#      - name: Extract version
+#        run: |
+#          VERSION=$(date +%Y%m%d.%H%M%S)
+#          echo "VERSION=$VERSION" >> $GITHUB_ENV
+#
+#      - name: Release binary
+#        uses: softprops/action-gh-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ env.VERSION }}
+#          name: Release ${{ env.VERSION }}
+#          body: ${{ github.event.commits[0].message }}
+#          files: java/target/sw
