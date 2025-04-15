@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**/README.md'
-      - '**/LICENSE'
+    paths:
+      - 'rust/**'
 
 permissions:
   contents: write
