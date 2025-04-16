@@ -8,18 +8,18 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BreakpointTest {
+class TodoTest {
 
     @Nested
     class DeserializeTests {
 
         @Test
-        void returnDeserializedBreakpointWhenGivenMinimumOptions() {
+        void returnDeserializedTodoWhenGivenMinimumOptions() {
             final String json = """
                     {
                        "entries": [
                          {
-                           "type": "Breakpoint"
+                           "type": "Todo"
                          }
                        ]
                     }""";
@@ -27,17 +27,17 @@ class BreakpointTest {
             final Document parsed = Document.parse(json);
 
             assertThat(parsed)
-                    .isEqualTo(new Document(List.of(new Breakpoint(Optional.empty()))));
+                    .isEqualTo(new Document(List.of(new Todo(Optional.empty()))));
         }
 
         @Test
-        void returnDeserializedBreakpointWhenGivenAllOptions() {
+        void returnDeserializedTodoWhenGivenAllOptions() {
             final String json = """
                     {
                        "entries": [
                          {
-                           "type": "Breakpoint",
-                           "comments": ["Testing breakpoints"]
+                           "type": "Todo",
+                           "comments": ["Testing todos"]
                          }
                        ]
                     }""";
@@ -45,7 +45,7 @@ class BreakpointTest {
             final Document parsed = Document.parse(json);
 
             assertThat(parsed)
-                    .isEqualTo(new Document(List.of(new Breakpoint(Optional.of(List.of("Testing breakpoints"))))));
+                    .isEqualTo(new Document(List.of(new Todo(Optional.of(List.of("Testing todos"))))));
         }
     }
 }

@@ -35,7 +35,8 @@ public record Document(List<Entry> entries) {
                         Breakpoint.class,
                         DisplayFile.class,
                         Heading.class,
-                        Markdown.class)
+                        Markdown.class,
+                        Todo.class)
                 .build();
     }
 }
