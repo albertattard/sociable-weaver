@@ -32,6 +32,7 @@ public record Document(List<Entry> entries) {
                 .addModule(new Jdk8Module())
                 .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                 .registerSubtypes(
+                        Breakpoint.class,
                         DisplayFile.class,
                         Heading.class,
                         Markdown.class)
