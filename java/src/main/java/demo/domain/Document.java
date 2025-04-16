@@ -1,8 +1,8 @@
 package demo.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
@@ -30,7 +30,10 @@ public record Document(List<Entry> entries) {
     private static ObjectMapper createMapper() {
         return JsonMapper.builder()
                 .addModule(new Jdk8Module())
-                .registerSubtypes(Heading.class,
+                .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .registerSubtypes(
+                        DisplayFile.class,
+                        Heading.class,
                         Markdown.class)
                 .build();
     }
