@@ -48,4 +48,38 @@ class TodoTest {
                     .isEqualTo(new Document(List.of(new Todo(Optional.of(List.of("Testing todos"))))));
         }
     }
+
+    @Nested
+    class RunTests {
+
+        @Test
+        void returnTheResultWithoutAdditionalComments() {
+            final Entry entry = new Todo(Optional.empty());
+
+            final Result result = entry.run();
+
+            final String expected = """
+                    [//]: # TODO
+                    """;
+
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
+        }
+
+        @Test
+        void returnTheResultWithTheAdditionalComments() {
+            final Entry entry = new Todo(Optional.of(List.of("Comment 1", "Comment 2")));
+
+            final Result result = entry.run();
+
+            final String expected = """
+                    [//]: # TODO
+                    [//]: # Comment 1
+                    [//]: # Comment 2
+                    """;
+
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
+        }
+    }
 }

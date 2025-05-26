@@ -32,7 +32,7 @@ public record Heading(HeadingLevel level, String title) implements Entry {
     }
 
     @Override
-    public String runMarkdown() {
-        return level.toMarkdown() + " " + title + '\n';
+    public Result run() {
+        return Result.ok(level.toMarkdown() + " " + title + '\n');
     }
 }

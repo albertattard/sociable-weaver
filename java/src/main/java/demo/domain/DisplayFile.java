@@ -23,21 +23,21 @@ public record DisplayFile(Path path,
                           Optional<List<String>> tags,
                           OptionalInt indent) implements Entry {
     @Override
-    public String runMarkdown() {
+    public Result run() {
         final String contentType = computeContentType();
 
         try (Stream<Stream<String>> stream = Stream.of(Stream.of("```" + contentType), readLines(), Stream.of("```"))) {
-            return stream.flatMap(Function.identity())
+            return Result.ok(stream.flatMap(Function.identity())
                     .map(indentLines())
                     .map(line -> line + '\n')
-                    .collect(Collectors.joining());
+                    .collect(Collectors.joining()));
         }
     }
 
     private Function<String, String> indentLines() {
         return indent.isEmpty()
                 ? Function.identity()
-                : line -> (" ".repeat(indent.getAsInt())).concat(line);
+                : line -> line.isBlank() ? line : (" ".repeat(indent.getAsInt())).concat(line);
     }
 
     private Stream<String> readLines() {
@@ -59,6 +59,7 @@ public record DisplayFile(Path path,
     }
 
     private String computeContentType() {
+        /* TODO: Handle Dockerfiles well, as these do not have an extension */
         return contentType.orElseGet(() -> pathExtension().orElse(""));
     }
 

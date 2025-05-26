@@ -57,18 +57,18 @@ class MarkdownTest {
     }
 
     @Nested
-    class MarkdownRunnableTests {
+    class RunTests {
         @Test
         void format() {
             final Entry entry = new Markdown(List.of("We make mistakes, and we make more mistakes, and some more, and that’s how we", "learn."), Optional.of(List.of("test")));
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
-            assertThat(markdown)
-                    .isEqualTo("""
+            assertThat(result)
+                    .isEqualTo(Result.ok("""
                             We make mistakes, and we make more mistakes, and some more, and that’s how we
                             learn.
-                            """);
+                            """));
         }
     }
 }

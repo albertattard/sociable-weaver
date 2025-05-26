@@ -48,4 +48,43 @@ class BreakpointTest {
                     .isEqualTo(new Document(List.of(new Breakpoint(Optional.of(List.of("Testing breakpoints"))))));
         }
     }
+
+    @Nested
+    class RunTests {
+
+        @Test
+        void returnTheResultWithoutAdditionalComments() {
+            final Entry entry = new Breakpoint(Optional.empty());
+
+            final Result result = entry.run();
+
+            final String expected = """
+                    ---
+                    
+                    # Breakpoint!
+                    """;
+
+            assertThat(result)
+                    .isEqualTo(Result.error(expected));
+        }
+
+        @Test
+        void returnTheResultWithTheAdditionalComments() {
+            final Entry entry = new Breakpoint(Optional.of(List.of("Comment 1", "Comment 2")));
+
+            final Result result = entry.run();
+
+            final String expected = """
+                    ---
+                    
+                    # Breakpoint!
+                    
+                    Comment 1
+                    Comment 2
+                    """;
+
+            assertThat(result)
+                    .isEqualTo(Result.error(expected));
+        }
+    }
 }

@@ -15,9 +15,9 @@ public record Markdown(List<String> contents, Optional<List<String>> tags) imple
     }
 
     @Override
-    public String runMarkdown() {
-        return contents.stream()
+    public Result run() {
+        return Result.ok(contents.stream()
                 .map(line -> line.concat("\n"))
-                .collect(Collectors.joining());
+                .collect(Collectors.joining()));
     }
 }

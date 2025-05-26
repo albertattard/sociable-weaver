@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "A simple example"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "We make mistakes, and we make more mistakes, and some more, and that’s how we learn."
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'Hello world!'"
+      ]
+    }
+  ]
+}

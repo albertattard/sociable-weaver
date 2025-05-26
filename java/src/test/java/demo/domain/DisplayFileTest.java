@@ -64,18 +64,18 @@ class DisplayFileTest {
     }
 
     @Nested
-    class MarkdownRunnableTests {
+    class RunTests {
         @Test
         void displayJavaFile() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main1 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -86,18 +86,18 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(file, Optional.empty(), OptionalInt.empty(), OptionalInt.empty(), Optional.empty(), OptionalInt.empty());
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                     ```java
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main1 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -105,21 +105,21 @@ class DisplayFileTest {
                     ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @Test
         void displayJavaFileThatDoesNotHaveNewLineAtTheEnd() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main2 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -129,18 +129,18 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(file, Optional.empty(), OptionalInt.empty(), OptionalInt.empty(), Optional.empty(), OptionalInt.empty());
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                     ```java
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main2 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -148,21 +148,21 @@ class DisplayFileTest {
                     ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @Test
         void displaySomeLinesFromFile() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main3 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -173,7 +173,7 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(file, Optional.empty(), OptionalInt.of(9), OptionalInt.of(3), Optional.empty(), OptionalInt.empty());
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                     ```java
@@ -183,21 +183,21 @@ class DisplayFileTest {
                     ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @Test
         void displayFileSpecificContentType() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main4 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -208,18 +208,18 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(file, Optional.of("txt"), OptionalInt.empty(), OptionalInt.empty(), Optional.empty(), OptionalInt.empty());
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                     ```txt
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main4 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -227,21 +227,21 @@ class DisplayFileTest {
                     ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @Test
         void displaySomeLinesFromFileAndApplyAdditionalIndentation() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main5 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -251,7 +251,7 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(file, Optional.empty(), OptionalInt.of(9), OptionalInt.of(3), Optional.empty(), OptionalInt.of(3));
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                        ```java
@@ -261,21 +261,21 @@ class DisplayFileTest {
                        ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @Test
         void handelPathStartingWithTilda() {
             final String javaFile = """
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main6 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -286,18 +286,18 @@ class DisplayFileTest {
 
             final Entry entry = new DisplayFile(Path.of("~/.tmp/Main6.java"), Optional.empty(), OptionalInt.empty(), OptionalInt.empty(), Optional.empty(), OptionalInt.empty());
 
-            final String markdown = entry.runMarkdown();
+            final Result result = entry.run();
 
             final String expected = """
                     ```java
                     package demo;
-                                        
+                    
                     import org.springframework.boot.SpringApplication;
                     import org.springframework.boot.autoconfigure.SpringBootApplication;
-                                        
+                    
                     @SpringBootApplication
                     public class Main6 {
-                                        
+                    
                         public static void main(final String[] args) {
                             SpringApplication.run(Main.class, args);
                         }
@@ -305,8 +305,8 @@ class DisplayFileTest {
                     ```
                     """;
 
-            assertThat(markdown)
-                    .isEqualTo(expected);
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
         }
 
         @AfterAll
