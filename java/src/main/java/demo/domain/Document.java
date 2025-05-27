@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import demo.json.DurationDeserializer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -65,6 +66,7 @@ public record Document(List<Entry> entries) {
     private static ObjectMapper createMapper() {
         return JsonMapper.builder()
                 .addModule(new Jdk8Module())
+                .addModule(DurationDeserializer.createModule())
                 .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                 .registerSubtypes(
                         Breakpoint.class,

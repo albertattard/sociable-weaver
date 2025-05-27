@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -45,6 +46,7 @@ class CommandTest {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
+                            Optional.empty(),
                             OptionalInt.empty()))));
         }
 
@@ -58,6 +60,7 @@ class CommandTest {
                            "commands": [
                              "echo 'Hello there!'"
                            ],
+                           "should_finish_within": "3 seconds",
                            "should_fail": true,
                            "on_failure_commands": [
                              "echo 'Failed to say hello there!'"
@@ -84,6 +87,7 @@ class CommandTest {
             assertThat(parsed)
                     .isEqualTo(new Document(List.of(new Command(
                             List.of("echo 'Hello there!'"),
+                            Optional.of(Duration.ofSeconds(3)),
                             Optional.of(true),
                             Optional.of(List.of("echo 'Failed to say hello there!'")),
                             Optional.of(List.of("echo 'Running cleanup!'")),
@@ -121,6 +125,7 @@ class CommandTest {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
+                            Optional.empty(),
                             Optional.of(new Command.CommandOutput(Optional.empty(), Optional.of(List.of("The output is visible")), Optional.empty())),
                             Optional.empty(),
                             OptionalInt.empty()))));
@@ -133,6 +138,7 @@ class CommandTest {
         void runSingleCommandWithoutShowingOutput() {
             final Entry entry = new Command(
                     List.of("echo 'Hello there!'"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
@@ -157,6 +163,7 @@ class CommandTest {
         void runSingleCommandAndShowingOutput() {
             final Entry entry = new Command(
                     List.of("echo 'Hello there!'"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
@@ -187,6 +194,7 @@ class CommandTest {
         void runMultipleCommandsAndShowingOutput() {
             final Entry entry = new Command(
                     List.of("echo 1", "echo 2"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
@@ -223,6 +231,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
+                    Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
                     Optional.empty(),
                     OptionalInt.of(3));
@@ -249,6 +258,7 @@ class CommandTest {
         void runCommandWithinWorkingDirectoryAndShowingOutput() {
             final Entry entry = new Command(
                     List.of("pwd | awk -F/ '{print $(NF-2) \"/\" $(NF-1) \"/\" $NF}'"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
@@ -282,6 +292,7 @@ class CommandTest {
         void runOnErrorWhenCommandFails() {
             final Entry entry = new Command(
                     List.of("failing on purpose"),
+                    Optional.empty(),
                     Optional.of(true),
                     Optional.of(List.of("cat << EOF > './target/error.txt'",
                             "It failed!",
@@ -309,6 +320,7 @@ class CommandTest {
         void runCommandWithLongOutput() {
             final Entry entry = new Command(
                     List.of("i=1; while [ \"${i}\" -le 10000 ]; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; i=$((i + 1)); done"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),

@@ -16,6 +16,16 @@
       "commands": [
         "echo 'Hello world!'"
       ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "echo '{\"name\": \"Albert Attard\"}'"
+      ],
+      "output": {
+        "caption": "Response",
+        "content_type": "json"
+      }
     }
   ]
 }

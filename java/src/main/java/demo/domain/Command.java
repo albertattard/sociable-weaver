@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import static java.util.Objects.requireNonNull;
 
 @JsonTypeName("Command")
 public record Command(List<String> commands,
+                      Optional<Duration> shouldFinishWithin,
                       Optional<Boolean> shouldFail,
                       Optional<List<String>> onFailureCommands,
                       Optional<List<String>> finallyCommands,

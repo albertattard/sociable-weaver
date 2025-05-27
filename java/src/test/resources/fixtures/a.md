@@ -7,3 +7,13 @@ We make mistakes, and we make more mistakes, and some more, and that’s how we 
 echo 'Hello world!'
 ```
 
+```shell
+echo '{"name": "Albert Attard"}'
+```
+
+Response
+
+```json
+{"name": "Albert Attard"}
+```
+
