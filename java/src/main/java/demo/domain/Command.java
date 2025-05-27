@@ -57,7 +57,7 @@ public record Command(List<String> commands,
             shouldPrintOutput(shellScriptResult).ifPresent(header -> {
                 streams.add(Stream.of(""));
                 streams.add(header.stream());
-                streams.add(Stream.of("", "```"));
+                streams.add(Stream.of("", "```" + outputOrDefault().contentTypeOrDefault()));
                 streams.add(shellScriptResult.readOutput());
                 streams.add(Stream.of("```"));
             });
@@ -271,8 +271,14 @@ public record Command(List<String> commands,
         }
 
         public List<String> captionOfDefault() {
-            return caption.orElse(List.of("_Output_"));
+            return caption.orElse(DEFAULT_CAPTION);
         }
+
+        public String contentTypeOrDefault() {
+            return contentType.orElse("");
+        }
+
+        private static final List<String> DEFAULT_CAPTION = List.of("_Output_");
     }
 
     private static final CommandOutput DEFAULT_COMMAND_OUTPUT = new CommandOutput(

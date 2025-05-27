@@ -191,6 +191,37 @@ class CommandTest {
         }
 
         @Test
+        void runSingleCommandAndShowOutputWithCustomContentType() {
+            final Entry entry = new Command(
+                    List.of("echo '{\"name\": \"Albert Attard\"}'"),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.of(new Command.CommandOutput(Optional.of(true), Optional.empty(), Optional.of("json"))),
+                    Optional.empty(),
+                    OptionalInt.empty());
+
+            final Result result = entry.run();
+
+            final String expected = """
+                    ```shell
+                    echo '{"name": "Albert Attard"}'
+                    ```
+                    
+                    _Output_
+                    
+                    ```json
+                    {"name": "Albert Attard"}
+                    ```
+                    """;
+
+            assertThat(result)
+                    .isEqualTo(Result.ok(expected));
+        }
+
+        @Test
         void runMultipleCommandsAndShowingOutput() {
             final Entry entry = new Command(
                     List.of("echo 1", "echo 2"),
