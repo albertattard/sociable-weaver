@@ -59,10 +59,16 @@ class DurationDeserializerTest {
                 .isEqualTo(Optional.of(Duration.ofHours(2).plusMinutes(5)));
     }
 
-    /* TODO: This test is failing for an unknown reason. Further investigation is needed. */
     @Test
     void deserializeMissingFieldAsOptionalEmpty() throws JsonProcessingException {
         final TestData testData = deserialize("{}");
+        assertThat(testData.timeout())
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
+    void deserializeNullFieldAsOptionalEmpty() throws JsonProcessingException {
+        final TestData testData = deserialize("{\"timeout\": null}");
         assertThat(testData.timeout())
                 .isEqualTo(Optional.empty());
     }
