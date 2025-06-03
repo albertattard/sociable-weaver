@@ -32,6 +32,7 @@ public record Command(List<String> commands,
                       Optional<Path> workingDir,
                       Optional<CommandOutput> output,
                       Optional<List<String>> tags,
+                      Optional<List<String>> comments,
                       OptionalInt indent) implements Entry {
 
     @Override

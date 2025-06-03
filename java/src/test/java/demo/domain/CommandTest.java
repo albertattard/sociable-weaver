@@ -47,6 +47,7 @@ class CommandTest {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
+                            Optional.empty(),
                             OptionalInt.empty()))));
         }
 
@@ -54,33 +55,38 @@ class CommandTest {
         void returnDeserializedCommandWhenGivenAllOptions() {
             final String json = """
                     {
-                       "entries": [
-                         {
-                           "type": "Command",
-                           "commands": [
-                             "echo 'Hello there!'"
-                           ],
-                           "should_finish_within": "3 seconds",
-                           "should_fail": true,
-                           "on_failure_commands": [
-                             "echo 'Failed to say hello there!'"
-                           ],
-                           "finally_commands": [
-                             "echo 'Running cleanup!'"
-                           ],
-                           "working_dir": "dir",
-                           "output": {
-                             "show": false,
-                             "caption": "The output is hidden",
-                             "content_type": "xml"
-                           },
-                           "tags": [
-                             "test"
-                           ],
-                           "indent": 3
-                         }
-                       ]
-                     }""";
+                      "entries": [
+                        {
+                          "type": "Command",
+                          "commands": [
+                            "echo 'Hello there!'"
+                          ],
+                          "should_finish_within": "3 seconds",
+                          "should_fail": true,
+                          "on_failure_commands": [
+                            "echo 'Failed to say hello there!'"
+                          ],
+                          "finally_commands": [
+                            "echo 'Running cleanup!'"
+                          ],
+                          "working_dir": "dir",
+                          "output": {
+                            "show": false,
+                            "caption": "The output is hidden",
+                            "content_type": "xml"
+                          },
+                          "comments": [
+                            "test",
+                            "comments"
+                          ],
+                          "tags": [
+                            "test",
+                            "tags"
+                          ],
+                          "indent": 3
+                        }
+                      ]
+                    }""";
 
             final Document parsed = Document.parse(json);
 
@@ -93,7 +99,8 @@ class CommandTest {
                             Optional.of(List.of("echo 'Running cleanup!'")),
                             Optional.of(Path.of("dir")),
                             Optional.of(new Command.CommandOutput(Optional.of(false), Optional.of(List.of("The output is hidden")), Optional.of("xml"))),
-                            Optional.of(List.of("test")),
+                            Optional.of(List.of("test", "tags")),
+                            Optional.of(List.of("test", "comments")),
                             OptionalInt.of(3)))));
         }
 
@@ -101,20 +108,20 @@ class CommandTest {
         void returnDeserializedCommandWhenGivenOutputCaptionAsList() {
             final String json = """
                     {
-                       "entries": [
-                         {
-                           "type": "Command",
-                           "commands": [
-                             "echo 'Hello there!'"
-                           ],
-                           "output": {
-                             "caption": [
-                               "The output is visible"
-                             ]
-                           }
-                         }
-                       ]
-                     }""";
+                      "entries": [
+                        {
+                          "type": "Command",
+                          "commands": [
+                            "echo 'Hello there!'"
+                          ],
+                          "output": {
+                            "caption": [
+                              "The output is visible"
+                            ]
+                          }
+                        }
+                      ]
+                    }""";
 
             final Document parsed = Document.parse(json);
 
@@ -128,6 +135,7 @@ class CommandTest {
                             Optional.empty(),
                             Optional.of(new Command.CommandOutput(Optional.empty(), Optional.of(List.of("The output is visible")), Optional.empty())),
                             Optional.empty(),
+                            Optional.empty(),
                             OptionalInt.empty()))));
         }
     }
@@ -138,6 +146,7 @@ class CommandTest {
         void runSingleCommandWithoutShowingOutput() {
             final Entry entry = new Command(
                     List.of("echo 'Hello there!'"),
+                    Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
@@ -170,6 +179,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
                     Optional.empty(),
+                    Optional.empty(),
                     OptionalInt.empty());
 
             final Result result = entry.run();
@@ -201,6 +211,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.of(true), Optional.empty(), Optional.of("json"))),
                     Optional.empty(),
+                    Optional.empty(),
                     OptionalInt.empty());
 
             final Result result = entry.run();
@@ -231,6 +242,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
+                    Optional.empty(),
                     Optional.empty(),
                     OptionalInt.empty());
 
@@ -265,6 +277,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
                     Optional.empty(),
+                    Optional.empty(),
                     OptionalInt.of(3));
 
             final Result result = entry.run();
@@ -295,6 +308,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.of(Path.of("target")),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
+                    Optional.empty(),
                     Optional.empty(),
                     OptionalInt.empty());
 
@@ -332,6 +346,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
+                    Optional.empty(),
                     OptionalInt.empty());
 
             final Result result = entry.run();
@@ -357,6 +372,7 @@ class CommandTest {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.of(new Command.CommandOutput(Optional.empty(), Optional.empty(), Optional.empty())),
+                    Optional.empty(),
                     Optional.empty(),
                     OptionalInt.empty());
 
