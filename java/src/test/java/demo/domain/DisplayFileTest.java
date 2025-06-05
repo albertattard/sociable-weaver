@@ -266,7 +266,7 @@ class DisplayFileTest {
         }
 
         @Test
-        void handelPathStartingWithTilda() {
+        void handlePathStartingWithTilde() {
             final String javaFile = """
                     package demo;
                     
