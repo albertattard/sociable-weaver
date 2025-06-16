@@ -37,31 +37,33 @@ public record Command(List<String> commands,
 
     @Override
     public Result run() {
-        final ShellScriptResult shellScriptResult = runCommands();
-
         final List<Stream<String>> streams = new ArrayList<>(7);
         streams.add(Stream.of("```shell"));
         streams.add(formatCommandsToRunAsStream(this.commands()));
         streams.add(Stream.of("```"));
 
-        if (shellScriptResult.hasFailed()) {
-            runOnFailureCommands();
-        }
-
         boolean error = false;
-        if (shellScriptResult.hasFailed() != shouldFailOrDefault()) {
-            streams.add(Stream.of("", "_Unexpected Outcome_ (Command exit code: " + shellScriptResult.exitCode() + ")", "", "```"));
-            streams.add(shellScriptResult.readOutput());
-            streams.add(Stream.of("```"));
-            error = true;
-        } else {
-            shouldPrintOutput(shellScriptResult).ifPresent(header -> {
-                streams.add(Stream.of(""));
-                streams.add(header.stream());
-                streams.add(Stream.of("", "```" + outputOrDefault().contentTypeOrDefault()));
+        if (!skipCommandExecution()) {
+            final ShellScriptResult shellScriptResult = runCommands();
+
+            if (shellScriptResult.hasFailed()) {
+                runOnFailureCommands();
+            }
+
+            if (shellScriptResult.hasFailed() != shouldFailOrDefault()) {
+                streams.add(Stream.of("", "_Unexpected Outcome_ (Command exit code: " + shellScriptResult.exitCode() + ")", "", "```"));
                 streams.add(shellScriptResult.readOutput());
                 streams.add(Stream.of("```"));
-            });
+                error = true;
+            } else {
+                shouldPrintOutput(shellScriptResult).ifPresent(header -> {
+                    streams.add(Stream.of(""));
+                    streams.add(header.stream());
+                    streams.add(Stream.of("", "```" + outputOrDefault().contentTypeOrDefault()));
+                    streams.add(shellScriptResult.readOutput());
+                    streams.add(Stream.of("```"));
+                });
+            }
         }
 
         final String output = streams.stream()
@@ -73,6 +75,11 @@ public record Command(List<String> commands,
         return error
                 ? Result.error(output)
                 : Result.ok(output);
+    }
+
+    private boolean skipCommandExecution() {
+        return tags.map(t -> t.contains("skip"))
+                .orElse(false);
     }
 
     @Override
