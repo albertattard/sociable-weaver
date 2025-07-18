@@ -325,7 +325,7 @@ class CommandTest {
                     _Output_
                     
                     ```
-                    sociable-weaver/java/target
+                    sociable-weaver/runner/target
                     ```
                     """;
 
