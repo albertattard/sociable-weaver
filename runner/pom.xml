@@ -125,7 +125,6 @@
                     <fallback>false</fallback>
                     <buildArgs>
                         <buildArg>--enable-sbom</buildArg>
-                        <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                     </buildArgs>
                 </configuration>
             </plugin>
