@@ -159,6 +159,13 @@
                                 <requireMavenVersion>
                                     <version>${required.maven.version}</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <message>
+                                        This example requires at least Java ${maven.compiler.release}, update your JVM,
+                                        and run the build again
+                                    </message>
+                                    <version>${maven.compiler.release}</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
