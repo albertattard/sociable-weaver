@@ -17,9 +17,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -34,7 +31,7 @@ jobs:
 
       - name: Build application
         run: |
-          ./mvnw clean native:compile verify
+          ./mvnw clean native:compile verify --projects runner
 
       - name: Extract version
         run: |

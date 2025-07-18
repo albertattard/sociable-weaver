@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>demo</groupId>
+    <artifactId>sociable-weaver</artifactId>
+    <version>1.0.0</version>
+    <name>Sociable Weaver</name>
+    <description>
+        Sociable Weaver
+    </description>
+    <organization>
+        <name>Sociable Weaver</name>
+        <url>https://github.com/albertattard/sociable-weaver</url>
+    </organization>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.java.version>24</project.java.version>
+        <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
+        <required.maven.version>3.6.3</required.maven.version>
+    </properties>
+
+    <modules>
+        <module>runner</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven.enforcer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>${required.maven.version}</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <message>
+                                        This example requires at least Java ${project.java.version}, update your JVM,
+                                        and run the build again
+                                    </message>
+                                    <version>${project.java.version}</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
