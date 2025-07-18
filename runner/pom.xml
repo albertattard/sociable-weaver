@@ -23,7 +23,7 @@
 
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
-        <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
+        <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
         <native.maven.plugin.version>0.10.6</native.maven.plugin.version>
         <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
         <required.maven.version>3.6.3</required.maven.version>
@@ -102,6 +102,18 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.jar.plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>demo.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <version>${native.maven.plugin.version}</version>
@@ -116,33 +128,6 @@
                         <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
                     </buildArgs>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven.shade.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${project.mainClass}</mainClass>
-                                    <manifestEntries>
-                                        <Implementation-Title>${project.name}</Implementation-Title>
-                                        <Implementation-Version>${project.version}</Implementation-Version>
-                                        <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
