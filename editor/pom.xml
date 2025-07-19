@@ -84,6 +84,9 @@
                 <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -93,6 +96,20 @@
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

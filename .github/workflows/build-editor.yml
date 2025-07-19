@@ -44,6 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.VERSION }}
-          name: Release ${{ env.VERSION }}
+          name: Editor Release ${{ env.VERSION }}
           body: ${{ github.event.commits[0].message }}
           files: editor/target/swe

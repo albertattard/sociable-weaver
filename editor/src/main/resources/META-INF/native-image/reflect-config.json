@@ -1,0 +1,88 @@
+[
+  {
+    "name": "[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
+  },
+  {
+    "name": "[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+  },
+  {
+    "name": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "demo.domain.EntryTo",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "name",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Class",
+    "methods": [
+      {
+        "name": "getRecordComponents",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Iterable",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.Record",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.reflect.RecordComponent",
+    "methods": [
+      {
+        "name": "getName",
+        "parameterTypes": []
+      },
+      {
+        "name": "getType",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.util.concurrent.ForkJoinTask",
+    "fields": [
+      {
+        "name": "aux"
+      },
+      {
+        "name": "status"
+      }
+    ]
+  },
+  {
+    "name": "java.util.concurrent.atomic.AtomicReference",
+    "fields": [
+      {
+        "name": "value"
+      }
+    ]
+  },
+  {
+    "name": "jdk.internal.misc.Unsafe"
+  }
+]
