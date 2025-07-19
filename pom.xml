@@ -24,6 +24,7 @@
     </properties>
 
     <modules>
+        <module>editor</module>
         <module>runner</module>
     </modules>
 

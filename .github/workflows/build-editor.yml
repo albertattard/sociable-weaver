@@ -1,0 +1,49 @@
+name: Build the editor (Web) Application
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'editor/**'
+      - '.github/workflows/build-editor.yml'
+      - '!**/README.md'
+      - '!**/LICENSE'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '24'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: Build application
+        run: |
+          ./mvnw --activate-profiles=native clean native:compile verify --projects editor
+
+      - name: Extract version
+        run: |
+          VERSION=$(date +%Y%m%d.%H%M%S)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Release binary
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: ${{ github.event.commits[0].message }}
+          files: editor/target/swe

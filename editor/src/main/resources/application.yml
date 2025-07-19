@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: Sociable Weaver Web Editor
+  thymeleaf:
+    encoding: UTF-8

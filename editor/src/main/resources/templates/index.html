@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot + HTMX SPA</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</head>
+<body>
+<h1>Sociable Weaver - Editor</h1>
+
+<ul id="entries">
+    <th:block th:each="entry : ${entries}">
+        <th:block th:replace="~{fragments/entry :: entryRow(${entry})}"></th:block>
+    </th:block>
+</ul>
+
+<form hx-post="/" hx-target="#entries" hx-swap="beforeend">
+    <input type="text" name="name" placeholder="Enter the entry name" required>
+    <button type="submit">Add</button>
+</form>
+
+</body>
+</html>
