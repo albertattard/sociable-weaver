@@ -1,3 +1,3 @@
 package demo.domain;
 
-public record EntryTo(String name) {}
+public record EntryTo(String type) {}

@@ -16,9 +16,9 @@ public final class EditorController {
     private final List<EntryTo> entries = new ArrayList<>();
 
     public EditorController() {
-        entries.add(new EntryTo("Apple"));
-        entries.add(new EntryTo("Banana"));
-        entries.add(new EntryTo("Orange"));
+        entries.add(new EntryTo("Heading"));
+        entries.add(new EntryTo("Markdown"));
+        entries.add(new EntryTo("DisplayFile"));
     }
 
     @GetMapping("/")
@@ -28,8 +28,8 @@ public final class EditorController {
     }
 
     @PostMapping("/")
-    public String addEntry(final @RequestParam String name, final Model model) {
-        final EntryTo newEntry = new EntryTo(name);
+    public String addEntry(final @RequestParam String type, final Model model) {
+        final EntryTo newEntry = new EntryTo(type);
         entries.add(newEntry);
         model.addAttribute("entry", newEntry);
         return "fragments/entry :: entryRow";

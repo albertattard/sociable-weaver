@@ -2,9 +2,9 @@ package demo;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
@@ -63,14 +63,15 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-    public EditorWebApplication addItem(final String name) {
-        final WebElement input = driver.findElement(By.name("name"));
-        input.sendKeys(name);
-        input.submit();
+    public EditorWebApplication addEntry(final String type) {
+        final Select select = new Select(driver.findElement(By.name("type")));
+        select.selectByVisibleText(type);
+
+        driver.findElement(By.name("submit")).click();
         return this;
     }
 
-    public EditorWebApplication assertLastItemIs(final String expected) {
+    public EditorWebApplication assertLastEntryOfType(final String expected) {
         final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         wait.until(textToBePresentInElementLocated(By.xpath("//ul[@id='entries']/li[last()]"), expected));
         return this;

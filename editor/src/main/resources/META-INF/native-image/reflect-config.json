@@ -21,13 +21,7 @@
     "queryAllDeclaredConstructors": true,
     "methods": [
       {
-        "name": "<init>",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      },
-      {
-        "name": "name",
+        "name": "type",
         "parameterTypes": []
       }
     ]

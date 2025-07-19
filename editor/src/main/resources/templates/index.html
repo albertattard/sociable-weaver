@@ -15,8 +15,15 @@
 </ul>
 
 <form hx-post="/" hx-target="#entries" hx-swap="beforeend">
-    <input type="text" name="name" placeholder="Enter the entry name" required>
-    <button type="submit">Add</button>
+    <select name="type">
+        <option value="Breakpoint">Breakpoint</option>
+        <option value="Command">Command</option>
+        <option value="DisplayFile">DisplayFile</option>
+        <option value="Heading">Heading</option>
+        <option value="Markdown">Markdown</option>
+        <option value="Todo">Todo</option>
+    </select>
+    <button name="submit" type="submit">Add</button>
 </form>
 
 </body>

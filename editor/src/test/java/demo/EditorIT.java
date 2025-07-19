@@ -8,8 +8,8 @@ class EditorIT {
     void addEntryToTheEndOfTheList() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
-                    .addItem("Mango")
-                    .assertLastItemIs("Mango");
+                    .addEntry("Markdown")
+                    .assertLastEntryOfType("Markdown");
         }
     }
 }
