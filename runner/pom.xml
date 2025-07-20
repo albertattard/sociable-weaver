@@ -28,7 +28,7 @@
         <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
         <required.maven.version>3.6.3</required.maven.version>
 
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.19.2</jackson.version>
         <commons.cli.version>1.9.0</commons.cli.version>
         <junit.version>5.12.2</junit.version>
         <assertj.version>3.27.3</assertj.version>

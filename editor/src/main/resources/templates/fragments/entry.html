@@ -1,8 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<th:block th:fragment="entryRow(entry)">
-    <li th:text="${entry.type}"></li>
+<th:block th:fragment="renderEntry(entry)">
+    <li th:switch="${entry.type}">
+        <th:block th:case="'Breakpoint'">Breakpoint</th:block>
+        <th:block th:case="'Command'">Command</th:block>
+        <th:block th:case="'DisplayFile'">DisplayFile</th:block>
+        <th:block th:case="'Heading'" th:replace="~{ :: renderHeading(${entry})}"></th:block>
+        <th:block th:case="'Markdown'">Markdown</th:block>
+        <th:block th:case="'Todo'">Todo</th:block>
+    </li>
+</th:block>
+
+<th:block th:fragment="renderHeading(entry)">
+    <th:block th:switch="${entry.level}">
+        <th:block th:case="'H1'"><h1 th:text="${entry.title}"></h1></th:block>
+        <th:block th:case="'H2'"><h2 th:text="${entry.title}"></h2></th:block>
+        <th:block th:case="'H3'"><h3 th:text="${entry.title}"></h3></th:block>
+        <th:block th:case="'H4'"><h4 th:text="${entry.title}"></h4></th:block>
+        <th:block th:case="'H5'"><h5 th:text="${entry.title}"></h5></th:block>
+    </th:block>
 </th:block>
 </body>
 </html>

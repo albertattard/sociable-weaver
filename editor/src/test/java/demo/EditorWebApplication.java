@@ -71,9 +71,29 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-    public EditorWebApplication assertLastEntryOfType(final String expected) {
+    public EditorWebApplication addHeading(final String level, final String title) {
+        final Select selectType = new Select(driver.findElement(By.name("type")));
+        selectType.selectByVisibleText("Heading");
+
+        final Select selectLevel = new Select(driver.findElement(By.name("level")));
+        selectLevel.selectByVisibleText(level);
+        driver.findElement(By.name("title")).sendKeys(title);
+
+        driver.findElement(By.name("submit")).click();
+        return this;
+    }
+
+    public EditorWebApplication assertLastEntryContains(final String expectedContent) {
+        return assertContainsText("ul#entries > li:last-child", expectedContent);
+    }
+
+    public EditorWebApplication assertLastEntryContains(final String cssSelector, final String expectedContent) {
+        return assertContainsText("ul#entries > li:last-child " + cssSelector, expectedContent);
+    }
+
+    private EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {
         final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(textToBePresentInElementLocated(By.xpath("//ul[@id='entries']/li[last()]"), expected));
+        wait.until(textToBePresentInElementLocated(By.cssSelector(cssSelector), expectedContent));
         return this;
     }
 
@@ -93,7 +113,7 @@ public class EditorWebApplication implements AutoCloseable {
             } catch (final IOException e) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException ie) {
+                } catch (final InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Interrupted while waiting for the port to respond", ie);
                 }

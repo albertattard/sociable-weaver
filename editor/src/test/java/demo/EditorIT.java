@@ -5,11 +5,20 @@ import org.junit.jupiter.api.Test;
 class EditorIT {
 
     @Test
-    void addEntryToTheEndOfTheList() {
+    void addHeadingToTheEndOfTheList() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .addHeading("H2", "Heading 2")
+                    .assertLastEntryContains("> h2", "Heading 2");
+        }
+    }
+
+    @Test
+    void addMarkdownToTheEndOfTheList() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .addEntry("Markdown")
-                    .assertLastEntryOfType("Markdown");
+                    .assertLastEntryContains("Markdown");
         }
     }
 }

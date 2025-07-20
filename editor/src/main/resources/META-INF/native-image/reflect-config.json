@@ -21,7 +21,43 @@
     "queryAllDeclaredConstructors": true,
     "methods": [
       {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String",
+          "java.lang.String",
+          "java.lang.String",
+          "java.lang.String",
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      },
+      {
         "name": "type",
+        "parameterTypes": []
+      },
+      {
+        "name": "comments",
+        "parameterTypes": []
+      },
+      {
+        "name": "commands",
+        "parameterTypes": []
+      },
+      {
+        "name": "path",
+        "parameterTypes": []
+      },
+      {
+        "name": "level",
+        "parameterTypes": []
+      },
+      {
+        "name": "title",
+        "parameterTypes": []
+      },
+      {
+        "name": "contents",
         "parameterTypes": []
       }
     ]

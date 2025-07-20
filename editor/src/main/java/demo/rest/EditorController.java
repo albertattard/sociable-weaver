@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public final class EditorController {
     private final List<EntryTo> entries = new ArrayList<>();
 
     public EditorController() {
-        entries.add(new EntryTo("Heading"));
+        entries.add(EntryTo.heading("H2", "Test Heading"));
         entries.add(new EntryTo("Markdown"));
         entries.add(new EntryTo("DisplayFile"));
     }
@@ -28,10 +27,10 @@ public final class EditorController {
     }
 
     @PostMapping("/")
-    public String addEntry(final @RequestParam String type, final Model model) {
-        final EntryTo newEntry = new EntryTo(type);
-        entries.add(newEntry);
-        model.addAttribute("entry", newEntry);
-        return "fragments/entry :: entryRow";
+    public String add(final EntryTo entry, final Model model) {
+        /* TODO: Add validation */
+        entries.add(entry);
+        model.addAttribute("entry", entry);
+        return "fragments/entry :: renderEntry";
     }
 }
