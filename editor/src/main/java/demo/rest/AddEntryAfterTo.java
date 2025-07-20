@@ -3,7 +3,7 @@ package demo.rest;
 import java.util.UUID;
 
 public record AddEntryAfterTo(
-        String afterId,
+        String id,
         EntryType type) {
 
     public EntryTo toEntry() {

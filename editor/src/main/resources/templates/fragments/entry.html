@@ -63,7 +63,7 @@
 </th:block>
 
 <th:block th:fragment="renderEntryButtons(id)">
-    <input type="hidden" name="afterId" th:value="${id}"/>
+    <input type="hidden" name="id" th:value="${id}"/>
     <select name="type"
             hx-post="/after"
             hx-trigger="change"

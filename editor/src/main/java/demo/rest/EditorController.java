@@ -43,8 +43,8 @@ public final class EditorController {
         /* TODO: Find the entry and add this after that entry */
         final EntryTo entry = addEntryAfter.toEntry();
 
-        final int index = indexOfEntry(addEntryAfter.afterId())
-                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + addEntryAfter.afterId() + " was not found"));
+        final int index = indexOfEntry(addEntryAfter.id())
+                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + addEntryAfter.id() + " was not found"));
 
         entries.add(index + 1, entry);
         model.addAttribute("entry", entry);
