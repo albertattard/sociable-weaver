@@ -5,12 +5,7 @@
 <th:block th:fragment="editEntry()">
     <form hx-post="/" hx-target="#entries" hx-swap="beforeend">
         <select name="type" onchange="showFields(this.value)">
-            <option value="Breakpoint">Breakpoint</option>
-            <option value="Command">Command</option>
-            <option value="DisplayFile">DisplayFile</option>
-            <option value="Heading">Heading</option>
-            <option value="Markdown">Markdown</option>
-            <option value="Todo">Todo</option>
+            <option th:each="type : ${T(demo.rest.EntryType).values()}" th:value="${type}" th:text="${type}"></option>
         </select>
 
         <div id="fields">
@@ -48,12 +43,13 @@
 <th:block th:fragment="renderEntry(entry)">
     <li>
         <th:block th:switch="${entry.type}">
-            <th:block th:case="'Breakpoint'">Breakpoint</th:block>
-            <th:block th:case="'Command'">Command</th:block>
-            <th:block th:case="'DisplayFile'">DisplayFile</th:block>
-            <th:block th:case="'Heading'" th:replace="~{ :: renderHeading(${entry})}"></th:block>
-            <th:block th:case="'Markdown'">Markdown</th:block>
-            <th:block th:case="'Todo'">Todo</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Breakpoint}">Breakpoint</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Command}">Command</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).DisplayFile}">DisplayFile</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Heading}"
+                      th:replace="~{ :: renderHeading(${entry})}"></th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Markdown}">Markdown</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Todo}">Todo</th:block>
         </th:block>
         <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"></th:block>
     </li>
@@ -77,12 +73,7 @@
             hx-target="closest li"
             hx-swap="afterend"
             hx-include="closest li">
-        <option value="Breakpoint">Breakpoint</option>
-        <option value="Command">Command</option>
-        <option value="DisplayFile">DisplayFile</option>
-        <option value="Heading">Heading</option>
-        <option value="Markdown">Markdown</option>
-        <option value="Todo">Todo</option>
+        <option th:each="type : ${T(demo.rest.EntryType).values()}" th:value="${type}" th:text="${type}"></option>
     </select>
 </th:block>
 </body>

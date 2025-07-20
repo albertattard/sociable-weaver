@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record EntryTo(
         String id,
-        String type,
+        EntryType type,
         String comments,
         String commands,
         String path,
@@ -13,10 +13,10 @@ public record EntryTo(
         String contents) {
 
     public static EntryTo heading(final String level, final String title) {
-        return new EntryTo(UUID.randomUUID().toString(), "Heading", null, null, null, level, title, null);
+        return new EntryTo(UUID.randomUUID().toString(), EntryType.Heading, null, null, null, level, title, null);
     }
 
-    public EntryTo(final String type) {
+    public EntryTo(final EntryType type) {
         this(UUID.randomUUID().toString(), type, null, null, null, null, null, null);
     }
 }

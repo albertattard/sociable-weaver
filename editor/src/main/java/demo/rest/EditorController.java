@@ -18,8 +18,8 @@ public final class EditorController {
 
     public EditorController() {
         entries.add(EntryTo.heading("H2", "Test Heading"));
-        entries.add(new EntryTo("Markdown"));
-        entries.add(new EntryTo("DisplayFile"));
+        entries.add(new EntryTo(EntryType.Markdown));
+        entries.add(new EntryTo(EntryType.DisplayFile));
     }
 
     @GetMapping("/")

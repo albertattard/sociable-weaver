@@ -24,7 +24,7 @@
         "name": "<init>",
         "parameterTypes": [
           "java.lang.String",
-          "java.lang.String",
+          "demo.rest.EntryType",
           "java.lang.String",
           "java.lang.String",
           "java.lang.String",
@@ -77,7 +77,7 @@
         "name": "<init>",
         "parameterTypes": [
           "java.lang.String",
-          "java.lang.String"
+          "demo.rest.EntryType"
         ]
       },
       {
@@ -86,6 +86,20 @@
       },
       {
         "name": "type",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "demo.rest.EntryType",
+    "allPublicFields": true,
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      },
+      {
+        "name": "toString",
         "parameterTypes": []
       }
     ]
