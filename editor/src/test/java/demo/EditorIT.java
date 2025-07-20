@@ -14,6 +14,15 @@ class EditorIT {
     }
 
     @Test
+    void addHeadingAfterAnotherEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .addAfter("Heading", 1)
+                    .assertEntryAtIndexContains(2, "> h2", "Heading...");
+        }
+    }
+
+    @Test
     void addMarkdownToTheEndOfTheList() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()

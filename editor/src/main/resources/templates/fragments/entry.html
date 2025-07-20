@@ -1,25 +1,89 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+
+<th:block th:fragment="editEntry()">
+    <form hx-post="/" hx-target="#entries" hx-swap="beforeend">
+        <select name="type" onchange="showFields(this.value)">
+            <option value="Breakpoint">Breakpoint</option>
+            <option value="Command">Command</option>
+            <option value="DisplayFile">DisplayFile</option>
+            <option value="Heading">Heading</option>
+            <option value="Markdown">Markdown</option>
+            <option value="Todo">Todo</option>
+        </select>
+
+        <div id="fields">
+            <div class="field Breakpoint" style="display:none">
+                <textarea name="comments" placeholder="Comments..."></textarea>
+            </div>
+            <div class="field Command" style="display:none">
+                <textarea name="commands" placeholder="Commands..."></textarea>
+            </div>
+            <div class="field DisplayFile" style="display:none">
+                <input type="text" name="path" placeholder="File path"/>
+            </div>
+            <div class="field Heading" style="display:none">
+                <select name="level">
+                    <option value="H1">H1</option>
+                    <option value="H2">H2</option>
+                    <option value="H3">H3</option>
+                    <option value="H4">H4</option>
+                    <option value="H5">H5</option>
+                </select>
+                <input type="text" name="title" placeholder="Heading"/>
+            </div>
+            <div class="field Markdown" style="display:none">
+                <textarea name="contents" placeholder="Markdown..."></textarea>
+            </div>
+            <div class="field Todo" style="display:none">
+                <textarea name="comments" placeholder="Comments..."></textarea>
+            </div>
+        </div>
+
+        <button name="submit" type="submit">Add</button>
+    </form>
+</th:block>
+
 <th:block th:fragment="renderEntry(entry)">
-    <li th:switch="${entry.type}">
-        <th:block th:case="'Breakpoint'">Breakpoint</th:block>
-        <th:block th:case="'Command'">Command</th:block>
-        <th:block th:case="'DisplayFile'">DisplayFile</th:block>
-        <th:block th:case="'Heading'" th:replace="~{ :: renderHeading(${entry})}"></th:block>
-        <th:block th:case="'Markdown'">Markdown</th:block>
-        <th:block th:case="'Todo'">Todo</th:block>
+    <li>
+        <th:block th:switch="${entry.type}">
+            <th:block th:case="'Breakpoint'">Breakpoint</th:block>
+            <th:block th:case="'Command'">Command</th:block>
+            <th:block th:case="'DisplayFile'">DisplayFile</th:block>
+            <th:block th:case="'Heading'" th:replace="~{ :: renderHeading(${entry})}"></th:block>
+            <th:block th:case="'Markdown'">Markdown</th:block>
+            <th:block th:case="'Todo'">Todo</th:block>
+        </th:block>
+        <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"></th:block>
     </li>
 </th:block>
 
 <th:block th:fragment="renderHeading(entry)">
     <th:block th:switch="${entry.level}">
-        <th:block th:case="'H1'"><h1 th:text="${entry.title}"></h1></th:block>
-        <th:block th:case="'H2'"><h2 th:text="${entry.title}"></h2></th:block>
-        <th:block th:case="'H3'"><h3 th:text="${entry.title}"></h3></th:block>
-        <th:block th:case="'H4'"><h4 th:text="${entry.title}"></h4></th:block>
-        <th:block th:case="'H5'"><h5 th:text="${entry.title}"></h5></th:block>
+        <th:block th:case="'H1'"><h1 th:text="${entry.title} ?: 'Heading 1'"></h1></th:block>
+        <th:block th:case="'H2'"><h2 th:text="${entry.title} ?: 'Heading 2'"></h2></th:block>
+        <th:block th:case="'H3'"><h3 th:text="${entry.title} ?: 'Heading 3'"></h3></th:block>
+        <th:block th:case="'H4'"><h4 th:text="${entry.title} ?: 'Heading 4'"></h4></th:block>
+        <th:block th:case="'H5'"><h5 th:text="${entry.title} ?: 'Heading 5'"></h5></th:block>
     </th:block>
+</th:block>
+
+<th:block th:fragment="renderEntryButtons(id)">
+    <input type="hidden" name="afterId" th:value="${id}"/>
+    <select name="type"
+            hx-post="/after"
+            hx-trigger="change"
+            hx-target="closest li"
+            hx-swap="afterend"
+            hx-include="closest li">
+        <option value="Breakpoint">Breakpoint</option>
+        <option value="Command">Command</option>
+        <option value="DisplayFile">DisplayFile</option>
+        <option value="Heading">Heading</option>
+        <option value="Markdown">Markdown</option>
+        <option value="Todo">Todo</option>
+    </select>
 </th:block>
 </body>
 </html>

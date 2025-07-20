@@ -14,46 +14,7 @@
     </th:block>
 </ul>
 
-<form hx-post="/" hx-target="#entries" hx-swap="beforeend">
-    <select name="type" onchange="showFields(this.value)">
-        <option value="Breakpoint">Breakpoint</option>
-        <option value="Command">Command</option>
-        <option value="DisplayFile">DisplayFile</option>
-        <option value="Heading">Heading</option>
-        <option value="Markdown">Markdown</option>
-        <option value="Todo">Todo</option>
-    </select>
-
-    <div id="fields">
-        <div class="field Breakpoint" style="display:none">
-            <textarea name="comments" placeholder="Comments..."></textarea>
-        </div>
-        <div class="field Command" style="display:none">
-            <textarea name="commands" placeholder="Commands..."></textarea>
-        </div>
-        <div class="field DisplayFile" style="display:none">
-            <input type="text" name="path" placeholder="File path"/>
-        </div>
-        <div class="field Heading" style="display:none">
-            <select name="level">
-                <option value="H1">H1</option>
-                <option value="H2">H2</option>
-                <option value="H3">H3</option>
-                <option value="H4">H4</option>
-                <option value="H5">H5</option>
-            </select>
-            <input type="text" name="title" placeholder="Heading"/>
-        </div>
-        <div class="field Markdown" style="display:none">
-            <textarea name="contents" placeholder="Markdown..."></textarea>
-        </div>
-        <div class="field Todo" style="display:none">
-            <textarea name="comments" placeholder="Comments..."></textarea>
-        </div>
-    </div>
-
-    <button name="submit" type="submit">Add</button>
-</form>
+<th:block th:replace="~{fragments/entry :: editEntry()}"></th:block>
 
 <script>
     function showFields(type) {

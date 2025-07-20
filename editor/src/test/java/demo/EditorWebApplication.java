@@ -72,14 +72,16 @@ public class EditorWebApplication implements AutoCloseable {
     }
 
     public EditorWebApplication addHeading(final String level, final String title) {
-        final Select selectType = new Select(driver.findElement(By.name("type")));
-        selectType.selectByVisibleText("Heading");
-
-        final Select selectLevel = new Select(driver.findElement(By.name("level")));
-        selectLevel.selectByVisibleText(level);
+        new Select(driver.findElement(By.cssSelector("form > select[name=\"type\"]"))).selectByVisibleText("Heading");
+        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level);
         driver.findElement(By.name("title")).sendKeys(title);
-
         driver.findElement(By.name("submit")).click();
+        return this;
+    }
+
+    public EditorWebApplication addAfter(final String type, final int index) {
+        new Select(driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") > select")))
+                .selectByVisibleText(type);
         return this;
     }
 
@@ -91,7 +93,11 @@ public class EditorWebApplication implements AutoCloseable {
         return assertContainsText("ul#entries > li:last-child " + cssSelector, expectedContent);
     }
 
-    private EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {
+    public EditorWebApplication assertEntryAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
+        return assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector, expectedContent);
+    }
+
+    public EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {
         final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         wait.until(textToBePresentInElementLocated(By.cssSelector(cssSelector), expectedContent));
         return this;

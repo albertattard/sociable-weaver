@@ -15,7 +15,7 @@
     ]
   },
   {
-    "name": "demo.domain.EntryTo",
+    "name": "demo.rest.EntryTo",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true,
     "queryAllDeclaredConstructors": true,
@@ -29,8 +29,13 @@
           "java.lang.String",
           "java.lang.String",
           "java.lang.String",
+          "java.lang.String",
           "java.lang.String"
         ]
+      },
+      {
+        "name": "id",
+        "parameterTypes": []
       },
       {
         "name": "type",
@@ -58,6 +63,29 @@
       },
       {
         "name": "contents",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "demo.rest.AddEntryAfterTo",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "afterId",
+        "parameterTypes": []
+      },
+      {
+        "name": "type",
         "parameterTypes": []
       }
     ]
