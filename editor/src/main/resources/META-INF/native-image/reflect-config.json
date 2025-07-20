@@ -28,7 +28,7 @@
           "java.lang.String",
           "java.lang.String",
           "java.lang.String",
-          "java.lang.String",
+          "demo.rest.HeadingLevel",
           "java.lang.String",
           "java.lang.String"
         ]
@@ -92,6 +92,20 @@
   },
   {
     "name": "demo.rest.EntryType",
+    "allPublicFields": true,
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": []
+      },
+      {
+        "name": "toString",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "demo.rest.HeadingLevel",
     "allPublicFields": true,
     "methods": [
       {

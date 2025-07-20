@@ -1,5 +1,7 @@
 package demo;
 
+import demo.rest.EntryType;
+import demo.rest.HeadingLevel;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -63,25 +65,25 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-    public EditorWebApplication addEntry(final String type) {
+    public EditorWebApplication addEntry(final EntryType type) {
         final Select select = new Select(driver.findElement(By.name("type")));
-        select.selectByVisibleText(type);
+        select.selectByVisibleText(type.name());
 
         driver.findElement(By.name("submit")).click();
         return this;
     }
 
-    public EditorWebApplication addHeading(final String level, final String title) {
+    public EditorWebApplication addHeading(final HeadingLevel level, final String title) {
         new Select(driver.findElement(By.cssSelector("form > select[name=\"type\"]"))).selectByVisibleText("Heading");
-        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level);
+        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level.name());
         driver.findElement(By.name("title")).sendKeys(title);
         driver.findElement(By.name("submit")).click();
         return this;
     }
 
-    public EditorWebApplication addAfter(final String type, final int index) {
+    public EditorWebApplication addAfter(final EntryType type, final int index) {
         new Select(driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") > select")))
-                .selectByVisibleText(type);
+                .selectByVisibleText(type.name());
         return this;
     }
 

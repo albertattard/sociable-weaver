@@ -17,7 +17,7 @@ public final class EditorController {
     private final List<EntryTo> entries = new ArrayList<>();
 
     public EditorController() {
-        entries.add(EntryTo.heading("H2", "Test Heading"));
+        entries.add(EntryTo.heading(HeadingLevel.H2, "Test Heading"));
         entries.add(new EntryTo(EntryType.Markdown));
         entries.add(new EntryTo(EntryType.DisplayFile));
     }

@@ -8,11 +8,11 @@ public record EntryTo(
         String comments,
         String commands,
         String path,
-        String level,
+        HeadingLevel level,
         String title,
         String contents) {
 
-    public static EntryTo heading(final String level, final String title) {
+    public static EntryTo heading(final HeadingLevel level, final String title) {
         return new EntryTo(UUID.randomUUID().toString(), EntryType.Heading, null, null, null, level, title, null);
     }
 
