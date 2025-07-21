@@ -30,7 +30,8 @@ public final class EditorController {
         return "index";
     }
 
-    @GetMapping("/{id}")
+    /* TODO: Switch ID to UUID */
+    @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
     public String get(final @PathVariable("id") String id, final Model model) {
         final EntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
