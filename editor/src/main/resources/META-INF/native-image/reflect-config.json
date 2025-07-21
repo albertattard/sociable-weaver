@@ -23,7 +23,7 @@
       {
         "name": "<init>",
         "parameterTypes": [
-          "java.lang.String",
+          "java.util.UUID",
           "demo.rest.EntryType",
           "java.lang.String",
           "java.lang.String",
@@ -76,7 +76,7 @@
       {
         "name": "<init>",
         "parameterTypes": [
-          "java.lang.String",
+          "java.util.UUID",
           "demo.rest.EntryType"
         ]
       },

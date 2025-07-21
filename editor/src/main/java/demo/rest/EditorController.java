@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @Controller
@@ -30,9 +27,8 @@ public final class EditorController {
         return "index";
     }
 
-    /* TODO: Switch ID to UUID */
     @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
-    public String get(final @PathVariable("id") String id, final Model model) {
+    public String get(final @PathVariable("id") UUID id, final Model model) {
         final EntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
 
@@ -52,7 +48,7 @@ public final class EditorController {
     @PostMapping("/after")
     public String addAfter(final AddEntryAfterTo addEntryAfter, final Model model) {
         /* TODO: Add validation */
-        final EntryTo entry = addEntryAfter.toEntry();
+        final EntryTo entry = addEntryAfter.toNewEntry();
 
         final int index = indexOfEntry(addEntryAfter.id())
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + addEntryAfter.id() + " was not found"));
@@ -63,19 +59,19 @@ public final class EditorController {
     }
 
     @GetMapping("/edit")
-    public String edit(final @RequestParam("id") String id, final Model model) {
+    public String edit(final @RequestParam("id") UUID id, final Model model) {
         final EntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
         model.addAttribute("entry", entry);
         return "fragments/entry :: editEntry";
     }
 
-    private Optional<EntryTo> findEntryWithId(final String entryId) {
+    private Optional<EntryTo> findEntryWithId(final UUID entryId) {
         return Optional.ofNullable(entryId)
                 .flatMap(id -> entries.stream().filter(e -> id.equals(e.id())).findFirst());
     }
 
-    private OptionalInt indexOfEntry(final String entryId) {
+    private OptionalInt indexOfEntry(final UUID entryId) {
         return Optional.ofNullable(entryId).stream()
                 .flatMapToInt(id -> {
                     for (int i = 0; i < entries.size(); i++) {

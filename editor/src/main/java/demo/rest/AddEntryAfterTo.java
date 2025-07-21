@@ -3,14 +3,14 @@ package demo.rest;
 import java.util.UUID;
 
 public record AddEntryAfterTo(
-        String id,
+        UUID id,
         EntryType type) {
 
-    public EntryTo toEntry() {
+    public EntryTo toNewEntry() {
         return switch (type) {
             case Heading ->
-                    new EntryTo(UUID.randomUUID().toString(), type, null, null, null, HeadingLevel.H2, "Heading...", null);
-            default -> new EntryTo(UUID.randomUUID().toString(), type, null, null, null, null, null, null);
+                    new EntryTo(UUID.randomUUID(), type, null, null, null, HeadingLevel.H2, "Heading...", null);
+            default -> new EntryTo(UUID.randomUUID(), type, null, null, null, null, null, null);
         };
     }
 }

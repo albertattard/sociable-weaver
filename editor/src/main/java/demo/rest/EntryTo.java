@@ -3,7 +3,7 @@ package demo.rest;
 import java.util.UUID;
 
 public record EntryTo(
-        String id,
+        UUID id,
         EntryType type,
         String comments,
         String commands,
@@ -13,10 +13,10 @@ public record EntryTo(
         String contents) {
 
     public static EntryTo heading(final HeadingLevel level, final String title) {
-        return new EntryTo(UUID.randomUUID().toString(), EntryType.Heading, null, null, null, level, title, null);
+        return new EntryTo(UUID.randomUUID(), EntryType.Heading, null, null, null, level, title, null);
     }
 
     public EntryTo(final EntryType type) {
-        this(UUID.randomUUID().toString(), type, null, null, null, null, null, null);
+        this(UUID.randomUUID(), type, null, null, null, null, null, null);
     }
 }
