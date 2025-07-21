@@ -47,3 +47,4 @@ jobs:
           name: Editor Release ${{ env.VERSION }}
           body: ${{ github.event.commits[0].message }}
           files: editor/target/swe
+          prerelease: true
