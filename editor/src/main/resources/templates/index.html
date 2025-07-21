@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Spring Boot + HTMX SPA</title>
+    <title>Sociable Weaver - Editor</title>
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
 </head>
 <body>
@@ -14,12 +14,12 @@
     </th:block>
 </ul>
 
-<th:block th:replace="~{fragments/entry :: editEntry()}"></th:block>
-
 <script>
-    function showFields(type) {
-        document.querySelectorAll("#fields .field").forEach(el => el.style.display = "none");
-        document.querySelectorAll("#fields ." + type).forEach(el => el.style.display = "block");
+    function showFields(selectElement) {
+        console.log('Toggle fields');
+        const form = selectElement.closest("form");
+        form.querySelectorAll("#fields .field").forEach(el => el.style.display = "none");
+        form.querySelectorAll("#fields ." + selectElement.value).forEach(el => el.style.display = "block");
     }
 </script>
 </body>

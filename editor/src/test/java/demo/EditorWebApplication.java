@@ -1,7 +1,6 @@
 package demo;
 
 import demo.rest.EntryType;
-import demo.rest.HeadingLevel;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -15,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +29,9 @@ public class EditorWebApplication implements AutoCloseable {
 
     public static EditorWebApplication launch() {
         final Path executable = Path.of("./target/swe");
+        if (!Files.isExecutable(executable)) {
+            throw new RuntimeException("The native executable '" + executable + "' is missing. Please make sure to build the native executable is built before running the functional tests.");
+        }
 
         try {
             final int port = findFreePort();
@@ -73,13 +76,13 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-    public EditorWebApplication addHeading(final HeadingLevel level, final String title) {
-        new Select(driver.findElement(By.cssSelector("form > select[name=\"type\"]"))).selectByVisibleText("Heading");
-        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level.name());
-        driver.findElement(By.name("title")).sendKeys(title);
-        driver.findElement(By.name("submit")).click();
-        return this;
-    }
+//    public EditorWebApplication addHeading(final HeadingLevel level, final String title) {
+//        new Select(driver.findElement(By.cssSelector("form > select[name=\"type\"]"))).selectByVisibleText("Heading");
+//        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level.name());
+//        driver.findElement(By.name("title")).sendKeys(title);
+//        driver.findElement(By.name("submit")).click();
+//        return this;
+//    }
 
     public EditorWebApplication addAfter(final EntryType type, final int index) {
         new Select(driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") > select")))
@@ -87,21 +90,25 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-    public EditorWebApplication assertLastEntryContains(final String expectedContent) {
-        return assertContainsText("ul#entries > li:last-child", expectedContent);
+    public EditorWebApplication clickOnElementAtIndex(final int index, final String cssSelector) {
+        driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector)).click();
+        return this;
     }
 
-    public EditorWebApplication assertLastEntryContains(final String cssSelector, final String expectedContent) {
-        return assertContainsText("ul#entries > li:last-child " + cssSelector, expectedContent);
-    }
-
-    public EditorWebApplication assertEntryAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
+    public EditorWebApplication assertElementAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
         return assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector, expectedContent);
     }
 
     public EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {
         final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         wait.until(textToBePresentInElementLocated(By.cssSelector(cssSelector), expectedContent));
+        return this;
+    }
+
+    public EditorWebApplication printPageSource() {
+        System.out.println("---");
+        System.out.println(driver.getPageSource());
+        System.out.println("---");
         return this;
     }
 

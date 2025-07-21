@@ -3,7 +3,9 @@ package demo.rest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,15 @@ public final class EditorController {
         return "index";
     }
 
+    @GetMapping("/{id}")
+    public String get(final @PathVariable("id") String id, final Model model) {
+        final EntryTo entry = findEntryWithId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
+
+        model.addAttribute("entry", entry);
+        return "fragments/entry :: renderEntry";
+    }
+
     @PostMapping("/")
     public String add(final EntryTo entry, final Model model) {
         /* TODO: Add validation */
@@ -40,7 +51,6 @@ public final class EditorController {
     @PostMapping("/after")
     public String addAfter(final AddEntryAfterTo addEntryAfter, final Model model) {
         /* TODO: Add validation */
-        /* TODO: Find the entry and add this after that entry */
         final EntryTo entry = addEntryAfter.toEntry();
 
         final int index = indexOfEntry(addEntryAfter.id())
@@ -49,6 +59,19 @@ public final class EditorController {
         entries.add(index + 1, entry);
         model.addAttribute("entry", entry);
         return "fragments/entry :: renderEntry";
+    }
+
+    @GetMapping("/edit")
+    public String edit(final @RequestParam("id") String id, final Model model) {
+        final EntryTo entry = findEntryWithId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
+        model.addAttribute("entry", entry);
+        return "fragments/entry :: editEntry";
+    }
+
+    private Optional<EntryTo> findEntryWithId(final String entryId) {
+        return Optional.ofNullable(entryId)
+                .flatMap(id -> entries.stream().filter(e -> id.equals(e.id())).findFirst());
     }
 
     private OptionalInt indexOfEntry(final String entryId) {
