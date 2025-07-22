@@ -3,6 +3,7 @@ package demo;
 import demo.rest.EntryType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.Select;
@@ -97,6 +98,14 @@ public class EditorWebApplication implements AutoCloseable {
 
     public EditorWebApplication assertElementAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
         return assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector, expectedContent);
+    }
+
+    public EditorWebApplication assertElementAtIndexVisible(final int index, final String cssSelector) {
+        final WebElement element = driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector));
+        if (!element.isDisplayed()) {
+            throw new AssertionError("Element '" + cssSelector + "' at index " + index + " is not visible");
+        }
+        return this;
     }
 
     public EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {

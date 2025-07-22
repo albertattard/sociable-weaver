@@ -24,4 +24,16 @@ class EditorIT {
                     .assertElementAtIndexContains(0, "> h2", "Test Heading");
         }
     }
+
+    @Test
+    void fieldsVisibleWhenEditingHeadingEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .clickOnElementAtIndex(0, "> button[name=edit]")
+                    .assertElementAtIndexVisible(0, "> form > select[name=type]")
+                    .assertElementAtIndexVisible(0, "> form > div#fields select[name=level]")
+                    .assertElementAtIndexVisible(0, "> form > div#fields input[name=title]")
+            ;
+        }
+    }
 }
