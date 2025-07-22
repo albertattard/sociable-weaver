@@ -3,7 +3,7 @@
 <body>
 
 <th:block th:fragment="editEntry(entry)">
-    <li th:id="|row-${entry.id}|">
+    <li th:id="|row-${entry.id}|" hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
         <form hx-post="/" hx-target="#entries" th:id="|form-${entry.id}|" hx-swap="beforeend">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
             <select name="type" onchange="showFields(this)">
