@@ -15,11 +15,12 @@ class EditorIT {
     }
 
     @Test
-    void editFirstHeadingEntry() {
+    void editAndCancelFirstHeadingEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .assertElementAtIndexContains(0, "> h2", "Test Heading")
                     .clickOnElementAtIndex(0, "> button[name=edit]")
+                    .waitForElementToBeVisible(0, "> form > button[name=cancel]")
                     .clickOnElementAtIndex(0, "> form > button[name=cancel]")
                     .assertElementAtIndexContains(0, "> h2", "Test Heading");
         }
@@ -30,6 +31,7 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .clickOnElementAtIndex(0, "> button[name=edit]")
+                    .waitForElementToBeVisible(0, "> form > select[name=type]")
                     .assertElementAtIndexVisible(0, "> form > select[name=type]")
                     .assertElementAtIndexVisible(0, "> form > div#fields select[name=level]")
                     .assertElementAtIndexVisible(0, "> form > div#fields input[name=title]")
@@ -38,12 +40,13 @@ class EditorIT {
     }
 
     @Test
-    void updateHeadingEntry() {
+    void updateFirstHeadingEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .clickOnElementAtIndex(0, "> button[name=edit]")
+                    .waitForElementToBeVisible(0, "> form input[name=title]")
                     .setInputValueAtIndex(0, "> form input[name=title]", "Updated Heading")
-                    .clickOnElementAtIndex(0, "> form > button[name=submit]")
+                    .clickOnElementAtIndex(0, "> form > button[name=update]")
                     .assertElementAtIndexContains(0, "> h2", "Updated Heading");
         }
     }
