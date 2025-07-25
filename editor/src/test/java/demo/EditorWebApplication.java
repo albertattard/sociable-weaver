@@ -96,6 +96,13 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
+    public EditorWebApplication setInputValueAtIndex(final int index, final String cssSelector, final String value) {
+        final WebElement element = driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector));
+        element.clear();
+        element.sendKeys(value);
+        return this;
+    }
+
     public EditorWebApplication assertElementAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
         return assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector, expectedContent);
     }

@@ -4,7 +4,7 @@
 
 <th:block th:fragment="editEntry(entry)">
     <li th:id="|row-${entry.id}|" hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
-        <form hx-post="/" hx-target="#entries" th:id="|form-${entry.id}|" hx-swap="beforeend">
+        <form hx-post="/edit" hx-target="closest li" th:id="|form-${entry.id}|" hx-swap="outerHTML">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
             <select name="type" onchange="showFields(this)">
                 <option th:each="type : ${T(demo.rest.EntryType).values()}"

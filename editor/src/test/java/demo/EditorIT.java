@@ -36,4 +36,15 @@ class EditorIT {
             ;
         }
     }
+
+    @Test
+    void updateHeadingEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .clickOnElementAtIndex(0, "> button[name=edit]")
+                    .setInputValueAtIndex(0, "> form input[name=title]", "Updated Heading")
+                    .clickOnElementAtIndex(0, "> form > button[name=submit]")
+                    .assertElementAtIndexContains(0, "> h2", "Updated Heading");
+        }
+    }
 }
