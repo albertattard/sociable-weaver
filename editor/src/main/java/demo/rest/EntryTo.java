@@ -8,15 +8,43 @@ public record EntryTo(
         String comments,
         String commands,
         String path,
+        String contentType,
+        Integer fromLine,
+        Integer numberOfLines,
+        Integer indent,
         HeadingLevel level,
         String title,
         String contents) {
 
     public static EntryTo heading(final HeadingLevel level, final String title) {
-        return new EntryTo(UUID.randomUUID(), EntryType.Heading, null, null, null, level, title, null);
+        return new EntryTo(
+                UUID.randomUUID(),
+                EntryType.Heading,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                level,
+                title,
+                null);
     }
 
     public EntryTo(final EntryType type) {
-        this(UUID.randomUUID(), type, null, null, null, null, null, null);
+        this(
+                UUID.randomUUID(),
+                type,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 }
