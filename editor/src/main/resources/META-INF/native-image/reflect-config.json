@@ -28,6 +28,10 @@
           "java.lang.String",
           "java.lang.String",
           "java.lang.String",
+          "java.lang.String",
+          "java.lang.Integer",
+          "java.lang.Integer",
+          "java.lang.Integer",
           "demo.rest.HeadingLevel",
           "java.lang.String",
           "java.lang.String"
@@ -51,6 +55,22 @@
       },
       {
         "name": "path",
+        "parameterTypes": []
+      },
+      {
+        "name": "contentType",
+        "parameterTypes": []
+      },
+      {
+        "name": "fromLine",
+        "parameterTypes": []
+      },
+      {
+        "name": "numberOfLines",
+        "parameterTypes": []
+      },
+      {
+        "name": "indent",
         "parameterTypes": []
       },
       {
