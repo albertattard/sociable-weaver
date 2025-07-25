@@ -58,6 +58,17 @@ public final class EditorController {
         return "fragments/entry :: renderEntry";
     }
 
+    @PostMapping("/edit")
+    public String update(final EntryTo entry, final Model model) {
+        /* TODO: Add validation */
+        final int index = indexOfEntry(entry.id())
+                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + entry.id() + " was not found"));
+
+        entries.set(index, entry);
+        model.addAttribute("entry", entry);
+        return "fragments/entry :: renderEntry";
+    }
+
     @GetMapping("/edit")
     public String edit(final @RequestParam("id") UUID id, final Model model) {
         final EntryTo entry = findEntryWithId(id)

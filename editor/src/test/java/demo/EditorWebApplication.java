@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 public class EditorWebApplication implements AutoCloseable {
 
@@ -77,22 +78,31 @@ public class EditorWebApplication implements AutoCloseable {
         return this;
     }
 
-//    public EditorWebApplication addHeading(final HeadingLevel level, final String title) {
-//        new Select(driver.findElement(By.cssSelector("form > select[name=\"type\"]"))).selectByVisibleText("Heading");
-//        new Select(driver.findElement(By.cssSelector("form > div > div > select[name=\"level\"]"))).selectByVisibleText(level.name());
-//        driver.findElement(By.name("title")).sendKeys(title);
-//        driver.findElement(By.name("submit")).click();
-//        return this;
-//    }
-
     public EditorWebApplication addAfter(final EntryType type, final int index) {
-        new Select(driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") > select")))
+        new Select(find(index, "> select"))
                 .selectByVisibleText(type.name());
         return this;
     }
 
     public EditorWebApplication clickOnElementAtIndex(final int index, final String cssSelector) {
-        driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector)).click();
+        find(index, cssSelector).click();
+        return this;
+    }
+
+    public EditorWebApplication setInputValueAtIndex(final int index, final String cssSelector, final String value) {
+        final WebElement element = find(index, cssSelector);
+        element.clear();
+        element.sendKeys(value);
+        return this;
+    }
+
+    public EditorWebApplication waitForElementToBeVisible(final int index, final String cssSelector) {
+        return waitForElementToBeVisible(index, cssSelector, Duration.ofSeconds(1));
+    }
+
+    public EditorWebApplication waitForElementToBeVisible(final int index, final String cssSelector, final Duration waitFor) {
+        new WebDriverWait(driver, waitFor)
+                .until(visibilityOfElementLocated(by(index, cssSelector)));
         return this;
     }
 
@@ -101,7 +111,7 @@ public class EditorWebApplication implements AutoCloseable {
     }
 
     public EditorWebApplication assertElementAtIndexVisible(final int index, final String cssSelector) {
-        final WebElement element = driver.findElement(By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector));
+        final WebElement element = find(index, cssSelector);
         if (!element.isDisplayed()) {
             throw new AssertionError("Element '" + cssSelector + "' at index " + index + " is not visible");
         }
@@ -112,6 +122,14 @@ public class EditorWebApplication implements AutoCloseable {
         final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         wait.until(textToBePresentInElementLocated(By.cssSelector(cssSelector), expectedContent));
         return this;
+    }
+
+    private WebElement find(final int index, final String cssSelector) {
+        return driver.findElement(by(index, cssSelector));
+    }
+
+    private static By by(final int index, final String cssSelector) {
+        return By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector);
     }
 
     public EditorWebApplication printPageSource() {
