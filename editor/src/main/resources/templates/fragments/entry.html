@@ -24,7 +24,16 @@
                 </div>
 
                 <div class="field DisplayFile" style="display:none">
+                    <label>File Path</label>
                     <input type="text" name="path" placeholder="File path" th:value="${entry.path}"/>
+                    <label>Content Type</label>
+                    <input type="text" name="contentType" placeholder="Content type" th:value="${entry.contentType}"/>
+                    <label>From line number (1 based)</label>
+                    <input type="text" name="fromLine" placeholder="From line" th:value="${entry.fromLine}"/>
+                    <label>Number of lines</label>
+                    <input type="text" name="numberOfLines" placeholder="Number of lines" th:value="${entry.numberOfLines}"/>
+                    <label>Indent</label>
+                    <input type="text" name="indent" placeholder="Indent" th:value="${entry.indent}"/>
                 </div>
 
                 <div class="field Heading" style="display:none">
