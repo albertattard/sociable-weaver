@@ -15,6 +15,8 @@ import java.util.stream.IntStream;
 public final class EditorController {
 
     private final List<EntryTo> entries = new ArrayList<>();
+    private EntryTo lastDeletedEntry;
+    private int lastDeletedIndex = -1;
 
     public EditorController() {
         entries.add(EntryTo.heading(HeadingLevel.H2, "Test Heading"));
@@ -82,8 +84,26 @@ public final class EditorController {
     public String delete(final @RequestParam("id") UUID id) {
         final int index = indexOfEntry(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
-        entries.remove(index);
-        return "fragments/entry :: empty";
+        lastDeletedEntry = entries.remove(index);
+        lastDeletedIndex = index;
+        return "fragments/entry :: undoDelete";
+    }
+
+    @PostMapping("/undo")
+    public String undo(final Model model) {
+        if (lastDeletedEntry == null) {
+            return "fragments/entry :: empty";
+        }
+
+        final int index = Math.min(Math.max(lastDeletedIndex, 0), entries.size());
+        entries.add(index, lastDeletedEntry);
+
+        model.addAttribute("entry", lastDeletedEntry);
+
+        lastDeletedEntry = null;
+        lastDeletedIndex = -1;
+
+        return "fragments/entry :: renderEntry";
     }
 
     private Optional<EntryTo> findEntryWithId(final UUID entryId) {

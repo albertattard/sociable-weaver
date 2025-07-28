@@ -106,7 +106,7 @@
             name="delete"
             hx-delete="/delete"
             hx-target="closest li"
-            hx-swap="delete"
+            hx-swap="outerHTML"
             hx-include="closest li">
         Delete
     </button>
@@ -118,6 +118,19 @@
             hx-include="closest li">
         <option th:each="type : ${T(demo.rest.EntryType).values()}" th:value="${type}" th:text="${type}"></option>
     </select>
+</th:block>
+
+<th:block th:fragment="undoDelete">
+    <li>
+        Entry deleted
+        <button
+                name="undo"
+                hx-post="/undo"
+                hx-target="closest li"
+                hx-swap="outerHTML">
+            Undo
+        </button>
+    </li>
 </th:block>
 
 <th:block th:fragment="empty"></th:block>

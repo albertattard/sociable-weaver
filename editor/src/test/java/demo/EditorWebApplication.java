@@ -198,6 +198,11 @@ public class EditorWebApplication implements AutoCloseable {
             return application;
         }
 
+        public EditorWebApplication clickUndoButton() {
+            application.clickOnElementAtIndex(index, "> button[name=undo]");
+            return application;
+        }
+
         private Row waitForElementToBeVisible(final String cssSelector) {
             application.waitForElementToBeVisible(index, cssSelector);
             return this;

@@ -56,7 +56,22 @@ class EditorIT {
                     .row(1)
                     .clickDeleteButton()
                     .row(1)
+                    .assertContains("Entry deleted")
+                    .row(2)
                     .assertContains("DisplayFile");
+        }
+    }
+
+    @Test
+    void deleteAndUndoSecondEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .row(1)
+                    .clickDeleteButton()
+                    .row(1)
+                    .clickUndoButton()
+                    .row(1)
+                    .assertContains("Markdown");
         }
     }
 }
