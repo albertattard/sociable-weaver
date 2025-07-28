@@ -19,8 +19,8 @@
     function showFields(selectElement) {
         console.log('Toggle fields');
         const form = selectElement.closest("form");
-        form.querySelectorAll("#fields .field").forEach(el => el.style.display = "none");
-        form.querySelectorAll("#fields ." + selectElement.value).forEach(el => el.style.display = "block");
+        form.querySelectorAll("div[name=fields] .field").forEach(el => el.style.display = "none");
+        form.querySelectorAll("div[name=fields] ." + selectElement.value).forEach(el => el.style.display = "block");
     }
 </script>
 </body>

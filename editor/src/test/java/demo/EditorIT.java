@@ -42,8 +42,8 @@ class EditorIT {
                     .clickOnElementAtIndex(0, "> button[name=edit]")
                     .waitForElementToBeVisible(0, "> form > select[name=type]")
                     .assertElementAtIndexVisible(0, "> form > select[name=type]")
-                    .assertElementAtIndexVisible(0, "> form > div#fields select[name=level]")
-                    .assertElementAtIndexVisible(0, "> form > div#fields input[name=title]")
+                    .assertElementAtIndexVisible(0, "> form select[name=level]")
+                    .assertElementAtIndexVisible(0, "> form input[name=title]")
             ;
         }
     }
