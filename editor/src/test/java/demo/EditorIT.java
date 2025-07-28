@@ -1,6 +1,7 @@
 package demo;
 
 import demo.rest.EntryType;
+import demo.rest.HeadingLevel;
 import org.junit.jupiter.api.Test;
 
 class EditorIT {
@@ -9,17 +10,14 @@ class EditorIT {
     void addHeadingAfterAnotherEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
-                    .addAfter(EntryType.Heading, 1)
-                    .waitForElementToBeVisible(2, "> form > select[name=type]")
-                    .assertElementAtIndexContains(2, "> form > select[name=type]", "Heading")
-                    .assertElementAtIndexVisible(2, "> form select[name=level]")
-                    .assertElementAtIndexVisible(2, "> form input[name=title]")
-                    .assertElementAtIndexVisible(2, "> form > button[name=update]")
-                    .assertElementAtIndexVisible(2, "> form > button[name=cancel]")
-                    .setInputValueAtIndex(2, "> form input[name=title]", "New Heading 2")
-                    .selectOptionElementAtIndex(2, "> form select[name=level]", "H2")
-                    .clickOnElementAtIndex(2, "> form > button[name=update]")
-                    .assertElementAtIndexContains(2, "> h2", "New Heading 2");
+                    .row(1)
+                    .addAfter(EntryType.Heading)
+                    .waitForEditFormToBeVisible()
+                    .assertHeadingFieldsVisible()
+                    .setTitle("New Heading 2")
+                    .selectLevel(HeadingLevel.H2)
+                    .clickUpdateButton()
+                    .assertTitleContains("New Heading 2");
         }
     }
 
@@ -27,24 +25,13 @@ class EditorIT {
     void editAndCancelFirstHeadingEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
-                    .assertElementAtIndexContains(0, "> h2", "Test Heading")
-                    .clickOnElementAtIndex(0, "> button[name=edit]")
-                    .waitForElementToBeVisible(0, "> form > button[name=cancel]")
-                    .clickOnElementAtIndex(0, "> form > button[name=cancel]")
-                    .assertElementAtIndexContains(0, "> h2", "Test Heading");
-        }
-    }
-
-    @Test
-    void fieldsVisibleWhenEditingHeadingEntry() {
-        try (EditorWebApplication editor = EditorWebApplication.launch()) {
-            editor.openEditorPage()
-                    .clickOnElementAtIndex(0, "> button[name=edit]")
-                    .waitForElementToBeVisible(0, "> form > select[name=type]")
-                    .assertElementAtIndexVisible(0, "> form > select[name=type]")
-                    .assertElementAtIndexVisible(0, "> form select[name=level]")
-                    .assertElementAtIndexVisible(0, "> form input[name=title]")
-            ;
+                    .row(0)
+                    .assertTitleContains("Test Heading")
+                    .clickEditButton()
+                    .waitForEditFormToBeVisible()
+                    .setTitle("New Heading")
+                    .clickCancelButton()
+                    .assertTitleContains("Test Heading");
         }
     }
 
@@ -52,11 +39,13 @@ class EditorIT {
     void updateFirstHeadingEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
-                    .clickOnElementAtIndex(0, "> button[name=edit]")
-                    .waitForElementToBeVisible(0, "> form input[name=title]")
-                    .setInputValueAtIndex(0, "> form input[name=title]", "Updated Heading")
-                    .clickOnElementAtIndex(0, "> form > button[name=update]")
-                    .assertElementAtIndexContains(0, "> h2", "Updated Heading");
+                    .row(0)
+                    .clickEditButton()
+                    .waitForEditFormToBeVisible()
+                    .assertHeadingFieldsVisible()
+                    .setTitle("Updated Heading")
+                    .clickUpdateButton()
+                    .assertTitleContains("Updated Heading");
         }
     }
 }
