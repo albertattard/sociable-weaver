@@ -193,14 +193,14 @@ public class EditorWebApplication implements AutoCloseable {
             return new EditForm(this);
         }
 
-        public EditorWebApplication clickDeleteButton() {
+        public Row clickDeleteButton() {
             application.clickOnElementAtIndex(index, "> button[name=delete]");
-            return application;
+            return this;
         }
 
-        public EditorWebApplication clickUndoButton() {
+        public Row clickUndoButton() {
             application.clickOnElementAtIndex(index, "> button[name=undo]");
-            return application;
+            return this;
         }
 
         private Row waitForElementToBeVisible(final String cssSelector) {
@@ -245,6 +245,10 @@ public class EditorWebApplication implements AutoCloseable {
 
         private Row next() {
             return new Row(index + 1, application);
+        }
+
+        public Row row(final int index) {
+            return application.row(index);
         }
     }
 

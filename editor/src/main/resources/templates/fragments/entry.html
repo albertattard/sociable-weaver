@@ -123,13 +123,21 @@
 <th:block th:fragment="undoDelete">
     <li>
         Entry deleted
+        <input type="hidden" name="id" th:value="${id}"/>
         <button
                 name="undo"
                 hx-post="/undo"
                 hx-target="closest li"
-                hx-swap="outerHTML">
+                hx-swap="outerHTML"
+                hx-include="closest li">
             Undo
         </button>
+    </li>
+</th:block>
+
+<th:block th:fragment="cannotUndoDelete">
+    <li>
+        Deletion cannot be undone
     </li>
 </th:block>
 
