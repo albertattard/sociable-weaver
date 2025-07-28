@@ -55,7 +55,7 @@ public final class EditorController {
 
         entries.add(index + 1, entry);
         model.addAttribute("entry", entry);
-        return "fragments/entry :: renderEntry";
+        return "fragments/entry :: editEntry";
     }
 
     @PostMapping("/edit")

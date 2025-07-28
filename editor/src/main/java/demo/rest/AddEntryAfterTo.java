@@ -7,34 +7,18 @@ public record AddEntryAfterTo(
         EntryType type) {
 
     public EntryTo toNewEntry() {
-        return switch (type) {
-            case Heading ->
-                    new EntryTo(
-                            UUID.randomUUID(),
-                            type,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            HeadingLevel.H2,
-                            "Heading...",
-                            null);
-            default -> new EntryTo(
-                            UUID.randomUUID(),
-                            type,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null);
-        };
+        return new EntryTo(
+                UUID.randomUUID(),
+                type,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 }

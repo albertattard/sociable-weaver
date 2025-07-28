@@ -79,8 +79,11 @@ public class EditorWebApplication implements AutoCloseable {
     }
 
     public EditorWebApplication addAfter(final EntryType type, final int index) {
-        new Select(find(index, "> select"))
-                .selectByVisibleText(type.name());
+        return selectOptionElementAtIndex(index, "> select", type.name());
+    }
+
+    public EditorWebApplication selectOptionElementAtIndex(final int index, final String cssSelector, final String option) {
+        new Select(find(index, cssSelector)).selectByVisibleText(option);
         return this;
     }
 

@@ -10,7 +10,16 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .addAfter(EntryType.Heading, 1)
-                    .assertElementAtIndexContains(2, "> h2", "Heading...");
+                    .waitForElementToBeVisible(2, "> form > select[name=type]")
+                    .assertElementAtIndexContains(2, "> form > select[name=type]", "Heading")
+                    .assertElementAtIndexVisible(2, "> form select[name=level]")
+                    .assertElementAtIndexVisible(2, "> form input[name=title]")
+                    .assertElementAtIndexVisible(2, "> form > button[name=update]")
+                    .assertElementAtIndexVisible(2, "> form > button[name=cancel]")
+                    .setInputValueAtIndex(2, "> form input[name=title]", "New Heading 2")
+                    .selectOptionElementAtIndex(2, "> form select[name=level]", "H2")
+                    .clickOnElementAtIndex(2, "> form > button[name=update]")
+                    .assertElementAtIndexContains(2, "> h2", "New Heading 2");
         }
     }
 
