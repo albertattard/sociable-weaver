@@ -193,9 +193,9 @@ public class EditorWebApplication implements AutoCloseable {
             return new EditForm(this);
         }
 
-        public Row clickDeleteButton() {
+        public EditorWebApplication clickDeleteButton() {
             application.clickOnElementAtIndex(index, "> button[name=delete]");
-            return this;
+            return application;
         }
 
         private Row waitForElementToBeVisible(final String cssSelector) {
