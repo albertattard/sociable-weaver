@@ -2,11 +2,7 @@ package demo.rest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -15,6 +11,9 @@ import java.util.stream.IntStream;
 public final class EditorController {
 
     private final List<EntryTo> entries = new ArrayList<>();
+
+    /* Can only delete the last deleted entry */
+    private DeletedEntry lastDeletedEntry;
 
     public EditorController() {
         entries.add(EntryTo.heading(HeadingLevel.H2, "Test Heading"));
@@ -79,11 +78,24 @@ public final class EditorController {
     }
 
     @DeleteMapping("/delete")
-    public String delete(final @RequestParam("id") UUID id) {
+    public String delete(final @RequestParam("id") UUID id, final Model model) {
         final int index = indexOfEntry(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
-        entries.remove(index);
-        return "fragments/entry :: empty";
+        lastDeletedEntry = new DeletedEntry(entries.remove(index), index);
+        model.addAttribute("id", id);
+        return "fragments/entry :: undoDelete";
+    }
+
+    @PostMapping("/undo")
+    public String undo(final @RequestParam("id") UUID id, final Model model) {
+        if (lastDeletedEntry == null || !id.equals(lastDeletedEntry.entry().id())) {
+            return "fragments/entry :: cannotUndoDelete";
+        }
+
+        entries.add(lastDeletedEntry.index(), lastDeletedEntry.entry());
+        model.addAttribute("entry", lastDeletedEntry.entry());
+        lastDeletedEntry = null;
+        return "fragments/entry :: renderEntry";
     }
 
     private Optional<EntryTo> findEntryWithId(final UUID entryId) {

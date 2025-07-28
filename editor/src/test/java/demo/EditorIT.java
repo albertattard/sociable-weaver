@@ -55,7 +55,37 @@ class EditorIT {
             editor.openEditorPage()
                     .row(1)
                     .clickDeleteButton()
+                    .assertContains("Entry deleted");
+        }
+    }
+
+    @Test
+    void deleteAndUndoSecondEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
                     .row(1)
+                    .clickDeleteButton()
+                    .assertContains("Entry deleted")
+                    .clickUndoButton()
+                    .assertContains("Markdown");
+        }
+    }
+
+    @Test
+    void deleteMultipleEntriesAndUndoFirstDeletedEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .row(1)
+                    .assertContains("Markdown")
+                    .clickDeleteButton()
+                    .row(2)
+                    .assertContains("DisplayFile")
+                    .clickDeleteButton()
+                    .row(1)
+                    .clickUndoButton()
+                    .assertContains("Deletion cannot be undone")
+                    .row(2)
+                    .clickUndoButton()
                     .assertContains("DisplayFile");
         }
     }
