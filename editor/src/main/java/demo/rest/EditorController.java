@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
@@ -75,6 +76,14 @@ public final class EditorController {
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
         model.addAttribute("entry", entry);
         return "fragments/entry :: editEntry";
+    }
+
+    @DeleteMapping("/delete")
+    public String delete(final @RequestParam("id") UUID id) {
+        final int index = indexOfEntry(id)
+                .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
+        entries.remove(index);
+        return "fragments/entry :: empty";
     }
 
     private Optional<EntryTo> findEntryWithId(final UUID entryId) {

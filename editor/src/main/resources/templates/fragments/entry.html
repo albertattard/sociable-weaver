@@ -102,6 +102,14 @@
             hx-include="closest li">
         Edit
     </button>
+    <button
+            name="delete"
+            hx-delete="/delete"
+            hx-target="closest li"
+            hx-swap="delete"
+            hx-include="closest li">
+        Delete
+    </button>
     <select name="type"
             hx-post="/after"
             hx-trigger="change"
@@ -111,5 +119,7 @@
         <option th:each="type : ${T(demo.rest.EntryType).values()}" th:value="${type}" th:text="${type}"></option>
     </select>
 </th:block>
+
+<th:block th:fragment="empty"></th:block>
 </body>
 </html>

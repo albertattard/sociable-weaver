@@ -193,6 +193,11 @@ public class EditorWebApplication implements AutoCloseable {
             return new EditForm(this);
         }
 
+        public Row clickDeleteButton() {
+            application.clickOnElementAtIndex(index, "> button[name=delete]");
+            return this;
+        }
+
         private Row waitForElementToBeVisible(final String cssSelector) {
             application.waitForElementToBeVisible(index, cssSelector);
             return this;
@@ -215,6 +220,11 @@ public class EditorWebApplication implements AutoCloseable {
 
         private Row assertElementContains(final String cssSelector, final String expected) {
             application.assertElementAtIndexContains(index, cssSelector, expected);
+            return this;
+        }
+
+        public Row assertContains(final String expected) {
+            application.assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ")", expected);
             return this;
         }
 

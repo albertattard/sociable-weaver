@@ -48,4 +48,15 @@ class EditorIT {
                     .assertTitleContains("Updated Heading");
         }
     }
+
+    @Test
+    void deleteSecondEntry() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .row(1)
+                    .clickDeleteButton()
+                    .row(1)
+                    .assertContains("DisplayFile");
+        }
+    }
 }
