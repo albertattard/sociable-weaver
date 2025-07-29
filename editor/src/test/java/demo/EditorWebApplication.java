@@ -2,11 +2,10 @@ package demo;
 
 import demo.rest.EntryType;
 import demo.rest.HeadingLevel;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -20,9 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
 public class EditorWebApplication implements AutoCloseable {
 
@@ -69,67 +70,6 @@ public class EditorWebApplication implements AutoCloseable {
     public EditorWebApplication openEditorPage() {
         driver.get("http://localhost:%d/".formatted(port));
         return this;
-    }
-
-    public EditorWebApplication addEntry(final EntryType type) {
-        final Select select = new Select(driver.findElement(By.name("type")));
-        select.selectByVisibleText(type.name());
-
-        driver.findElement(By.name("submit")).click();
-        return this;
-    }
-
-    private EditorWebApplication selectOptionElementAtIndex(final int index, final String cssSelector, final String option) {
-        new Select(find(index, cssSelector)).selectByVisibleText(option);
-        return this;
-    }
-
-    private EditorWebApplication clickOnElementAtIndex(final int index, final String cssSelector) {
-        find(index, cssSelector).click();
-        return this;
-    }
-
-    private EditorWebApplication setInputValueAtIndex(final int index, final String cssSelector, final String value) {
-        final WebElement element = find(index, cssSelector);
-        element.clear();
-        element.sendKeys(value);
-        return this;
-    }
-
-    private EditorWebApplication waitForElementToBeVisible(final int index, final String cssSelector) {
-        return waitForElementToBeVisible(index, cssSelector, Duration.ofSeconds(1));
-    }
-
-    private EditorWebApplication waitForElementToBeVisible(final int index, final String cssSelector, final Duration waitFor) {
-        new WebDriverWait(driver, waitFor)
-                .until(visibilityOfElementLocated(by(index, cssSelector)));
-        return this;
-    }
-
-    private EditorWebApplication assertElementAtIndexContains(final int index, final String cssSelector, final String expectedContent) {
-        return assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector, expectedContent);
-    }
-
-    private EditorWebApplication assertElementAtIndexVisible(final int index, final String cssSelector) {
-        final WebElement element = find(index, cssSelector);
-        if (!element.isDisplayed()) {
-            throw new AssertionError("Element '" + cssSelector + "' at index " + index + " is not visible");
-        }
-        return this;
-    }
-
-    private EditorWebApplication assertContainsText(final String cssSelector, final String expectedContent) {
-        final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(textToBePresentInElementLocated(By.cssSelector(cssSelector), expectedContent));
-        return this;
-    }
-
-    private WebElement find(final int index, final String cssSelector) {
-        return driver.findElement(by(index, cssSelector));
-    }
-
-    private static By by(final int index, final String cssSelector) {
-        return By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ") " + cssSelector);
     }
 
     private static int findFreePort() {
@@ -181,125 +121,126 @@ public class EditorWebApplication implements AutoCloseable {
         return new Row(index, this);
     }
 
-    public record Row(int index, EditorWebApplication application) {
+    public record Row(int index, EditorWebApplication application) implements WebContainer {
+
+        private static final By EDIT_BUTTON = By.cssSelector("button[name=edit]");
+        private static final By DELETE_BUTTON = By.cssSelector("button[name=delete]");
+        private static final By UNDO_BUTTON = By.cssSelector("button[name=undo]");
+        private static final By SELECT_NEW_TYPE = By.cssSelector("select[name=type]");
 
         public EditForm addAfter(final EntryType type) {
-            application.selectOptionElementAtIndex(index, "> select", type.name());
+            selectOption(SELECT_NEW_TYPE, type.name());
             return new EditForm(next());
         }
 
         public EditForm clickEditButton() {
-            application.clickOnElementAtIndex(index, "> button[name=edit]");
+            clickOn(EDIT_BUTTON);
             return new EditForm(this);
         }
 
         public Row clickDeleteButton() {
-            application.clickOnElementAtIndex(index, "> button[name=delete]");
+            clickOn(DELETE_BUTTON);
             return this;
         }
 
         public Row clickUndoButton() {
-            application.clickOnElementAtIndex(index, "> button[name=undo]");
+            clickOn(UNDO_BUTTON);
             return this;
         }
 
-        private Row waitForElementToBeVisible(final String cssSelector) {
-            application.waitForElementToBeVisible(index, cssSelector);
+        public Row waitForHeadingToBeVisible(final HeadingLevel level) {
+            waitForElementToBeVisible(() -> findElement(headingLocator(level)));
             return this;
         }
 
-        public Row assertTitleContains(final String expected) {
-            application.assertElementAtIndexContains(index, "> h2", expected);
+        public Row assertTitleContains(final HeadingLevel level, final String expected) {
+            assertElementTextContains(findElement(headingLocator(level)), expected);
             return this;
         }
 
-        private Row setInputValue(final String cssSelector, final String value) {
-            application.setInputValueAtIndex(index, cssSelector, value);
+        public Row assertRowTextContains(final String expected) {
+            assertElementTextContains(element(), expected);
             return this;
         }
 
-        private Row clickOnElement(final String cssSelector) {
-            application.clickOnElementAtIndex(index, cssSelector);
-            return this;
-        }
-
-        private Row assertElementContains(final String cssSelector, final String expected) {
-            application.assertElementAtIndexContains(index, cssSelector, expected);
-            return this;
-        }
-
-        public Row assertContains(final String expected) {
-            application.assertContainsText("ul#entries > li:nth-of-type(" + (index + 1) + ")", expected);
-            return this;
-        }
-
-        private Row assertElementVisible(final String cssSelector) {
-            application.assertElementAtIndexVisible(index, cssSelector);
-            return this;
-        }
-
-        private Row selectOptionElement(final String cssSelector, final String value) {
-            application.selectOptionElementAtIndex(index, cssSelector, value);
-            return null;
+        private static By headingLocator(final HeadingLevel level) {
+            return By.cssSelector(level.name().toLowerCase() + "[name=title]");
         }
 
         private Row next() {
-            return new Row(index + 1, application);
+            return row(index + 1);
         }
 
         public Row row(final int index) {
             return application.row(index);
         }
+
+        public WebElement element() {
+            final By cssSelector = By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ")");
+            return driver().findElement(cssSelector);
+        }
+
+        public WebDriver driver() {
+            return application.driver;
+        }
     }
 
-    public record EditForm(Row row) {
+    public record EditForm(Row row) implements WebContainer {
+
+        private static final By FORM = By.cssSelector("form[name=edit]");
+        private static final By UPDATE_BUTTON = By.cssSelector("button[name=update]");
+        private static final By CANCEL_BUTTON = By.cssSelector("button[name=cancel]");
+        private static final By TITLE_INPUT = By.cssSelector("input[name=title]");
+        private static final By LEVEL_SELECT = By.cssSelector("select[name=level]");
 
         public EditForm waitForEditFormToBeVisible() {
-            row.waitForElementToBeVisible("> form[name=edit]");
+            waitForElementToBeVisible(this::element);
             return this;
         }
 
         public EditForm setTitle(final String title) {
-            row.setInputValue("> form[name=edit] input[name=title]", title);
+            setInputValue(TITLE_INPUT, title);
             return this;
         }
 
         public EditForm assertTitleInputVisible() {
-            row.assertElementVisible("> form[name=edit] input[name=title]");
+            assertVisible(TITLE_INPUT);
             return this;
         }
 
         public EditForm assertTitleContains(final String expected) {
-            row.assertElementContains("> form[name=edit] input[name=title]", expected);
+            assertThat(textToBePresentInElementValue(findElement(TITLE_INPUT), expected));
             return this;
         }
 
         public EditForm assertLevelSelectVisible() {
-            row.assertElementVisible("> form[name=edit] select[name=level]");
+            assertVisible(LEVEL_SELECT);
             return this;
         }
 
         public EditForm selectLevel(final HeadingLevel value) {
-            row.selectOptionElement("> form[name=edit] select[name=level]", value.name());
+            selectOption(LEVEL_SELECT, value.name());
             return this;
         }
 
         public EditForm assertUpdateButtonVisible() {
-            row.assertElementVisible("> form[name=edit] > button[name=update]");
+            assertVisible(UPDATE_BUTTON);
             return this;
         }
 
         public Row clickUpdateButton() {
-            return row.clickOnElement("> form[name=edit] > button[name=update]");
+            clickOn(UPDATE_BUTTON);
+            return row;
         }
 
         public EditForm assertCancelButtonVisible() {
-            row.assertElementVisible("> form[name=edit] > button[name=cancel]");
+            assertVisible(CANCEL_BUTTON);
             return this;
         }
 
         public Row clickCancelButton() {
-            return row.clickOnElement("> form[name=edit] > button[name=cancel]");
+            clickOn(CANCEL_BUTTON);
+            return row;
         }
 
         /* TODO: Assert that the other fields are not visible */
@@ -309,5 +250,71 @@ public class EditorWebApplication implements AutoCloseable {
                     .assertUpdateButtonVisible()
                     .assertCancelButtonVisible();
         }
+
+        public WebElement element() {
+            return row.findElement(FORM);
+        }
+
+        public WebDriver driver() {
+            return row.driver();
+        }
+    }
+
+    public interface WebContainer {
+
+        default void waitForElementToBeVisible(final Supplier<WebElement> supplier) {
+            new WebDriverWait(driver(), Duration.ofSeconds(1))
+                    .until((ExpectedCondition<WebElement>) driver -> {
+                                try {
+                                    final WebElement element = supplier.get();
+                                    return element != null && element.isDisplayed()
+                                            ? element
+                                            : null;
+                                } catch (final NoSuchElementException | StaleElementReferenceException e) {
+                                    return null;
+                                }
+                            }
+                    );
+        }
+
+        default void setInputValue(final By by, final String value) {
+            final WebElement element = findElement(by);
+            element.clear();
+            element.sendKeys(value);
+        }
+
+        default void clickOn(final By by) {
+            findElement(by).click();
+        }
+
+        default void selectOption(final By by, final String text) {
+            new Select(findElement(by)).selectByVisibleText(text);
+        }
+
+        default void assertVisible(final By by) {
+            assertVisible(by, true);
+        }
+
+        default void assertVisible(final By by, final boolean visible) {
+            if (visible != findElement(by).isDisplayed()) {
+                throw new AssertionError("Element '" + by + "' is not visible");
+            }
+        }
+
+        default void assertElementTextContains(final WebElement element, final String expected) {
+            assertThat(textToBePresentInElement(element, expected));
+        }
+
+        default void assertThat(final Function<WebDriver, Boolean> isTrue) {
+            new WebDriverWait(driver(), Duration.ofSeconds(1)).until(isTrue);
+        }
+
+        default WebElement findElement(final By by) {
+            return element().findElement(by);
+        }
+
+        WebElement element();
+
+        WebDriver driver();
     }
 }

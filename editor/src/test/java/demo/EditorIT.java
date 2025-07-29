@@ -17,7 +17,7 @@ class EditorIT {
                     .setTitle("New Heading 2")
                     .selectLevel(HeadingLevel.H2)
                     .clickUpdateButton()
-                    .assertTitleContains("New Heading 2");
+                    .assertTitleContains(HeadingLevel.H2, "New Heading 2");
         }
     }
 
@@ -26,12 +26,13 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .row(0)
-                    .assertTitleContains("Test Heading")
+                    .assertTitleContains(HeadingLevel.H2, "Test Heading")
                     .clickEditButton()
                     .waitForEditFormToBeVisible()
                     .setTitle("New Heading")
                     .clickCancelButton()
-                    .assertTitleContains("Test Heading");
+                    .waitForHeadingToBeVisible(HeadingLevel.H2)
+                    .assertTitleContains(HeadingLevel.H2, "Test Heading");
         }
     }
 
@@ -43,9 +44,10 @@ class EditorIT {
                     .clickEditButton()
                     .waitForEditFormToBeVisible()
                     .assertHeadingFieldsVisible()
+                    .assertTitleContains("Test Heading")
                     .setTitle("Updated Heading")
                     .clickUpdateButton()
-                    .assertTitleContains("Updated Heading");
+                    .assertTitleContains(HeadingLevel.H2, "Updated Heading");
         }
     }
 
@@ -55,7 +57,7 @@ class EditorIT {
             editor.openEditorPage()
                     .row(1)
                     .clickDeleteButton()
-                    .assertContains("Entry deleted");
+                    .assertRowTextContains("Entry deleted");
         }
     }
 
@@ -65,9 +67,9 @@ class EditorIT {
             editor.openEditorPage()
                     .row(1)
                     .clickDeleteButton()
-                    .assertContains("Entry deleted")
+                    .assertRowTextContains("Entry deleted")
                     .clickUndoButton()
-                    .assertContains("Markdown");
+                    .assertRowTextContains("Markdown");
         }
     }
 
@@ -76,17 +78,17 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .row(1)
-                    .assertContains("Markdown")
+                    .assertRowTextContains("Markdown")
                     .clickDeleteButton()
                     .row(2)
-                    .assertContains("DisplayFile")
+                    .assertRowTextContains("DisplayFile")
                     .clickDeleteButton()
                     .row(1)
                     .clickUndoButton()
-                    .assertContains("Deletion cannot be undone")
+                    .assertRowTextContains("Deletion cannot be undone")
                     .row(2)
                     .clickUndoButton()
-                    .assertContains("DisplayFile");
+                    .assertRowTextContains("DisplayFile");
         }
     }
 }
