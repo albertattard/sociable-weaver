@@ -2,7 +2,7 @@ package demo.rest;
 
 import java.util.UUID;
 
-public record EntryTo(
+public record BigEntryTo(
         UUID id,
         EntryType type,
         String comments,
@@ -16,8 +16,8 @@ public record EntryTo(
         String title,
         String contents) {
 
-    public static EntryTo breakpoint(final String comments) {
-        return new EntryTo(
+    public static BigEntryTo breakpoint(final String comments) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.Breakpoint,
                 comments,
@@ -32,8 +32,8 @@ public record EntryTo(
                 null);
     }
 
-    public static EntryTo command(final String commands) {
-        return new EntryTo(
+    public static BigEntryTo command(final String commands) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.Command,
                 null,
@@ -48,8 +48,8 @@ public record EntryTo(
                 null);
     }
 
-    public static EntryTo displayFile(final String path, final String contentType, final Integer fromLine, final Integer numberOfLines, final Integer indent) {
-        return new EntryTo(
+    public static BigEntryTo displayFile(final String path, final String contentType, final Integer fromLine, final Integer numberOfLines, final Integer indent) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.DisplayFile,
                 null,
@@ -64,8 +64,8 @@ public record EntryTo(
                 null);
     }
 
-    public static EntryTo heading(final HeadingLevel level, final String title) {
-        return new EntryTo(
+    public static BigEntryTo heading(final HeadingLevel level, final String title) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.Heading,
                 null,
@@ -80,8 +80,8 @@ public record EntryTo(
                 null);
     }
 
-    public static EntryTo markdown(final String contents) {
-        return new EntryTo(
+    public static BigEntryTo markdown(final String contents) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.Markdown,
                 null,
@@ -96,27 +96,11 @@ public record EntryTo(
                 contents);
     }
 
-    public static EntryTo todo(final String comments) {
-        return new EntryTo(
+    public static BigEntryTo todo(final String comments) {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 EntryType.Todo,
                 comments,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-    }
-
-    public EntryTo(final EntryType type) {
-        this(
-                UUID.randomUUID(),
-                type,
-                null,
                 null,
                 null,
                 null,

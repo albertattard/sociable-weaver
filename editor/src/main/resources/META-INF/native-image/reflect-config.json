@@ -15,7 +15,7 @@
     ]
   },
   {
-    "name": "demo.rest.EntryTo",
+    "name": "demo.rest.BigEntryTo",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true,
     "queryAllDeclaredConstructors": true,

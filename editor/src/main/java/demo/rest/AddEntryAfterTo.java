@@ -6,8 +6,8 @@ public record AddEntryAfterTo(
         UUID id,
         EntryType type) {
 
-    public EntryTo toNewEntry() {
-        return new EntryTo(
+    public BigEntryTo toNewEntry() {
+        return new BigEntryTo(
                 UUID.randomUUID(),
                 type,
                 null,

@@ -10,18 +10,18 @@ import java.util.stream.IntStream;
 @Controller
 public final class EditorController {
 
-    private final List<EntryTo> entries = new ArrayList<>();
+    private final List<BigEntryTo> entries = new ArrayList<>();
 
     /* Can only delete the last deleted entry */
     private DeletedEntry lastDeletedEntry;
 
     public EditorController() {
-        entries.add(EntryTo.heading(HeadingLevel.H2, "Test Heading"));
-        entries.add(EntryTo.markdown("A simple example"));
-        entries.add(EntryTo.displayFile("./src/main/java/demo.Main.java", null, null, null, null));
-        entries.add(EntryTo.command("java --version"));
-        entries.add(EntryTo.breakpoint("A breakpoint!!"));
-        entries.add(EntryTo.todo("A simple Todo note!!"));
+        entries.add(BigEntryTo.heading(HeadingLevel.H2, "Test Heading"));
+        entries.add(BigEntryTo.markdown("A simple example"));
+        entries.add(BigEntryTo.displayFile("./src/main/java/demo.Main.java", null, null, null, null));
+        entries.add(BigEntryTo.command("java --version"));
+        entries.add(BigEntryTo.breakpoint("A breakpoint!!"));
+        entries.add(BigEntryTo.todo("A simple Todo note!!"));
     }
 
     @GetMapping("/")
@@ -32,7 +32,7 @@ public final class EditorController {
 
     @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
     public String get(final @PathVariable("id") UUID id, final Model model) {
-        final EntryTo entry = findEntryWithId(id)
+        final BigEntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
 
         model.addAttribute("entry", entry);
@@ -40,7 +40,7 @@ public final class EditorController {
     }
 
     @PostMapping("/")
-    public String add(final EntryTo entry, final Model model) {
+    public String add(final BigEntryTo entry, final Model model) {
         /* TODO: Add validation */
         /* TODO: Change the type and create the ID */
         entries.add(entry);
@@ -51,7 +51,7 @@ public final class EditorController {
     @PostMapping("/after")
     public String addAfter(final AddEntryAfterTo addEntryAfter, final Model model) {
         /* TODO: Add validation */
-        final EntryTo entry = addEntryAfter.toNewEntry();
+        final BigEntryTo entry = addEntryAfter.toNewEntry();
 
         final int index = indexOfEntry(addEntryAfter.id())
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + addEntryAfter.id() + " was not found"));
@@ -62,7 +62,7 @@ public final class EditorController {
     }
 
     @PostMapping("/edit")
-    public String update(final EntryTo entry, final Model model) {
+    public String update(final BigEntryTo entry, final Model model) {
         /* TODO: Add validation */
         final int index = indexOfEntry(entry.id())
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + entry.id() + " was not found"));
@@ -74,7 +74,7 @@ public final class EditorController {
 
     @GetMapping("/edit")
     public String edit(final @RequestParam("id") UUID id, final Model model) {
-        final EntryTo entry = findEntryWithId(id)
+        final BigEntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
         model.addAttribute("entry", entry);
         return "fragments/entry :: editEntry";
@@ -101,7 +101,7 @@ public final class EditorController {
         return "fragments/entry :: renderEntry";
     }
 
-    private Optional<EntryTo> findEntryWithId(final UUID entryId) {
+    private Optional<BigEntryTo> findEntryWithId(final UUID entryId) {
         return Optional.ofNullable(entryId)
                 .flatMap(id -> entries.stream().filter(e -> id.equals(e.id())).findFirst());
     }

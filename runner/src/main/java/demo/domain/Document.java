@@ -81,7 +81,7 @@ public record Document(List<Entry> entries) {
     private static String readSwPlaybookFromFile(final Path path) {
         try {
             return Files.readString(path);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException("Failed to read the Sociable Weaver playbook file: " + path, e);
         }
     }
