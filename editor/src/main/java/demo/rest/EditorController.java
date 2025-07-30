@@ -17,8 +17,11 @@ public final class EditorController {
 
     public EditorController() {
         entries.add(EntryTo.heading(HeadingLevel.H2, "Test Heading"));
-        entries.add(new EntryTo(EntryType.Markdown));
-        entries.add(new EntryTo(EntryType.DisplayFile));
+        entries.add(EntryTo.markdown("A simple example"));
+        entries.add(EntryTo.displayFile("./src/main/java/demo.Main.java", null, null, null, null));
+        entries.add(EntryTo.command("java --version"));
+        entries.add(EntryTo.breakpoint("A breakpoint!!"));
+        entries.add(EntryTo.todo("A simple Todo note!!"));
     }
 
     @GetMapping("/")
