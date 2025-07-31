@@ -92,6 +92,7 @@ public final class EditorController {
     @PostMapping("/undo")
     public String undo(final @RequestParam("id") UUID id, final Model model) {
         if (lastDeletedEntry == null || !id.equals(lastDeletedEntry.entry().id())) {
+            model.addAttribute("id", id);
             return "fragments/entry :: cannotUndoDelete";
         }
 

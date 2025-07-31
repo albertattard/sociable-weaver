@@ -85,6 +85,7 @@ class EditorIT {
                     .clickDeleteButton()
                     .row(1)
                     .clickUndoButton()
+                    // #entries > li:nth-child(2)
                     .assertRowTextContains("Deletion cannot be undone")
                     .row(2)
                     .clickUndoButton()

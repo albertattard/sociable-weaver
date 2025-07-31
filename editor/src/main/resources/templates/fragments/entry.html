@@ -70,16 +70,47 @@
 <th:block th:fragment="renderEntry(entry)">
     <li th:id="|row-${entry.id}|">
         <th:block th:switch="${entry.type}">
-            <th:block th:case="${T(demo.rest.EntryType).Breakpoint}">Breakpoint</th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Command}">Command</th:block>
-            <th:block th:case="${T(demo.rest.EntryType).DisplayFile}">DisplayFile</th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Heading}"
-                      th:replace="~{ :: renderHeading(${entry})}"></th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Markdown}">Markdown</th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Todo}">Todo</th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Breakpoint}">
+                <th:block th:replace="~{ :: renderBreakpoint(${entry})}"/>
+            </th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Command}">
+                <th:block th:replace="~{ :: renderCommand(${entry})}"/>
+            </th:block>
+            <th:block th:case="${T(demo.rest.EntryType).DisplayFile}">
+                <th:block th:replace="~{ :: renderDisplayFile(${entry})}"/>
+            </th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Heading}">
+                <th:block th:replace="~{ :: renderHeading(${entry})}"/>
+            </th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Markdown}">
+                <th:block th:replace="~{ :: renderMarkdown(${entry})}"/>
+            </th:block>
+            <th:block th:case="${T(demo.rest.EntryType).Todo}">
+                <th:block th:replace="~{ :: renderTodo(${entry})}"/>
+            </th:block>
         </th:block>
         <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"></th:block>
     </li>
+</th:block>
+
+<th:block th:fragment="renderBreakpoint(entry)">
+    Breakpoint
+</th:block>
+
+<th:block th:fragment="renderCommand(entry)">
+    Command
+</th:block>
+
+<th:block th:fragment="renderDisplayFile(entry)">
+    DisplayFile
+</th:block>
+
+<th:block th:fragment="renderMarkdown(entry)">
+    Markdown
+</th:block>
+
+<th:block th:fragment="renderTodo(entry)">
+    Todo
 </th:block>
 
 <th:block th:fragment="renderHeading(entry)">
@@ -131,7 +162,7 @@
 </th:block>
 
 <th:block th:fragment="undoDelete">
-    <li>
+    <li th:id="|row-${id}|">
         Entry deleted
         <input type="hidden" name="id" th:value="${id}"/>
         <button
@@ -146,7 +177,7 @@
 </th:block>
 
 <th:block th:fragment="cannotUndoDelete">
-    <li>
+    <li th:id="|row-${id}|">
         Deletion cannot be undone
     </li>
 </th:block>

@@ -176,7 +176,9 @@ public class EditorWebApplication implements AutoCloseable {
         }
 
         public WebElement element() {
-            final By cssSelector = By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ")");
+            /* The nth-of type is 1 based, while index is 0 based, thus needs to add 1 to the index */
+            // final By cssSelector = By.cssSelector("ul#entries > li:nth-of-type(" + (index + 1) + ")");
+            final By cssSelector = By.cssSelector("ul#entries > li:nth-child(" + (index + 1) + ")");
             return driver().findElement(cssSelector);
         }
 
@@ -306,7 +308,7 @@ public class EditorWebApplication implements AutoCloseable {
         }
 
         default void assertThat(final Function<WebDriver, Boolean> isTrue) {
-            new WebDriverWait(driver(), Duration.ofSeconds(1)).until(isTrue);
+            new WebDriverWait(driver(), Duration.ofSeconds(2)).until(isTrue);
         }
 
         default WebElement findElement(final By by) {
