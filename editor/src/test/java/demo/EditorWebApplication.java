@@ -163,6 +163,10 @@ public class EditorWebApplication implements AutoCloseable {
             return this;
         }
 
+        public Row printPage() {
+            return (Row) WebContainer.super.printPage();
+        }
+
         private static By headingLocator(final HeadingLevel level) {
             return By.cssSelector(level.name().toLowerCase() + "[name=title]");
         }
@@ -197,6 +201,11 @@ public class EditorWebApplication implements AutoCloseable {
 
         public EditForm waitForEditFormToBeVisible() {
             waitForElementToBeVisible(this::element);
+            return this;
+        }
+
+        public EditForm waitForEditHeadingToBeVisible() {
+            waitForElementToBeVisible(() -> findElement(TITLE_INPUT));
             return this;
         }
 
@@ -251,6 +260,10 @@ public class EditorWebApplication implements AutoCloseable {
                     .assertLevelSelectVisible()
                     .assertUpdateButtonVisible()
                     .assertCancelButtonVisible();
+        }
+
+        public EditForm printPage() {
+            return (EditForm) WebContainer.super.printPage();
         }
 
         public WebElement element() {
@@ -309,6 +322,13 @@ public class EditorWebApplication implements AutoCloseable {
 
         default void assertThat(final Function<WebDriver, Boolean> isTrue) {
             new WebDriverWait(driver(), Duration.ofSeconds(2)).until(isTrue);
+        }
+
+        default WebContainer printPage() {
+            System.out.println("---");
+            System.out.println(driver().getPageSource());
+            System.out.println("---");
+            return this;
         }
 
         default WebElement findElement(final By by) {

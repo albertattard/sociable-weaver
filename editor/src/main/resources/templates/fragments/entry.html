@@ -3,8 +3,8 @@
 <body>
 
 <th:block th:fragment="editEntry(entry)">
-    <li th:id="|row-${entry.id}|">
-        <form hx-post="/edit" hx-target="closest li" th:id="|form-${entry.id}|" name="edit" hx-swap="outerHTML" hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
+    <li hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
+        <form hx-post="/edit" hx-target="closest li" th:id="|form-${entry.id}|" hx-swap="innerHTML" name="edit">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
             <select name="type" onchange="showFields(this)">
                 <option th:each="type : ${T(demo.rest.EntryType).values()}"
@@ -43,7 +43,7 @@
                                 th:selected="${type == entry.level}"
                                 th:text="${type}"></option>
                     </select>
-                    <input type="text" name="title" placeholder="Heading" th:value="${entry.title}"/>
+                    <input type="text" name="title" placeholder="Heading..." th:value="${entry.title}"/>
                 </div>
 
                 <div class="field Markdown" style="display:none">
@@ -59,7 +59,7 @@
             <button
                     name="cancel"
                     th:hx-get="@{/{id}(id=${entry.id})}"
-                    th:hx-target="'#row-'+${entry.id}"
+                    hx-target="closest li"
                     hx-swap="outerHTML">
                 Cancel
             </button>
@@ -68,7 +68,7 @@
 </th:block>
 
 <th:block th:fragment="renderEntry(entry)">
-    <li th:id="|row-${entry.id}|">
+    <li>
         <th:block th:switch="${entry.type}">
             <th:block th:case="${T(demo.rest.EntryType).Breakpoint}">
                 <th:block th:replace="~{ :: renderBreakpoint(${entry})}"/>
@@ -139,7 +139,7 @@
             name="edit"
             hx-get="/edit"
             hx-target="closest li"
-            hx-swap="outerHTML"
+            hx-swap="innerHTML"
             hx-include="closest li">
         Edit
     </button>
@@ -147,10 +147,11 @@
             name="delete"
             hx-delete="/delete"
             hx-target="closest li"
-            hx-swap="outerHTML"
+            hx-swap="innerHTML"
             hx-include="closest li">
         Delete
     </button>
+    Add
     <select name="type"
             hx-post="/after"
             hx-trigger="change"
@@ -162,26 +163,21 @@
 </th:block>
 
 <th:block th:fragment="undoDelete">
-    <li th:id="|row-${id}|">
         Entry deleted
         <input type="hidden" name="id" th:value="${id}"/>
         <button
                 name="undo"
                 hx-post="/undo"
                 hx-target="closest li"
-                hx-swap="outerHTML"
+                hx-swap="innerHTML"
                 hx-include="closest li">
             Undo
         </button>
-    </li>
 </th:block>
 
 <th:block th:fragment="cannotUndoDelete">
-    <li th:id="|row-${id}|">
         Deletion cannot be undone
-    </li>
 </th:block>
 
-<th:block th:fragment="empty"></th:block>
 </body>
 </html>
