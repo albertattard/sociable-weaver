@@ -89,7 +89,7 @@
                 <th:block th:replace="~{ :: renderTodo(${entry})}"/>
             </th:block>
         </th:block>
-        <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"></th:block>
+        <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"/>
     </li>
 </th:block>
 
@@ -163,20 +163,15 @@
 </th:block>
 
 <th:block th:fragment="undoDelete">
-        Entry deleted
-        <input type="hidden" name="id" th:value="${id}"/>
-        <button
-                name="undo"
-                hx-post="/undo"
-                hx-target="closest li"
-                hx-swap="innerHTML"
-                hx-include="closest li">
-            Undo
-        </button>
+    Entry deleted
+    <input type="hidden" name="id" th:value="${id}"/>
+    <button name="undo" hx-post="/undo" hx-target="closest li" hx-swap="innerHTML" hx-include="closest li">
+        Undo
+    </button>
 </th:block>
 
 <th:block th:fragment="cannotUndoDelete">
-        Deletion cannot be undone
+    Deletion cannot be undone
 </th:block>
 
 </body>
