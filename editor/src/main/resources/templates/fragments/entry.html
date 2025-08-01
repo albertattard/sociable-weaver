@@ -38,7 +38,7 @@
 
                 <div class="field Heading" style="display:none">
                     <select name="level">
-                        <option th:each="type : ${T(demo.rest.HeadingLevel).values()}"
+                        <option th:each="type : ${T(demo.domain.Heading.HeadingLevel).values()}"
                                 th:value="${type}"
                                 th:selected="${type == entry.level}"
                                 th:text="${type}"></option>
@@ -115,19 +115,19 @@
 
 <th:block th:fragment="renderHeading(entry)">
     <th:block th:switch="${entry.level}">
-        <th:block th:case="${T(demo.rest.HeadingLevel).H1}">
+        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H1}">
             <h1 name="title" th:text="${entry.title} ?: 'Heading 1'"></h1>
         </th:block>
-        <th:block th:case="${T(demo.rest.HeadingLevel).H2}">
+        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H2}">
             <h2 name="title" th:text="${entry.title} ?: 'Heading 2'"></h2>
         </th:block>
-        <th:block th:case="${T(demo.rest.HeadingLevel).H3}">
+        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H3}">
             <h3 name="title" th:text="${entry.title} ?: 'Heading 3'"></h3>
         </th:block>
-        <th:block th:case="${T(demo.rest.HeadingLevel).H4}">
+        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H4}">
             <h4 name="title" th:text="${entry.title} ?: 'Heading 4'"></h4>
         </th:block>
-        <th:block th:case="${T(demo.rest.HeadingLevel).H5}">
+        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H5}">
             <h5 name="title" th:text="${entry.title} ?: 'Heading 5'"></h5>
         </th:block>
     </th:block>

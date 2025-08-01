@@ -1,7 +1,7 @@
 package demo;
 
+import demo.domain.Heading.HeadingLevel;
 import demo.rest.EntryType;
-import demo.rest.HeadingLevel;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;

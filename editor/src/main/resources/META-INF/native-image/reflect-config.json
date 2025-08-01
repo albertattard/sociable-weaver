@@ -15,6 +15,26 @@
     ]
   },
   {
+    "name": "demo.domain.Heading",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "demo.domain.Heading$HeadingLevel",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "demo.domain.Heading$HeadingLevel",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
     "name": "demo.rest.BigEntryTo",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true,
@@ -32,7 +52,7 @@
           "java.lang.Integer",
           "java.lang.Integer",
           "java.lang.Integer",
-          "demo.rest.HeadingLevel",
+          "demo.domain.Heading$HeadingLevel",
           "java.lang.String",
           "java.lang.String"
         ]

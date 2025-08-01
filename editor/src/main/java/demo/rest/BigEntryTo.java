@@ -1,5 +1,7 @@
 package demo.rest;
 
+import demo.domain.Heading.HeadingLevel;
+
 import java.util.UUID;
 
 public record BigEntryTo(
