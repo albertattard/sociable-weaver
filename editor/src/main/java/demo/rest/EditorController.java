@@ -1,12 +1,15 @@
 package demo.rest;
 
 import demo.domain.Heading.HeadingLevel;
+import demo.service.HtmlConverterService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static java.util.Objects.requireNonNull;
 
 @Controller
 public final class EditorController {
@@ -16,7 +19,13 @@ public final class EditorController {
     /* Can only delete the last deleted entry */
     private DeletedEntry lastDeletedEntry;
 
-    public EditorController() {
+    private final HtmlConverterService htmlConverterService;
+
+    public EditorController(final HtmlConverterService htmlConverterService) {
+        requireNonNull(htmlConverterService, "The markdown service cannot be null");
+
+        this.htmlConverterService = htmlConverterService;
+
         entries.add(BigEntryTo.heading(HeadingLevel.H2, "Test Heading"));
         entries.add(BigEntryTo.markdown("A simple example"));
         entries.add(BigEntryTo.displayFile("./src/main/java/demo.Main.java", null, null, null, null));
@@ -27,7 +36,7 @@ public final class EditorController {
 
     @GetMapping("/")
     public String index(final Model model) {
-        model.addAttribute("entries", entries);
+        model.addAttribute("entries", entries.stream().map(htmlConverterService::toView).toList());
         return "index";
     }
 
@@ -36,16 +45,7 @@ public final class EditorController {
         final BigEntryTo entry = findEntryWithId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + id + " was not found"));
 
-        model.addAttribute("entry", entry);
-        return "fragments/entry :: renderEntry";
-    }
-
-    @PostMapping("/")
-    public String add(final BigEntryTo entry, final Model model) {
-        /* TODO: Add validation */
-        /* TODO: Change the type and create the ID */
-        entries.add(entry);
-        model.addAttribute("entry", entry);
+        model.addAttribute("entry", htmlConverterService.toView(entry));
         return "fragments/entry :: renderEntry";
     }
 
@@ -69,7 +69,7 @@ public final class EditorController {
                 .orElseThrow(() -> new IllegalArgumentException("Entry with id " + entry.id() + " was not found"));
 
         entries.set(index, entry);
-        model.addAttribute("entry", entry);
+        model.addAttribute("entry", htmlConverterService.toView(entry));
         return "fragments/entry :: renderEntry";
     }
 
@@ -98,7 +98,7 @@ public final class EditorController {
         }
 
         entries.add(lastDeletedEntry.index(), lastDeletedEntry.entry());
-        model.addAttribute("entry", lastDeletedEntry.entry());
+        model.addAttribute("entry", htmlConverterService.toView(lastDeletedEntry.entry()));
         lastDeletedEntry = null;
         return "fragments/entry :: renderEntry";
     }

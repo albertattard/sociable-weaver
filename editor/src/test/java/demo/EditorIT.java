@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class EditorIT {
 
     @Test
-    void addHeadingAfterAnotherEntry() {
+    void addHeadingAfterTheFirstEntry() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .row(1)
@@ -69,7 +69,7 @@ class EditorIT {
                     .clickDeleteButton()
                     .assertRowTextContains("Entry deleted")
                     .clickUndoButton()
-                    .assertRowTextContains("Markdown");
+                    .assertRowTextContains("A simple example");
         }
     }
 
@@ -78,7 +78,7 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .row(1)
-                    .assertRowTextContains("Markdown")
+                    .assertRowTextContains("A simple example")
                     .clickDeleteButton()
                     .row(2)
                     .assertRowTextContains("DisplayFile")

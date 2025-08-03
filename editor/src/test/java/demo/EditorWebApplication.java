@@ -168,7 +168,7 @@ public class EditorWebApplication implements AutoCloseable {
         }
 
         private static By headingLocator(final HeadingLevel level) {
-            return By.cssSelector(level.name().toLowerCase() + "[name=title]");
+            return By.cssSelector(level.name().toLowerCase());
         }
 
         private Row next() {
@@ -286,6 +286,7 @@ public class EditorWebApplication implements AutoCloseable {
                                             ? element
                                             : null;
                                 } catch (final NoSuchElementException | StaleElementReferenceException e) {
+                                    printPage();
                                     return null;
                                 }
                             }

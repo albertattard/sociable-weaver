@@ -69,97 +69,38 @@
 
 <th:block th:fragment="renderEntry(entry)">
     <li>
-        <th:block th:switch="${entry.type}">
-            <th:block th:case="${T(demo.rest.EntryType).Breakpoint}">
-                <th:block th:replace="~{ :: renderBreakpoint(${entry})}"/>
-            </th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Command}">
-                <th:block th:replace="~{ :: renderCommand(${entry})}"/>
-            </th:block>
-            <th:block th:case="${T(demo.rest.EntryType).DisplayFile}">
-                <th:block th:replace="~{ :: renderDisplayFile(${entry})}"/>
-            </th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Heading}">
-                <th:block th:replace="~{ :: renderHeading(${entry})}"/>
-            </th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Markdown}">
-                <th:block th:replace="~{ :: renderMarkdown(${entry})}"/>
-            </th:block>
-            <th:block th:case="${T(demo.rest.EntryType).Todo}">
-                <th:block th:replace="~{ :: renderTodo(${entry})}"/>
-            </th:block>
-        </th:block>
-        <th:block th:replace="~{ :: renderEntryButtons(${entry.id})}"/>
+        <th:block th:utext="${entry.contents}"/>
+        <div>
+            <input type="hidden" name="id" th:value="${entry.id}"/>
+            <button
+                    name="edit"
+                    hx-get="/edit"
+                    hx-target="closest li"
+                    hx-swap="innerHTML"
+                    hx-include="closest li">
+                Edit
+            </button>
+            <button
+                    name="delete"
+                    hx-delete="/delete"
+                    hx-target="closest li"
+                    hx-swap="innerHTML"
+                    hx-include="closest li">
+                Delete
+            </button>
+            Add
+            <select name="type"
+                    hx-post="/after"
+                    hx-trigger="change"
+                    hx-target="closest li"
+                    hx-swap="afterend"
+                    hx-include="closest li">
+                <option th:each="type : ${T(demo.rest.EntryType).values()}"
+                        th:value="${type}"
+                        th:text="${type}"></option>
+            </select>
+        </div>
     </li>
-</th:block>
-
-<th:block th:fragment="renderBreakpoint(entry)">
-    Breakpoint
-</th:block>
-
-<th:block th:fragment="renderCommand(entry)">
-    Command
-</th:block>
-
-<th:block th:fragment="renderDisplayFile(entry)">
-    DisplayFile
-</th:block>
-
-<th:block th:fragment="renderMarkdown(entry)">
-    Markdown
-</th:block>
-
-<th:block th:fragment="renderTodo(entry)">
-    Todo
-</th:block>
-
-<th:block th:fragment="renderHeading(entry)">
-    <th:block th:switch="${entry.level}">
-        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H1}">
-            <h1 name="title" th:text="${entry.title} ?: 'Heading 1'"></h1>
-        </th:block>
-        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H2}">
-            <h2 name="title" th:text="${entry.title} ?: 'Heading 2'"></h2>
-        </th:block>
-        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H3}">
-            <h3 name="title" th:text="${entry.title} ?: 'Heading 3'"></h3>
-        </th:block>
-        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H4}">
-            <h4 name="title" th:text="${entry.title} ?: 'Heading 4'"></h4>
-        </th:block>
-        <th:block th:case="${T(demo.domain.Heading.HeadingLevel).H5}">
-            <h5 name="title" th:text="${entry.title} ?: 'Heading 5'"></h5>
-        </th:block>
-    </th:block>
-</th:block>
-
-<th:block th:fragment="renderEntryButtons(id)">
-    <input type="hidden" name="id" th:value="${id}"/>
-    <button
-            name="edit"
-            hx-get="/edit"
-            hx-target="closest li"
-            hx-swap="innerHTML"
-            hx-include="closest li">
-        Edit
-    </button>
-    <button
-            name="delete"
-            hx-delete="/delete"
-            hx-target="closest li"
-            hx-swap="innerHTML"
-            hx-include="closest li">
-        Delete
-    </button>
-    Add
-    <select name="type"
-            hx-post="/after"
-            hx-trigger="change"
-            hx-target="closest li"
-            hx-swap="afterend"
-            hx-include="closest li">
-        <option th:each="type : ${T(demo.rest.EntryType).values()}" th:value="${type}" th:text="${type}"></option>
-    </select>
 </th:block>
 
 <th:block th:fragment="undoDelete">
