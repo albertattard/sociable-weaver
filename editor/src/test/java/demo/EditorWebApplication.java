@@ -37,13 +37,21 @@ public class EditorWebApplication implements AutoCloseable {
             throw new RuntimeException("The native executable '" + executable + "' is missing. Please make sure to build the native executable is built before running the functional tests.");
         }
 
+        /* TODO: In the future we need to allow non existing files to be passed and show the error on the page */
+        final Path playbook = Path.of("src", "test", "resources", "fixtures", "sw-runbook.json");
+        if (!Files.exists(playbook)) {
+            throw new RuntimeException("The playbook path (" + playbook + ") does not exists");
+        }
+
         try {
             final int port = findFreePort();
 
             final File log = File.createTempFile("swe-", ".log");
             log.deleteOnExit();
 
-            final ProcessBuilder builder = new ProcessBuilder(executable.toString(), "--server.port=" + port);
+            final ProcessBuilder builder = new ProcessBuilder(executable.toString(),
+                    "--server.port=" + port,
+                    "--playbook=" + playbook);
             builder.redirectErrorStream(true);
             builder.redirectOutput(log);
             final Process process = builder.start();

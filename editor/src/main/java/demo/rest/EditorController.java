@@ -1,11 +1,15 @@
 package demo.rest;
 
-import demo.domain.Heading.HeadingLevel;
+import demo.domain.Document;
 import demo.service.HtmlConverterService;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -13,6 +17,9 @@ import static java.util.Objects.requireNonNull;
 
 @Controller
 public final class EditorController {
+
+    @Value("${playbook:sw-runbook.json}")
+    private Path playbook;
 
     private final List<BigEntryTo> entries = new ArrayList<>();
 
@@ -22,16 +29,18 @@ public final class EditorController {
     private final HtmlConverterService htmlConverterService;
 
     public EditorController(final HtmlConverterService htmlConverterService) {
-        requireNonNull(htmlConverterService, "The markdown service cannot be null");
+        this.htmlConverterService = requireNonNull(htmlConverterService, "The markdown service cannot be null");
+    }
 
-        this.htmlConverterService = htmlConverterService;
-
-        entries.add(BigEntryTo.heading(HeadingLevel.H2, "Test Heading"));
-        entries.add(BigEntryTo.markdown("A simple example"));
-        entries.add(BigEntryTo.displayFile("./src/main/java/demo.Main.java", null, null, null, null));
-        entries.add(BigEntryTo.command("java --version"));
-        entries.add(BigEntryTo.breakpoint("A breakpoint!!"));
-        entries.add(BigEntryTo.todo("A simple Todo note!!"));
+    @PostConstruct
+    public void init() {
+        if (playbook != null && Files.exists(playbook)) {
+            Document.parse(playbook).entries().stream()
+                    .map(BigEntryTo::of)
+                    .forEach(entries::add);
+        } else {
+            /* TODO: Show a warning on the page instead */
+        }
     }
 
     @GetMapping("/")

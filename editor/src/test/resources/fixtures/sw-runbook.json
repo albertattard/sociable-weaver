@@ -1,0 +1,37 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Test Heading"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "A simple example"
+      ]
+    },
+    {
+      "type": "DisplayFile",
+      "path": "./src/main/java/demo/Main.java"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "java --version"
+      ]
+    },
+    {
+      "type": "Breakpoint",
+      "comments": [
+        "A breakpoint!!"
+      ]
+    },
+    {
+      "type": "Todo",
+      "comments": [
+        "A simple Todo note!!"
+      ]
+    }
+  ]
+}

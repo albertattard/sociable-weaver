@@ -26,13 +26,13 @@ class EditorIT {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
                     .row(0)
-                    .assertTitleContains(HeadingLevel.H2, "Test Heading")
+                    .assertTitleContains(HeadingLevel.H1, "Test Heading")
                     .clickEditButton()
                     .waitForEditFormToBeVisible()
                     .setTitle("New Heading")
                     .clickCancelButton()
-                    .waitForHeadingToBeVisible(HeadingLevel.H2)
-                    .assertTitleContains(HeadingLevel.H2, "Test Heading");
+                    .waitForHeadingToBeVisible(HeadingLevel.H1)
+                    .assertTitleContains(HeadingLevel.H1, "Test Heading");
         }
     }
 
@@ -47,7 +47,7 @@ class EditorIT {
                     .assertTitleContains("Test Heading")
                     .setTitle("Updated Heading")
                     .clickUpdateButton()
-                    .assertTitleContains(HeadingLevel.H2, "Updated Heading");
+                    .assertTitleContains(HeadingLevel.H1, "Updated Heading");
         }
     }
 

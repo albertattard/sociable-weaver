@@ -257,17 +257,7 @@
     },
     {
       "type": "demo.domain.Command$CommandOutput",
-      "allDeclaredFields": true,
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.util.Optional",
-            "java.util.Optional",
-            "java.util.Optional"
-          ]
-        }
-      ]
+      "allDeclaredFields": true
     },
     {
       "type": "demo.domain.DisplayFile",
