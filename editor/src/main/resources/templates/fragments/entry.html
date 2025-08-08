@@ -3,8 +3,9 @@
 <body>
 
 <th:block th:fragment="editEntry(entry)">
-    <li hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
-        <form hx-post="/edit" hx-target="closest li" th:id="|form-${entry.id}|" hx-swap="innerHTML" name="edit">
+    <div data-entry hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
+        <form hx-post="/edit" hx-target="closest [data-entry]" th:id="|form-${entry.id}|" hx-swap="innerHTML"
+              name="edit">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
             <select name="type" onchange="showFields(this)">
                 <option th:each="type : ${T(demo.rest.EntryType).values()}"
@@ -59,54 +60,60 @@
             <button
                     name="cancel"
                     th:hx-get="@{/{id}(id=${entry.id})}"
-                    hx-target="closest li"
+                    hx-target="closest [data-entry]"
                     hx-swap="outerHTML">
                 Cancel
             </button>
         </form>
-    </li>
+    </div>
 </th:block>
 
 <th:block th:fragment="renderEntry(entry)">
-    <li>
+    <div data-entry
+         class="group relative rounded-lg bg-white p-3 shadow-sm hover:bg-gray-50 transition">
         <th:block th:utext="${entry.contents}"/>
-        <div>
+        <div class="mt-2 flex flex-wrap items-center gap-2">
             <input type="hidden" name="id" th:value="${entry.id}"/>
             <button
                     name="edit"
+                    class="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     hx-get="/edit"
-                    hx-target="closest li"
+                    hx-target="closest [data-entry]"
                     hx-swap="innerHTML"
-                    hx-include="closest li">
+                    hx-include="closest div">
                 Edit
             </button>
             <button
                     name="delete"
+                    class="inline-flex items-center rounded-md border border-red-300 bg-white px-2 py-0.5 text-[10px] font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                     hx-delete="/delete"
-                    hx-target="closest li"
+                    hx-target="closest [data-entry]"
                     hx-swap="innerHTML"
-                    hx-include="closest li">
+                    hx-include="closest div">
                 Delete
             </button>
-            Add
-            <select name="type"
-                    hx-post="/after"
-                    hx-trigger="change"
-                    hx-target="closest li"
-                    hx-swap="afterend"
-                    hx-include="closest li">
-                <option th:each="type : ${T(demo.rest.EntryType).values()}"
-                        th:value="${type}"
-                        th:text="${type}"></option>
-            </select>
+            <label class="flex items-center gap-2 text-xs text-gray-500">
+                <span class="whitespace-nowrap">Add</span>
+                <select name="type"
+                        class="rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[10px] text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        hx-post="/after"
+                        hx-trigger="change"
+                        hx-target="closest [data-entry]"
+                        hx-swap="afterend"
+                        hx-include="closest div">
+                    <option th:each="type : ${T(demo.rest.EntryType).values()}"
+                            th:value="${type}"
+                            th:text="${type}"></option>
+                </select>
+            </label>
         </div>
-    </li>
+    </div>
 </th:block>
 
 <th:block th:fragment="undoDelete">
     Entry deleted
     <input type="hidden" name="id" th:value="${id}"/>
-    <button name="undo" hx-post="/undo" hx-target="closest li" hx-swap="innerHTML" hx-include="closest li">
+    <button name="undo" hx-post="/undo" hx-target="closest [data-entry]" hx-swap="innerHTML" hx-include="closest div">
         Undo
     </button>
 </th:block>

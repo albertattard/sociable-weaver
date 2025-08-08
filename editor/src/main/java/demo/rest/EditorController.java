@@ -20,6 +20,7 @@ public final class EditorController {
 
     @Value("${playbook:sw-runbook.json}")
     private Path playbook;
+    private String warning;
 
     private final List<BigEntryTo> entries = new ArrayList<>();
 
@@ -40,12 +41,21 @@ public final class EditorController {
                     .forEach(entries::add);
         } else {
             /* TODO: Show a warning on the page instead */
+            warning = "Failed to open playbook: " + playbook;
         }
     }
 
     @GetMapping("/")
     public String index(final Model model) {
         model.addAttribute("entries", entries.stream().map(htmlConverterService::toView).toList());
+
+        if (warning == null) {
+            if (playbook != null) {
+                model.addAttribute("playbook", playbook);
+            }
+        } else {
+            model.addAttribute("warning", warning);
+        }
         return "index";
     }
 

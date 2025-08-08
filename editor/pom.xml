@@ -30,6 +30,8 @@
         <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
         <required.maven.version>3.6.3</required.maven.version>
 
+        <flexmark.version>0.64.8</flexmark.version>
+        <owasp.java.html.sanitizer.version>20240325.1</owasp.java.html.sanitizer.version>
         <selenium.version>4.34.0</selenium.version>
     </properties>
 
@@ -48,12 +50,12 @@
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-all</artifactId>
-            <version>0.64.8</version>
+            <version>${flexmark.version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
             <artifactId>owasp-java-html-sanitizer</artifactId>
-            <version>20240325.1</version>
+            <version>${owasp.java.html.sanitizer.version}</version>
         </dependency>
 
         <!-- Testing -->
