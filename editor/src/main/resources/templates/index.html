@@ -35,14 +35,17 @@
 
 <div class="border-b bg-white/80 backdrop-blur">
     <div class="mx-auto max-w-5xl px-4 py-2">
-        <div id="playbook" class="flex items-center gap-2">
+        <form id="playbook" class="flex items-center gap-2" method="get" th:action="@{/}">
             <label for="playbook-input" class="font-medium">Playbook:</label>
             <input id="playbook-input"
+                   name="playbook"
                    type="text"
                    th:value="${playbook}"
                    class="flex-1 min-w-0 rounded border px-3 py-1.5"/>
-            <button class="rounded bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700">Open</button>
-        </div>
+            <button type="submit"
+                    name="open"
+                    class="rounded bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700">Open</button>
+        </form>
 
         <div th:if="${warning}"
              id="warning"

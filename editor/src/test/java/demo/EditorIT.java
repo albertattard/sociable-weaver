@@ -91,4 +91,38 @@ class EditorIT {
                     .assertRowTextContains("DisplayFile");
         }
     }
+
+    @Test
+    void openPlaybookFromPath() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .setPlaybookPath("src/test/resources/fixtures/another-runbook.json")
+                    .clickOpenButton()
+                    .row(0)
+                    .waitForHeadingToBeVisible(HeadingLevel.H1)
+                    .assertTitleContains(HeadingLevel.H1, "Another Heading");
+
+            editor.assertNoWarning();
+        }
+    }
+
+    @Test
+    void showWarningWhenPlaybookDoesNotExist() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .setPlaybookPath("src/test/resources/fixtures/missing.json")
+                    .clickOpenButton()
+                    .assertWarningContains("does not exist");
+        }
+    }
+
+    @Test
+    void showWarningWhenFileIsNotAPlaybook() {
+        try (EditorWebApplication editor = EditorWebApplication.launch()) {
+            editor.openEditorPage()
+                    .setPlaybookPath("src/test/resources/fixtures/not-a-playbook.txt")
+                    .clickOpenButton()
+                    .assertWarningContains("not a playbook");
+        }
+    }
 }
