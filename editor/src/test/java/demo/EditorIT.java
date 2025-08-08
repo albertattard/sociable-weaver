@@ -96,13 +96,13 @@ class EditorIT {
     void openPlaybookFromPath() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
+                    .open()
                     .setPlaybookPath("src/test/resources/fixtures/another-runbook.json")
+                    .assertNoWarning()
                     .clickOpenButton()
                     .row(0)
                     .waitForHeadingToBeVisible(HeadingLevel.H1)
                     .assertTitleContains(HeadingLevel.H1, "Another Heading");
-
-            editor.assertNoWarning();
         }
     }
 
@@ -110,6 +110,7 @@ class EditorIT {
     void showWarningWhenPlaybookDoesNotExist() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
+                    .open()
                     .setPlaybookPath("src/test/resources/fixtures/missing.json")
                     .clickOpenButton()
                     .assertWarningContains("does not exist");
@@ -120,6 +121,7 @@ class EditorIT {
     void showWarningWhenFileIsNotAPlaybook() {
         try (EditorWebApplication editor = EditorWebApplication.launch()) {
             editor.openEditorPage()
+                    .open()
                     .setPlaybookPath("src/test/resources/fixtures/not-a-playbook.txt")
                     .clickOpenButton()
                     .assertWarningContains("not a playbook");

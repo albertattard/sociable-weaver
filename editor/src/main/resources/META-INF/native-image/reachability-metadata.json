@@ -362,6 +362,40 @@
       ]
     },
     {
+      "type": "demo.service.HtmlConverterService",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "demo.service.MarkdownService"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "demo.service.HtmlSanitizerService",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "demo.service.MarkdownService",
+      "allDeclaredFields": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "demo.service.HtmlSanitizerService"
+          ]
+        }
+      ]
+    },
+    {
       "type": "demo.web.AddEntryAfterTo",
       "fields": [
         {
@@ -495,6 +529,7 @@
         {
           "name": "index",
           "parameterTypes": [
+            "java.nio.file.Path",
             "org.springframework.ui.Model"
           ]
         },
@@ -538,40 +573,6 @@
         {
           "name": "id",
           "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "demo.service.HtmlConverterService",
-      "allDeclaredFields": true,
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "demo.service.MarkdownService"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "demo.service.HtmlSanitizerService",
-      "allDeclaredFields": true,
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "demo.service.MarkdownService",
-      "allDeclaredFields": true,
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "demo.service.HtmlSanitizerService"
-          ]
         }
       ]
     },
@@ -4240,9 +4241,6 @@
       "glob": "demo"
     },
     {
-      "glob": "demo/rest/EditorController.class"
-    },
-    {
       "glob": "demo/service/HtmlConverterService.class"
     },
     {
@@ -4250,6 +4248,9 @@
     },
     {
       "glob": "demo/service/MarkdownService.class"
+    },
+    {
+      "glob": "demo/web/EditorController.class"
     },
     {
       "glob": "git.properties"

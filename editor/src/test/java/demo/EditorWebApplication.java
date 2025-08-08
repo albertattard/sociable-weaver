@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
-public class EditorWebApplication implements AutoCloseable, EditorWebApplication.WebContainer {
+public final class EditorWebApplication implements AutoCloseable {
 
     private final int port;
     private final WebDriver driver;
@@ -78,32 +78,6 @@ public class EditorWebApplication implements AutoCloseable, EditorWebApplication
         return this;
     }
 
-    private static final By PLAYBOOK_INPUT = By.cssSelector("#playbook-input");
-    private static final By OPEN_BUTTON = By.cssSelector("button[name=open]");
-    private static final By WARNING = By.cssSelector("#warning");
-
-    public EditorWebApplication setPlaybookPath(final String path) {
-        setInputValue(PLAYBOOK_INPUT, path);
-        return this;
-    }
-
-    public EditorWebApplication clickOpenButton() {
-        clickOn(OPEN_BUTTON);
-        return this;
-    }
-
-    public EditorWebApplication assertWarningContains(final String expected) {
-        assertElementTextContains(findElement(WARNING), expected);
-        return this;
-    }
-
-    public EditorWebApplication assertNoWarning() {
-        if (!driver.findElements(WARNING).isEmpty()) {
-            throw new AssertionError("Warning is visible");
-        }
-        return this;
-    }
-
     private static int findFreePort() {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
@@ -146,6 +120,54 @@ public class EditorWebApplication implements AutoCloseable, EditorWebApplication
             } finally {
                 this.process = null;
             }
+        }
+    }
+
+    public Open open() {
+        return new Open(this);
+    }
+
+    public record Open(EditorWebApplication application) implements WebContainer {
+
+        private static final By OPEN_PANE = By.cssSelector("div[data-open]");
+        private static final By PLAYBOOK_INPUT = By.cssSelector("#playbook-input");
+        private static final By OPEN_BUTTON = By.cssSelector("button[name=open]");
+        private static final By WARNING = By.cssSelector("#warning");
+
+        public Open setPlaybookPath(final String path) {
+            setInputValue(PLAYBOOK_INPUT, path);
+            return this;
+        }
+
+        public Open clickOpenButton() {
+            clickOn(OPEN_BUTTON);
+            return this;
+        }
+
+        public Open assertWarningContains(final String expected) {
+            assertElementTextContains(findElement(WARNING), expected);
+            return this;
+        }
+
+        public Open assertNoWarning() {
+            if (!driver().findElements(WARNING).isEmpty()) {
+                throw new AssertionError("Warning is visible");
+            }
+            return this;
+        }
+
+        public Row row(final int index) {
+            return new Row(index, application);
+        }
+
+        @Override
+        public WebElement element() {
+            return driver().findElement(OPEN_PANE);
+        }
+
+        @Override
+        public WebDriver driver() {
+            return application.driver;
         }
     }
 
@@ -371,15 +393,5 @@ public class EditorWebApplication implements AutoCloseable, EditorWebApplication
         WebElement element();
 
         WebDriver driver();
-    }
-
-    @Override
-    public WebElement element() {
-        return driver.findElement(By.tagName("body"));
-    }
-
-    @Override
-    public WebDriver driver() {
-        return driver;
     }
 }
