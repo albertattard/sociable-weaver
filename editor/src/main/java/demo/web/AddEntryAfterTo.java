@@ -1,4 +1,4 @@
-package demo.rest;
+package demo.web;
 
 import java.util.UUID;
 

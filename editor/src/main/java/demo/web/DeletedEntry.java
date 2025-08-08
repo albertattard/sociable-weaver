@@ -1,3 +1,3 @@
-package demo.rest;
+package demo.web;
 
 public record DeletedEntry(BigEntryTo entry, int index) {}

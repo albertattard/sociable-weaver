@@ -1,4 +1,4 @@
-package demo.rest;
+package demo.web;
 
 import demo.domain.Document;
 import demo.service.HtmlConverterService;
@@ -48,14 +48,8 @@ public final class EditorController {
     @GetMapping("/")
     public String index(final Model model) {
         model.addAttribute("entries", entries.stream().map(htmlConverterService::toView).toList());
-
-        if (warning == null) {
-            if (playbook != null) {
-                model.addAttribute("playbook", playbook);
-            }
-        } else {
-            model.addAttribute("warning", warning);
-        }
+        model.addAttribute("playbook", playbook);
+        model.addAttribute("warning", warning);
         return "index";
     }
 

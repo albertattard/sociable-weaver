@@ -1,4 +1,4 @@
-package demo.rest;
+package demo.web;
 
 public enum EntryType {
     Breakpoint,

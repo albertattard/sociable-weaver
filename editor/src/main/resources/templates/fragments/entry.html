@@ -8,7 +8,7 @@
               name="edit">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
             <select name="type" onchange="showFields(this)">
-                <option th:each="type : ${T(demo.rest.EntryType).values()}"
+                <option th:each="type : ${T(demo.web.EntryType).values()}"
                         th:value="${type}"
                         th:selected="${type == entry.type}"
                         th:text="${type}">
@@ -101,7 +101,7 @@
                         hx-target="closest [data-entry]"
                         hx-swap="afterend"
                         hx-include="closest div">
-                    <option th:each="type : ${T(demo.rest.EntryType).values()}"
+                    <option th:each="type : ${T(demo.web.EntryType).values()}"
                             th:value="${type}"
                             th:text="${type}"></option>
                 </select>

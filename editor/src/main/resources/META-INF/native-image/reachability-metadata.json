@@ -362,7 +362,7 @@
       ]
     },
     {
-      "type": "demo.rest.AddEntryAfterTo",
+      "type": "demo.web.AddEntryAfterTo",
       "fields": [
         {
           "name": "hashCode"
@@ -385,20 +385,20 @@
           "name": "<init>",
           "parameterTypes": [
             "java.util.UUID",
-            "demo.rest.EntryType"
+            "demo.web.EntryType"
           ]
         }
       ]
     },
     {
-      "type": "demo.rest.BigEntryTo",
+      "type": "demo.web.BigEntryTo",
       "allDeclaredFields": true,
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
             "java.util.UUID",
-            "demo.rest.EntryType",
+            "demo.web.EntryType",
             "java.lang.String",
             "java.lang.String",
             "java.lang.String",
@@ -462,7 +462,7 @@
       ]
     },
     {
-      "type": "demo.rest.EditorController",
+      "type": "demo.web.EditorController",
       "allDeclaredFields": true,
       "methods": [
         {
@@ -474,7 +474,7 @@
         {
           "name": "addAfter",
           "parameterTypes": [
-            "demo.rest.AddEntryAfterTo",
+            "demo.web.AddEntryAfterTo",
             "org.springframework.ui.Model"
           ]
         },
@@ -512,14 +512,14 @@
         {
           "name": "update",
           "parameterTypes": [
-            "demo.rest.BigEntryTo",
+            "demo.web.BigEntryTo",
             "org.springframework.ui.Model"
           ]
         }
       ]
     },
     {
-      "type": "demo.rest.EntryType",
+      "type": "demo.web.EntryType",
       "methods": [
         {
           "name": "values",
@@ -528,7 +528,7 @@
       ]
     },
     {
-      "type": "demo.rest.ViewEntryTo",
+      "type": "demo.web.ViewEntryTo",
       "allDeclaredFields": true,
       "methods": [
         {

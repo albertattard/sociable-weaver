@@ -1,4 +1,4 @@
-package demo.rest;
+package demo.web;
 
 import demo.domain.*;
 import demo.domain.Heading.HeadingLevel;

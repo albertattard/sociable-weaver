@@ -1,7 +1,7 @@
 package demo;
 
 import demo.domain.Heading.HeadingLevel;
-import demo.rest.EntryType;
+import demo.web.EntryType;
 import org.junit.jupiter.api.Test;
 
 class EditorIT {

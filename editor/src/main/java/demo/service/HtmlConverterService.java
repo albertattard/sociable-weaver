@@ -1,7 +1,7 @@
 package demo.service;
 
-import demo.rest.BigEntryTo;
-import demo.rest.ViewEntryTo;
+import demo.web.BigEntryTo;
+import demo.web.ViewEntryTo;
 import org.springframework.stereotype.Service;
 
 import static java.util.Objects.requireNonNull;
