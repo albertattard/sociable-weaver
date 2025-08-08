@@ -340,6 +340,7 @@ public final class EditorWebApplication implements AutoCloseable {
                                             ? element
                                             : null;
                                 } catch (final NoSuchElementException | StaleElementReferenceException e) {
+                                    System.out.println("Element not found!");
                                     printPage();
                                     return null;
                                 }

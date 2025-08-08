@@ -3,11 +3,13 @@
 <body>
 
 <th:block th:fragment="editEntry(entry)">
-    <div data-entry hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))">
-        <form hx-post="/edit" hx-target="closest [data-entry]" th:id="|form-${entry.id}|" hx-swap="innerHTML"
+    <div data-entry
+         hx-on="htmx:load:showFields(this.querySelector('select[name=type]'))"
+         class="group relative rounded-lg bg-blue-50 p-3 shadow-sm hover:bg-blue-100 transition">
+        <form hx-post="/edit" hx-target="closest [data-entry]" th:id="|form-${entry.id}|" hx-swap="outerHTML"
               name="edit">
             <input th:if="${entry}" type="hidden" name="id" th:value="${entry.id}"/>
-            <select name="type" onchange="showFields(this)">
+            <select name="type" onchange="showFields(this)" class="shrink-0 border rounded px-2 py-1">
                 <option th:each="type : ${T(demo.web.EntryType).values()}"
                         th:value="${type}"
                         th:selected="${type == entry.type}"
@@ -16,15 +18,15 @@
             </select>
 
             <div name="fields">
-                <div class="field Breakpoint" style="display:none">
+                <div class="field Breakpoint hidden">
                     <textarea name="comments" placeholder="Comments..." th:text="${entry.comments}"></textarea>
                 </div>
 
-                <div class="field Command" style="display:none">
+                <div class="field Command hidden">
                     <textarea name="commands" placeholder="Commands..." th:text="${entry.commands}"></textarea>
                 </div>
 
-                <div class="field DisplayFile" style="display:none">
+                <div class="field DisplayFile hidden">
                     <label>File Path</label>
                     <input type="text" name="path" placeholder="File path" th:value="${entry.path}"/>
                     <label>Content Type</label>
@@ -37,33 +39,47 @@
                     <input type="text" name="indent" placeholder="Indent" th:value="${entry.indent}"/>
                 </div>
 
-                <div class="field Heading" style="display:none">
-                    <select name="level">
+                <div class="field Heading flex items-center gap-2 min-w-0 hidden">
+                    <select name="level" class="shrink-0 border rounded px-2 py-1">
                         <option th:each="type : ${T(demo.domain.Heading.HeadingLevel).values()}"
                                 th:value="${type}"
                                 th:selected="${type == entry.level}"
                                 th:text="${type}"></option>
                     </select>
-                    <input type="text" name="title" placeholder="Heading..." th:value="${entry.title}"/>
+                    <input type="text"
+                           name="title"
+                           placeholder="Heading..."
+                           th:value="${entry.title}"
+                           class="flex-1 min-w-0 border rounded px-2 py-1"/>
                 </div>
 
-                <div class="field Markdown" style="display:none">
+                <div class="field Markdown hidden">
                     <textarea name="contents" placeholder="Markdown..." th:text="${entry.contents}"></textarea>
                 </div>
 
-                <div class="field Todo" style="display:none">
+                <div class="field Todo hidden">
                     <textarea name="comments" placeholder="Comments..." th:text="${entry.comments}"></textarea>
                 </div>
             </div>
 
-            <button name="update" type="submit">Update</button>
-            <button
-                    name="cancel"
-                    th:hx-get="@{/{id}(id=${entry.id})}"
-                    hx-target="closest [data-entry]"
-                    hx-swap="outerHTML">
-                Cancel
-            </button>
+            <div class="mt-1 flex items-center gap-2 text-xs">
+                <button
+                        type="submit"
+                        name="update"
+                        class="inline-flex items-center rounded bg-blue-600 px-2 py-0.5 text-white hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1">
+                    Update
+                </button>
+
+                <button
+                        type="button"
+                        name="cancel"
+                        th:hx-get="@{/{id}(id=${entry.id})}"
+                        hx-target="closest [data-entry]"
+                        hx-swap="outerHTML"
+                        class="text-blue-600 hover:underline focus:outline-none">
+                    Cancel
+                </button>
+            </div>
         </form>
     </div>
 </th:block>
@@ -79,7 +95,7 @@
                     class="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     hx-get="/edit"
                     hx-target="closest [data-entry]"
-                    hx-swap="innerHTML"
+                    hx-swap="outerHTML"
                     hx-include="closest div">
                 Edit
             </button>
@@ -88,7 +104,7 @@
                     class="inline-flex items-center rounded-md border border-red-300 bg-white px-2 py-0.5 text-[10px] font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                     hx-delete="/delete"
                     hx-target="closest [data-entry]"
-                    hx-swap="innerHTML"
+                    hx-swap="outerHTML"
                     hx-include="closest div">
                 Delete
             </button>
@@ -111,15 +127,26 @@
 </th:block>
 
 <th:block th:fragment="undoDelete">
-    Entry deleted
-    <input type="hidden" name="id" th:value="${id}"/>
-    <button name="undo" hx-post="/undo" hx-target="closest [data-entry]" hx-swap="innerHTML" hx-include="closest div">
-        Undo
-    </button>
+    <div data-entry
+         class="group relative rounded-lg bg-orange-50 p-3 shadow-sm hover:bg-orange-100 transition">
+        <span class="whitespace-nowrap">Entry deleted</span>
+        <input type="hidden" name="id" th:value="${id}"/>
+        <button name="undo"
+                hx-post="/undo"
+                hx-target="closest [data-entry]"
+                hx-swap="outerHTML"
+                hx-include="closest div"
+                class="text-blue-600 hover:underline focus:outline-none">
+            Undo
+        </button>
+    </div>
 </th:block>
 
 <th:block th:fragment="cannotUndoDelete">
-    Deletion cannot be undone
+    <div data-entry
+         class="group relative rounded-lg bg-red-50 p-3 shadow-sm hover:bg-red-100 transition whitespace-nowrap">
+        Deletion cannot be undone
+    </div>
 </th:block>
 
 </body>
