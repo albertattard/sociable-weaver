@@ -25,22 +25,20 @@ import java.util.function.Supplier;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
-public class EditorWebApplication implements AutoCloseable {
+public final class EditorWebApplication implements AutoCloseable {
 
     private final int port;
     private final WebDriver driver;
     private Process process;
 
     public static EditorWebApplication launch() {
+        return launch(Path.of("src", "test", "resources", "fixtures", "sw-runbook.json"));
+    }
+
+    public static EditorWebApplication launch(final Path playbook) {
         final Path executable = Path.of("./target/swe");
         if (!Files.isExecutable(executable)) {
             throw new RuntimeException("The native executable '" + executable + "' is missing. Please make sure to build the native executable is built before running the functional tests.");
-        }
-
-        /* TODO: In the future we need to allow non existing files to be passed and show the error on the page */
-        final Path playbook = Path.of("src", "test", "resources", "fixtures", "sw-runbook.json");
-        if (!Files.exists(playbook)) {
-            throw new RuntimeException("The playbook path (" + playbook + ") does not exists");
         }
 
         try {
@@ -122,6 +120,54 @@ public class EditorWebApplication implements AutoCloseable {
             } finally {
                 this.process = null;
             }
+        }
+    }
+
+    public Open open() {
+        return new Open(this);
+    }
+
+    public record Open(EditorWebApplication application) implements WebContainer {
+
+        private static final By OPEN_PANE = By.cssSelector("div[data-open]");
+        private static final By PLAYBOOK_INPUT = By.cssSelector("#playbook-input");
+        private static final By OPEN_BUTTON = By.cssSelector("button[name=open]");
+        private static final By WARNING = By.cssSelector("#warning");
+
+        public Open setPlaybookPath(final String path) {
+            setInputValue(PLAYBOOK_INPUT, path);
+            return this;
+        }
+
+        public Open clickOpenButton() {
+            clickOn(OPEN_BUTTON);
+            return this;
+        }
+
+        public Open assertWarningContains(final String expected) {
+            assertElementTextContains(findElement(WARNING), expected);
+            return this;
+        }
+
+        public Open assertNoWarning() {
+            if (!driver().findElements(WARNING).isEmpty()) {
+                throw new AssertionError("Warning is visible");
+            }
+            return this;
+        }
+
+        public Row row(final int index) {
+            return new Row(index, application);
+        }
+
+        @Override
+        public WebElement element() {
+            return driver().findElement(OPEN_PANE);
+        }
+
+        @Override
+        public WebDriver driver() {
+            return application.driver;
         }
     }
 

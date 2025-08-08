@@ -35,22 +35,44 @@ public final class EditorController {
 
     @PostConstruct
     public void init() {
-        if (playbook != null && Files.exists(playbook)) {
-            Document.parse(playbook).entries().stream()
-                    .map(BigEntryTo::of)
-                    .forEach(entries::add);
-        } else {
-            /* TODO: Show a warning on the page instead */
-            warning = "Failed to open playbook: " + playbook;
-        }
+        open(playbook);
     }
 
     @GetMapping("/")
-    public String index(final Model model) {
+    public String index(@RequestParam(value = "playbook", required = false) final Path requestedPlaybook,
+                        final Model model) {
+        if (requestedPlaybook != null) {
+            open(requestedPlaybook);
+        }
+
         model.addAttribute("entries", entries.stream().map(htmlConverterService::toView).toList());
         model.addAttribute("playbook", playbook);
         model.addAttribute("warning", warning);
         return "index";
+    }
+
+    private void open(final Path newPlaybook) {
+        this.playbook = newPlaybook;
+        this.warning = null;
+        this.entries.clear();
+        this.lastDeletedEntry = null;
+
+        if (newPlaybook == null) {
+            return;
+        }
+
+        if (!Files.exists(newPlaybook)) {
+            this.warning = "The playbook path does not exist: " + newPlaybook;
+            return;
+        }
+
+        try {
+            Document.parse(newPlaybook).entries().stream()
+                    .map(BigEntryTo::of)
+                    .forEach(entries::add);
+        } catch (final RuntimeException e) {
+            this.warning = "The file is not a playbook: " + newPlaybook;
+        }
     }
 
     @GetMapping("/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
