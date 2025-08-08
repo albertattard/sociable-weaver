@@ -129,7 +129,7 @@
 <th:block th:fragment="undoDelete">
     <div data-entry
          class="group relative rounded-lg bg-orange-50 p-3 shadow-sm hover:bg-orange-100 transition">
-        <span class="whitespace-nowrap">Entry deleted</span>
+        <span class="whitespace-nowrap" data-deleted-entry>Entry deleted</span>
         <input type="hidden" name="id" th:value="${id}"/>
         <button name="undo"
                 hx-post="/undo"
@@ -145,7 +145,7 @@
 <th:block th:fragment="cannotUndoDelete">
     <div data-entry
          class="group relative rounded-lg bg-red-50 p-3 shadow-sm hover:bg-red-100 transition whitespace-nowrap">
-        Deletion cannot be undone
+        <span class="whitespace-nowrap" data-cannot-undo-delete>Deletion cannot be undone</span>
     </div>
 </th:block>
 

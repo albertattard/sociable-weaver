@@ -181,6 +181,8 @@ public final class EditorWebApplication implements AutoCloseable {
         private static final By DELETE_BUTTON = By.cssSelector("button[name=delete]");
         private static final By UNDO_BUTTON = By.cssSelector("button[name=undo]");
         private static final By SELECT_NEW_TYPE = By.cssSelector("select[name=type]");
+        private static final By DATA_DELETED_ENTRY = By.cssSelector("span[data-deleted-entry]");
+        private static final By CANNOT_UNDO_ENTRY = By.cssSelector("span[data-cannot-undo-delete]");
 
         public EditForm addAfter(final EntryType type) {
             selectOption(SELECT_NEW_TYPE, type.name());
@@ -204,6 +206,21 @@ public final class EditorWebApplication implements AutoCloseable {
 
         public Row waitForHeadingToBeVisible(final HeadingLevel level) {
             waitForElementToBeVisible(() -> findElement(headingLocator(level)));
+            return this;
+        }
+
+        public Row waitForEditButtonToBeVisible() {
+            waitForElementToBeVisible(() -> findElement(EDIT_BUTTON));
+            return this;
+        }
+
+        public Row waitForDeletedEntryToBeVisible() {
+            waitForElementToBeVisible(() -> findElement(DATA_DELETED_ENTRY));
+            return this;
+        }
+
+        public Row waitForCannotUndoDeleteToBeVisible() {
+            waitForElementToBeVisible(() -> findElement(CANNOT_UNDO_ENTRY));
             return this;
         }
 

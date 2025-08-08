@@ -67,8 +67,10 @@ class EditorIT {
             editor.openEditorPage()
                     .row(1)
                     .clickDeleteButton()
+                    .waitForDeletedEntryToBeVisible()
                     .assertRowTextContains("Entry deleted")
                     .clickUndoButton()
+                    .waitForEditButtonToBeVisible()
                     .assertRowTextContains("A simple example");
         }
     }
@@ -85,9 +87,11 @@ class EditorIT {
                     .clickDeleteButton()
                     .row(1)
                     .clickUndoButton()
+                    .waitForCannotUndoDeleteToBeVisible()
                     .assertRowTextContains("Deletion cannot be undone")
                     .row(2)
                     .clickUndoButton()
+                    .waitForEditButtonToBeVisible()
                     .assertRowTextContains("DisplayFile");
         }
     }
