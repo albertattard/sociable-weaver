@@ -11,10 +11,14 @@ public class HtmlSanitizerService {
 
     public HtmlSanitizerService() {
         this.policy = new HtmlPolicyBuilder()
-                .allowElements("p", "a", "ul", "ol", "li", "strong", "em", "code", "pre", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6")
+                .allowElements("p", "a", "img", "ul", "ol", "li", "strong", "em", "code", "pre", "blockquote",
+                        "table", "thead", "tbody", "tr", "th", "td",
+                        "h1", "h2", "h3", "h4", "h5", "h6")
                 .allowUrlProtocols("http", "https")
                 .allowAttributes("href").onElements("a")
+                .allowAttributes("src").onElements("img")
                 .requireRelNofollowOnLinks()
+                .allowStyling()
                 .toFactory();
     }
 

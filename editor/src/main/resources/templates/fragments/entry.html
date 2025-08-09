@@ -19,11 +19,23 @@
 
             <div name="fields">
                 <div class="field Breakpoint hidden">
-                    <textarea name="comments" placeholder="Comments..." th:text="${entry.comments}"></textarea>
+                    <textarea
+                            name="comments"
+                            placeholder="Comments..."
+                            th:text="${entry.comments}"
+                            rows="10"
+                            class="block w-full resize-y overflow-auto border rounded px-2 py-1 font-mono">
+                    </textarea>
                 </div>
 
                 <div class="field Command hidden">
-                    <textarea name="commands" placeholder="Commands..." th:text="${entry.commands}"></textarea>
+                    <textarea
+                            name="commands"
+                            placeholder="Commands..."
+                            th:text="${entry.commands}"
+                            rows="10"
+                            class="block w-full resize-y overflow-auto border rounded px-2 py-1 font-mono">
+                    </textarea>
                 </div>
 
                 <div class="field DisplayFile hidden">
@@ -54,11 +66,23 @@
                 </div>
 
                 <div class="field Markdown hidden">
-                    <textarea name="contents" placeholder="Markdown..." th:text="${entry.contents}"></textarea>
+                    <textarea
+                        name="contents"
+                        placeholder="Markdown..."
+                        th:text="${entry.contents}"
+                        rows="10"
+                        class="block w-full resize-y overflow-auto border rounded px-2 py-1 font-mono">
+                    </textarea>
                 </div>
 
                 <div class="field Todo hidden">
-                    <textarea name="comments" placeholder="Comments..." th:text="${entry.comments}"></textarea>
+                    <textarea
+                            name="comments"
+                            placeholder="Comments..."
+                            th:text="${entry.comments}"
+                            rows="10"
+                            class="block w-full resize-y overflow-auto border rounded px-2 py-1 font-mono">
+                    </textarea>
                 </div>
             </div>
 
