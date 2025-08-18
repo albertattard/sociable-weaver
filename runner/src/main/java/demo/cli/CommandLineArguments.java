@@ -1,7 +1,10 @@
 package demo.cli;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.cli.help.HelpFormatter;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 public record CommandLineArguments(boolean showHelp, Path playbook, Path output) {
@@ -24,8 +27,12 @@ public record CommandLineArguments(boolean showHelp, Path playbook, Path output)
     }
 
     public void printHelp() {
-        final HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("sw", options());
+        try {
+            final HelpFormatter formatter = HelpFormatter.builder().get();
+            formatter.printHelp("sw", "Sociable Weaver", options(), "", false);
+        } catch (final IOException e) {
+            throw new UncheckedIOException("Failed to print the help message", e);
+        }
     }
 
     private static boolean parseHelp(final CommandLine commandLine) throws ParseException {
@@ -57,7 +64,7 @@ public record CommandLineArguments(boolean showHelp, Path playbook, Path output)
             .option("h")
             .longOpt("help")
             .desc("Prints the help")
-            .build();
+            .get();
 
     private static final Option PLAYBOOK_OPTION = Option.builder()
             .required(false)
@@ -67,7 +74,7 @@ public record CommandLineArguments(boolean showHelp, Path playbook, Path output)
             .numberOfArgs(1)
             .converter(Path::of)
             .desc("The path to the Sociable Weaver playbook, default 'sw-playbook.json'")
-            .build();
+            .get();
 
     private static final Option OUTPUT_OPTION = Option.builder()
             .required(false)
@@ -77,5 +84,5 @@ public record CommandLineArguments(boolean showHelp, Path playbook, Path output)
             .numberOfArgs(1)
             .converter(Path::of)
             .desc("The path to the Markdown output file, default 'README.md'")
-            .build();
+            .get();
 }

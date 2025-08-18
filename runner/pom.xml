@@ -141,13 +141,11 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
+                                    <message>This project requires at least Maven ${required.maven.version}, update your Maven, and run the build again</message>
                                     <version>${required.maven.version}</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <message>
-                                        This example requires at least Java ${maven.compiler.release}, update your JVM,
-                                        and run the build again
-                                    </message>
+                                    <message>This project requires at least GraalVM ${maven.compiler.release}, update your JVM, and run the build again</message>
                                     <version>${maven.compiler.release}</version>
                                 </requireJavaVersion>
                             </rules>

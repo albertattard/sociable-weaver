@@ -27,7 +27,7 @@ class ApplicationIT {
         final String output = Files.readString(outputFile.toPath());
         assertThat(output)
                 .describedAs("The program should print the help message to the standard output")
-                .startsWith("usage: sw");
+                .contains("Sociable Weaver");
     }
 
     @Test
