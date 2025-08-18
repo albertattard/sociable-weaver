@@ -161,7 +161,7 @@ public record Command(List<String> commands,
             final Path path = workingDir.get();
             list.add(Stream.of("# Running command from within the '" + path + "' directory",
                     "(cd '" + path + '\''));
-            list.add(commands.stream().map(" "::concat));
+            list.add(commands.stream());
             list.add(Stream.of(")"));
         } else {
             list.add(commands.stream());

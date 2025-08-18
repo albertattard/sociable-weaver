@@ -318,7 +318,7 @@ class CommandTest {
                     ```shell
                     # Running command from within the 'target' directory
                     (cd 'target'
-                     pwd | awk -F/ '{print $(NF-2) "/" $(NF-1) "/" $NF}'
+                    pwd | awk -F/ '{print $(NF-2) "/" $(NF-1) "/" $NF}'
                     )
                     ```
                     
