@@ -176,19 +176,24 @@ public record Command(List<String> commands,
     }
 
     private CommandOutput outputOrDefault() {
-        return output.orElseGet(() -> DEFAULT_COMMAND_OUTPUT);
+        return output.orElse(DEFAULT_COMMAND_OUTPUT);
+    }
+
+    private Duration shouldFinishWithinOrDefault() {
+        return shouldFinishWithin.orElse(DEFAULT_TIMEOUT);
     }
 
     private ShellScriptResult runCommands() {
         final String commands = commandsAsShellScript();
         final Path script = writeShellScriptToFile(commands);
-        return runShellScript(script, shouldFinishWithin.orElse(DEFAULT_TIMEOUT));
+        return runShellScript(script, shouldFinishWithinOrDefault());
     }
 
     private Optional<ShellScriptResult> runOnFailureCommands() {
         return onFailureCommandsAsShellScript()
                 .map(Command::writeShellScriptToFile)
-                .map(script -> runShellScript(script, DEFAULT_TIMEOUT));
+                /* TODO: What should be the timeout of the cleanup commands? */
+                .map(script -> runShellScript(script, Duration.ofMinutes(10)));
     }
 
     private static Path writeShellScriptToFile(final String script) {
@@ -299,5 +304,6 @@ public record Command(List<String> commands,
             Optional.of(false),
             Optional.empty(),
             Optional.empty());
+
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
 }
