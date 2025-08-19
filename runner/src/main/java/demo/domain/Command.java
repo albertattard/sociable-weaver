@@ -86,7 +86,7 @@ public record Command(List<String> commands,
     public void runFinally() {
         finallyCommandsFailureCommandsAsShellScript().ifPresent(commands -> {
             final Path script = writeShellScriptToFile(commands);
-            runShellScript(script);
+            runShellScript(script, DEFAULT_TIMEOUT);
         });
     }
 
@@ -176,19 +176,24 @@ public record Command(List<String> commands,
     }
 
     private CommandOutput outputOrDefault() {
-        return output.orElseGet(() -> DEFAULT_COMMAND_OUTPUT);
+        return output.orElse(DEFAULT_COMMAND_OUTPUT);
+    }
+
+    private Duration shouldFinishWithinOrDefault() {
+        return shouldFinishWithin.orElse(DEFAULT_TIMEOUT);
     }
 
     private ShellScriptResult runCommands() {
         final String commands = commandsAsShellScript();
         final Path script = writeShellScriptToFile(commands);
-        return runShellScript(script);
+        return runShellScript(script, shouldFinishWithinOrDefault());
     }
 
     private Optional<ShellScriptResult> runOnFailureCommands() {
         return onFailureCommandsAsShellScript()
                 .map(Command::writeShellScriptToFile)
-                .map(this::runShellScript);
+                /* TODO: What should be the timeout of the cleanup commands? */
+                .map(script -> runShellScript(script, Duration.ofMinutes(10)));
     }
 
     private static Path writeShellScriptToFile(final String script) {
@@ -210,7 +215,7 @@ public record Command(List<String> commands,
         return path;
     }
 
-    private ShellScriptResult runShellScript(final Path script) {
+    private ShellScriptResult runShellScript(final Path script, final Duration timeout) {
         final Path outputFile = script.toAbsolutePath().getParent().resolve(script.getFileName() + ".out");
         outputFile.toFile().deleteOnExit();
 
@@ -219,8 +224,14 @@ public record Command(List<String> commands,
                     .redirectOutput(outputFile.toFile())
                     .redirectErrorStream(true)
                     .start();
+            final boolean finished = process.waitFor(timeout.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                process.waitFor();
+                return new ShellScriptResult(-1, outputFile);
+            }
 
-            final int exitCode = process.waitFor();
+            final int exitCode = process.exitValue();
             return new ShellScriptResult(exitCode, outputFile);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -293,4 +304,6 @@ public record Command(List<String> commands,
             Optional.of(false),
             Optional.empty(),
             Optional.empty());
+
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
 }
