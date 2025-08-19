@@ -363,6 +363,34 @@ class CommandTest {
         }
 
         @Test
+        void runOnErrorWhenCommandTimesOut() {
+            final Entry entry = new Command(
+                    List.of("sleep 5"),
+                    Optional.of(Duration.ofMillis(100)),
+                    Optional.empty(),
+                    Optional.of(List.of("cat << EOF > './target/timeout.txt'",
+                            "Timed out!",
+                            "EOF")),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    OptionalInt.empty());
+
+            final Result result = entry.run();
+            final String output = readString(Path.of("target", "timeout.txt"));
+
+            assertThat(result)
+                    .isInstanceOf(Result.Error.class);
+
+            assertThat(output)
+                    .isEqualTo("""
+                            Timed out!
+                            """);
+        }
+
+        @Test
         void runCommandWithLongOutput() {
             final Entry entry = new Command(
                     List.of("i=1; while [ \"${i}\" -le 10000 ]; do echo \"[${i}] The quick brown fox jumps over the lazy dog!\"; i=$((i + 1)); done"),
