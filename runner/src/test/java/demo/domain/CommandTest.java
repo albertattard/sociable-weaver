@@ -316,8 +316,8 @@ class CommandTest {
 
             final String expected = """
                     ```shell
-                    # Running command from within the 'target' directory
                     (cd 'target'
+                    # Running commands from within the 'target' directory
                     pwd | awk -F/ '{print $(NF-2) "/" $(NF-1) "/" $NF}'
                     )
                     ```

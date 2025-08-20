@@ -159,8 +159,8 @@ public record Command(List<String> commands,
 
         if (workingDir.isPresent()) {
             final Path path = workingDir.get();
-            list.add(Stream.of("# Running command from within the '" + path + "' directory",
-                    "(cd '" + path + '\''));
+            list.add(Stream.of("(cd '" + path + '\'',
+                    "# Running commands from within the '" + path + "' directory"));
             list.add(commands.stream());
             list.add(Stream.of(")"));
         } else {
