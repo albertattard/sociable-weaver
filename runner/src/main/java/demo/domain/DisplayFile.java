@@ -60,7 +60,17 @@ public record DisplayFile(Path path,
 
     private String computeContentType() {
         /* TODO: Handle Dockerfiles well, as these do not have an extension */
-        return contentType.orElseGet(() -> pathExtension().orElse(""));
+        return contentType.orElseGet(() -> pathExtension()
+                .map(DisplayFile::toContentType)
+                .orElse(""));
+    }
+
+    private static String toContentType(final String extension) {
+        final String lowerCase = extension.toLowerCase();
+        return switch (lowerCase) {
+            case "md" -> "markdown";
+            default -> lowerCase;
+        };
     }
 
     private Optional<String> pathExtension() {
